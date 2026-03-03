@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ozobot Fractions Lab</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <main class="workspace">
+        <section class="mission-row">
+          <div class="mission-card">
+            <p class="eyebrow">Mission Objective</p>
+            <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
+            <p id="missionText" class="mission"></p>
+            <div id="feedback" class="feedback hidden"></div>
+          </div>
+          <div class="pie-card">
+            <p class="eyebrow">Segment Pie Chart</p>
+            <svg id="pieChart" viewBox="0 0 140 140" aria-label="Segment pie chart">
+              <circle cx="70" cy="70" r="64" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"></circle>
+              <g id="pieSlices"></g>
+            </svg>
+            <div id="pieLabel" class="pie-label">0.00 of 1.00</div>
+          </div>
+        </section>
+        <section id="checkDetails" class="check-details hidden"></section>
+
+        <section class="track-wrap">
+          <div class="track-bg"></div>
+          <div id="trackFill" class="track-fill"></div>
+          <div id="segmentOverlay" class="segment-overlay"></div>
+          <div id="codesLayer" class="codes-layer"></div>
+          <div class="axis">
+            <span>0</span>
+            <span>0.25</span>
+            <span>0.5</span>
+            <span>0.75</span>
+            <span>1 WHOLE</span>
+          </div>
+        </section>
+
+        <section class="actions-row">
+          <div class="progress-card">
+            <div class="label">Total Progress</div>
+            <div id="progressValue" class="value">0.00</div>
+          </div>
+          <div class="controls">
+            <button id="calibrateBtn" class="btn btn-light">Calibration Circle</button>
+            <button id="undoBtn" class="btn btn-light">Undo</button>
+            <button id="resetBtn" class="btn btn-light danger">Clear</button>
+            <button id="checkBtn" class="btn btn-primary">Check Answer</button>
+            <button id="triedBtn" class="btn btn-light">I Tried Ozobot</button>
+            <button id="nextBtn" class="btn btn-light" disabled>Next Problem</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="toolbar">
+        <section class="panel">
+          <h2>Add Fraction Segment</h2>
+          <div id="fractionButtons" class="button-grid"></div>
+        </section>
+        <section class="panel">
+          <h2>Add Action Code</h2>
+          <div id="codeButtons" class="button-grid"></div>
+        </section>
+      </footer>
+    </div>
+    <div id="calibrationModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="calibrationTitle">
+      <div class="modal-card">
+        <h2 id="calibrationTitle">Ozobot Calibration Circle</h2>
+        <p class="modal-text">Place Ozobot inside the black circle before you start.</p>
+        <ol class="modal-steps">
+          <li>Press and hold the power button for 5 seconds (or until the top LED flashes white), then let go.</li>
+          <li>Ozobot will wiggle left and right and move out of the circle.</li>
+          <li>If it blinks green, calibration worked.</li>
+          <li>If it blinks red, start over and try again.</li>
+        </ol>
+        <div class="calibration-circle" aria-hidden="true"></div>
+        <button id="closeCalibrationBtn" class="btn btn-primary">Done</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
