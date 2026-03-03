@@ -7,17 +7,17 @@ const FRACTIONS = [
 ];
 
 const OZOBOT_CODES = [
-  { id: "spin", letter: "G R G R", colors: ["#00FF00", "#FF0000", "#00FF00", "#FF0000"] },
-  { id: "zigzag", letter: "B BK G R", colors: ["#0000FF", "#000000", "#00FF00", "#FF0000"] },
-  { id: "fast", letter: "B BK B", colors: ["#0000FF", "#000000", "#0000FF"] },
-  { id: "slow", letter: "R BK R", colors: ["#FF0000", "#000000", "#FF0000"] },
-  { id: "play_again", letter: "G B", colors: ["#00FF00", "#0000FF"] }
+  { id: "spin", name: "Spin", colors: ["#00FF00", "#FF0000", "#00FF00", "#FF0000"] },
+  { id: "zigzag", name: "Zigzag", colors: ["#0000FF", "#000000", "#00FF00", "#FF0000"] },
+  { id: "fast", name: "Fast", colors: ["#0000FF", "#000000", "#0000FF"] },
+  { id: "slow", name: "Slow", colors: ["#FF0000", "#000000", "#FF0000"] },
+  { id: "play_again", name: "Play Again", colors: ["#00FF00", "#0000FF"] }
 ];
 
 // NC.3.NF.2-aligned progression: unit fractions and non-unit fractions on a number line.
 const CHALLENGES = [
   {
-    title: "Length model: partition 1 whole into 4 equal parts (unit fraction 1/4). Show 2 copies of 1/4 by placing Spin (G R G R) at 2/4 (1/2).",
+    title: "Length model: partition 1 whole into 4 equal parts (unit fraction 1/4). Show 2 copies of 1/4 by placing [spin] at 2/4 (1/2).",
     requirements: { segments: { "1/4": 4 }, codes: [{ codeId: "spin", position: 0.5 }] }
   },
   {
@@ -31,11 +31,11 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Length model: partition into 8 equal parts. Show numerator 3 by placing Zigzag (B BK G R) at 3/8.",
+    title: "Length model: partition into 8 equal parts. Show numerator 3 by placing [zigzag] at 3/8.",
     requirements: { segments: { "1/8": 8 }, codes: [{ codeId: "zigzag", position: 3 / 8 }] }
   },
   {
-    title: "Length model: with fourths, place Fast (B BK B) at 1/4 and Slow (R BK R) at 3/4 to show 1 and 3 copies of 1/4.",
+    title: "Length model: with fourths, place [fast] at 1/4 and [slow] at 3/4 to show 1 and 3 copies of 1/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
@@ -45,7 +45,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Length model: partition into thirds. Place Spin (G R G R) at 1/3 and Play Again (G B) at 3/3 (1 whole).",
+    title: "Length model: partition into thirds. Place [spin] at 1/3 and [play_again] at 3/3 (1 whole).",
     requirements: {
       segments: { "1/3": 3 },
       codes: [
@@ -55,7 +55,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Length model: partition into halves. Place Zigzag (B BK G R) at 1/2 and Play Again (G B) at 2/2 (1 whole).",
+    title: "Length model: partition into halves. Place [zigzag] at 1/2 and [play_again] at 2/2 (1 whole).",
     requirements: {
       segments: { "1/2": 2 },
       codes: [
@@ -65,7 +65,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Length model: with sixths, place Fast (B BK B) at 1/6 and Slow (R BK R) at 5/6. Explain: numerator is number of unit lengths from 0.",
+    title: "Length model: with sixths, place [fast] at 1/6 and [slow] at 5/6. Explain: numerator is number of unit lengths from 0.",
     requirements: {
       segments: { "1/6": 6 },
       codes: [
@@ -75,7 +75,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Garden task (from NC example): using eighths, mark Fast at 1/8, Spin at 3/8, and Zigzag at 4/8.",
+    title: "Garden task (from NC example): using eighths, mark [fast] at 1/8, [spin] at 3/8, and [zigzag] at 4/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
@@ -86,7 +86,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Road task (from NC example): partition into thirds and place Slow (R BK R) at 2/3.",
+    title: "Road task (from NC example): partition into thirds and place [slow] at 2/3.",
     requirements: {
       segments: { "1/3": 3 },
       codes: [
@@ -95,7 +95,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Final mixed challenge: build 1 whole in fourths and place Fast at 1/4, Zigzag at 2/4, Slow at 3/4, and Play Again at 4/4.",
+    title: "Final mixed challenge: build 1 whole in fourths and place [fast] at 1/4, [zigzag] at 2/4, [slow] at 3/4, and [play_again] at 4/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
@@ -150,6 +150,29 @@ function makeId() {
 
 function currentProblem() {
   return CHALLENGES[state.currentProblemIdx];
+}
+
+function findCodeById(codeId) {
+  return OZOBOT_CODES.find((code) => code.id === codeId);
+}
+
+function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
+  return colors
+    .map(
+      (color) =>
+        `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:2px"></span>`
+    )
+    .join("");
+}
+
+function codeBadgeHTML(codeId) {
+  const code = findCodeById(codeId);
+  if (!code) return `<span style="padding:0 4px;border:1px dashed #94a3b8;border-radius:4px;">${codeId}</span>`;
+  return `<span class="inline-code-badge" aria-label="${code.name} action code" style="display:inline-flex;align-items:center;vertical-align:middle;margin:0 3px;"><span class="inline-code-image" style="display:inline-flex;gap:1px;background:#fff;padding:3px;border:1px solid #94a3b8;border-radius:6px;box-shadow:0 1px 0 rgba(15,23,42,0.08);">${codeStripesHTML(code.colors, 18, 9)}</span></span>`;
+}
+
+function missionHTML(title) {
+  return title.replace(/\[([a-z_]+)\]/g, (_, codeId) => codeBadgeHTML(codeId));
 }
 
 function setFeedback(type, message) {
@@ -240,20 +263,22 @@ function evaluateStudentWork() {
   const problem = currentProblem();
   const errors = [];
   const passes = [];
+  const hints = [];
 
   problem.requirements.codes.forEach((req) => {
     const match = state.placedCodes.find(
       (pc) => pc.id === req.codeId && Math.abs(pc.position - req.position) < 0.01
     );
 
-    const code = OZOBOT_CODES.find((c) => c.id === req.codeId);
+    const code = findCodeById(req.codeId);
     const asFraction = FRACTIONS.find((f) => Math.abs(f.value - req.position) < 0.01);
     const label = asFraction ? asFraction.label : req.position.toFixed(2);
 
     if (!match) {
-      errors.push(`Missing code '${code ? code.letter : req.codeId}' at ${label}`);
+      errors.push(`Missing ${code ? code.name : "action code"} at ${label}.`);
+      hints.push(`Try this: Place ${codeBadgeHTML(req.codeId)} at ${label}.`);
     } else {
-      passes.push(`Code '${code ? code.letter : req.codeId}' is in the right spot at ${label}.`);
+      passes.push(`Action code ${codeBadgeHTML(req.codeId)} is in the right spot at ${label}.`);
     }
   });
 
@@ -262,6 +287,7 @@ function evaluateStudentWork() {
     const count = state.placedSegments.filter((s) => s.label === segmentLabel).length;
     if (count < needed) {
       errors.push(`Need ${needed} total ${segmentLabel} segments (currently ${count}).`);
+      hints.push(`Try this: Add more ${segmentLabel} segments until you have ${needed}.`);
     } else {
       passes.push(`Great partitioning with ${segmentLabel} segments (${count}).`);
     }
@@ -269,9 +295,10 @@ function evaluateStudentWork() {
 
   if (totalLength() > 1.001) {
     errors.push("The line is longer than 1 whole.");
+    hints.push("Try this: Remove one segment so your total is exactly 1 whole.");
   }
 
-  return { passed: errors.length === 0, errors, passes };
+  return { passed: errors.length === 0, errors, passes, hints };
 }
 
 function checkAnswer() {
@@ -298,7 +325,7 @@ function checkAnswer() {
     state.isCheckedCorrect = false;
     updateProgressControls();
     setFeedback("error", `${msg} ${result.errors[0]}`);
-    setCheckDetails(["Mission hints:", ...result.errors.map((e) => `Try this: ${e}`)], false);
+    setCheckDetails(["Mission hints:", ...result.hints], false);
   }
 }
 
@@ -411,12 +438,7 @@ function renderCodeButtons() {
   OZOBOT_CODES.forEach((code) => {
     const btn = document.createElement("button");
     btn.className = "tile";
-
-    const stripes = code.colors
-      .map((color) => `<span class="code-stripe" style="background:${color};height:18px;width:8px"></span>`)
-      .join("");
-
-    btn.innerHTML = `<div style="display:flex;gap:1px;background:#fff;padding:2px;border:1px solid #cbd5e1;border-radius:5px;">${stripes}</div><div class="small">${code.letter}</div>`;
+    btn.innerHTML = `<div style="display:flex;gap:1px;background:#fff;padding:2px;border:1px solid #cbd5e1;border-radius:5px;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
     btn.addEventListener("click", () => addCode(code));
     el.codeButtons.appendChild(btn);
   });
@@ -424,7 +446,7 @@ function renderCodeButtons() {
 
 function renderTrack() {
   const length = totalLength();
-  el.trackFill.style.width = `${Math.min(100, length * 100)}%`;
+  el.trackFill.style.transform = `translateY(-50%) scaleX(${Math.min(1, length)})`;
 
   el.segmentOverlay.innerHTML = "";
   state.placedSegments.forEach((segment) => {
@@ -451,7 +473,7 @@ function renderTrack() {
 function render() {
   const problem = currentProblem();
   el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
-  el.missionText.textContent = problem.title;
+  el.missionText.innerHTML = missionHTML(problem.title);
   el.progressValue.textContent = totalLength().toFixed(2);
 
   renderFractionButtons();

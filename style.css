@@ -75,6 +75,23 @@ body {
   color: #1e1b4b;
 }
 
+.inline-code-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+.inline-code-image {
+  display: inline-flex;
+  gap: 1px;
+  background: #fff;
+  padding: 2px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+}
+
 .problem-counter {
   margin: 8px 0 0;
   display: inline-block;
@@ -166,8 +183,8 @@ body {
 .track-fill,
 .segment-overlay {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 36px;
+  right: 36px;
   height: 28px;
   border-radius: 999px;
   top: 44%;
@@ -180,10 +197,11 @@ body {
 }
 
 .track-fill {
-  right: auto;
-  width: 0;
+  width: auto;
   background: #000;
-  transition: width 0.2s ease;
+  transform-origin: left center;
+  transform: translateY(-50%) scaleX(0);
+  transition: transform 0.2s ease;
   z-index: 2;
 }
 
@@ -201,8 +219,8 @@ body {
 
 .codes-layer {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 36px;
+  right: 36px;
   top: 44%;
   transform: translateY(-50%);
   height: 60px;
@@ -229,8 +247,8 @@ body {
 
 .axis {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 36px;
+  right: 36px;
   top: calc(44% + 26px);
   display: flex;
   justify-content: space-between;
