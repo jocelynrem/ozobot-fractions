@@ -447,15 +447,7 @@ function renderCodeButtons() {
 function renderTrack() {
   const length = totalLength();
   el.trackFill.style.transform = `translateY(-50%) scaleX(${Math.min(1, length)})`;
-
   el.segmentOverlay.innerHTML = "";
-  state.placedSegments.forEach((segment) => {
-    const part = document.createElement("div");
-    part.className = "overlay-segment";
-    part.style.width = `${segment.value * 100}%`;
-    part.style.background = segment.color;
-    el.segmentOverlay.appendChild(part);
-  });
 
   el.codesLayer.innerHTML = "";
   state.placedCodes.forEach((placedCode) => {
@@ -463,7 +455,10 @@ function renderTrack() {
     chip.className = "code-chip";
     chip.style.left = `${placedCode.position * 100}%`;
     chip.innerHTML = placedCode.colors
-      .map((color) => `<span class="code-stripe" style="background:${color}"></span>`)
+      .map(
+        (color) =>
+          `<span class="code-stripe" style="background:${color};width:var(--ozobot-line-size);height:var(--ozobot-line-size);border-radius:0"></span>`
+      )
       .join("");
 
     el.codesLayer.appendChild(chip);

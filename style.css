@@ -7,6 +7,7 @@
   --primary-dark: #4338ca;
   --danger: #e11d48;
   --border: #e2e8f0;
+  --ozobot-line-size: 24px;
 }
 
 * {
@@ -181,15 +182,15 @@ body {
   position: absolute;
   left: 36px;
   right: 36px;
-  height: 28px;
+  height: var(--ozobot-line-size);
   border-radius: 999px;
   top: 44%;
   transform: translateY(-50%);
 }
 
 .track-bg {
-  border: 2px dashed #cbd5e1;
-  background: #f8fafc;
+  border: 2px solid #ffffff;
+  background: #ffffff;
 }
 
 .track-fill {
@@ -202,9 +203,7 @@ body {
 }
 
 .segment-overlay {
-  display: flex;
-  overflow: hidden;
-  opacity: 0.35;
+  display: none;
   z-index: 3;
 }
 
@@ -219,7 +218,7 @@ body {
   right: 36px;
   top: 44%;
   transform: translateY(-50%);
-  height: 60px;
+  height: var(--ozobot-line-size);
   z-index: 4;
 }
 
