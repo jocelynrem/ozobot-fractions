@@ -160,7 +160,7 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
   return colors
     .map(
       (color) =>
-        `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:2px"></span>`
+        `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:0"></span>`
     )
     .join("");
 }
@@ -168,7 +168,7 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
 function codeBadgeHTML(codeId) {
   const code = findCodeById(codeId);
   if (!code) return `<span style="padding:0 4px;border:1px dashed #94a3b8;border-radius:4px;">${codeId}</span>`;
-  return `<span class="inline-code-badge" aria-label="${code.name} action code" style="display:inline-flex;align-items:center;vertical-align:middle;margin:0 3px;"><span class="inline-code-image" style="display:inline-flex;gap:1px;background:#fff;padding:3px;border:1px solid #94a3b8;border-radius:6px;box-shadow:0 1px 0 rgba(15,23,42,0.08);">${codeStripesHTML(code.colors, 18, 9)}</span></span>`;
+  return `<span class="inline-code-badge" aria-label="${code.name} action code" style="display:inline-flex;align-items:center;vertical-align:middle;margin:0 3px;"><span class="inline-code-image" style="display:inline-flex;gap:0;">${codeStripesHTML(code.colors, 18, 9)}</span></span>`;
 }
 
 function missionHTML(title) {
@@ -438,7 +438,7 @@ function renderCodeButtons() {
   OZOBOT_CODES.forEach((code) => {
     const btn = document.createElement("button");
     btn.className = "tile";
-    btn.innerHTML = `<div style="display:flex;gap:1px;background:#fff;padding:2px;border:1px solid #cbd5e1;border-radius:5px;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
+    btn.innerHTML = `<div style="display:flex;gap:0;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
     btn.addEventListener("click", () => addCode(code));
     el.codeButtons.appendChild(btn);
   });
