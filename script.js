@@ -1,108 +1,106 @@
+const BASE_UNITS = 24;
+
 const FRACTIONS = [
-  { label: "1/2", value: 0.5, color: "#ef4444", name: "Half" },
-  { label: "1/3", value: 1 / 3, color: "#f59e0b", name: "Third" },
-  { label: "1/4", value: 0.25, color: "#10b981", name: "Fourth" },
-  { label: "1/6", value: 1 / 6, color: "#3b82f6", name: "Sixth" },
-  { label: "1/8", value: 0.125, color: "#8b5cf6", name: "Eighth" }
+  { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", name: "Half" },
+  { label: "1/3", numerator: 1, denominator: 3, units: 8, color: "#f59e0b", name: "Third" },
+  { label: "1/4", numerator: 1, denominator: 4, units: 6, color: "#10b981", name: "Fourth" },
+  { label: "1/6", numerator: 1, denominator: 6, units: 4, color: "#3b82f6", name: "Sixth" },
+  { label: "1/8", numerator: 1, denominator: 8, units: 3, color: "#8b5cf6", name: "Eighth" }
 ];
 
 const OZOBOT_CODES = [
   { id: "spin", name: "Spin", colors: ["#00FF00", "#FF0000", "#00FF00", "#FF0000"] },
-  { id: "zigzag", name: "Zigzag", colors: ["#0000FF", "#000000", "#00FF00", "#FF0000"] },
-  { id: "fast", name: "Fast", colors: ["#0000FF", "#000000", "#0000FF"] },
   { id: "slow", name: "Slow", colors: ["#FF0000", "#000000", "#FF0000"] },
+  { id: "fast", name: "Fast", colors: ["#0000FF", "#000000", "#0000FF"] },
+  { id: "zigzag", name: "Zigzag", colors: ["#0000FF", "#000000", "#00FF00", "#FF0000"] },
   { id: "play_again", name: "Play Again", colors: ["#00FF00", "#0000FF"] }
 ];
 
-// NC.3.NF.2-aligned progression: unit fractions and non-unit fractions on a number line.
 const CHALLENGES = [
   {
-    title: "Length model: partition 1 whole into 4 equal parts (unit fraction 1/4). Show 2 copies of 1/4 by placing [spin] at 2/4 (1/2).",
-    requirements: { segments: { "1/4": 4 }, codes: [{ codeId: "spin", position: 0.5 }] }
+    title: "Make 1 whole with fourths. Put an action code block at 2/4.",
+    requirements: { segments: { "1/4": 4 }, codes: [{ numerator: 2, denominator: 4 }] }
   },
   {
-    title: "Length model: partition into 6 equal parts. Show 2 copies of 1/6 at 1/3 and 4 copies of 1/6 at 2/3.",
+    title: "Make 1 whole with sixths. Put an action code block at 4/6.",
     requirements: {
       segments: { "1/6": 6 },
-      codes: [
-        { codeId: "slow", position: 1 / 3 },
-        { codeId: "fast", position: 2 / 3 }
-      ]
+      codes: [{ numerator: 4, denominator: 6 }]
     }
   },
   {
-    title: "Length model: partition into 8 equal parts. Show numerator 3 by placing [zigzag] at 3/8.",
-    requirements: { segments: { "1/8": 8 }, codes: [{ codeId: "zigzag", position: 3 / 8 }] }
-  },
-  {
-    title: "Length model: with fourths, place [fast] at 1/4 and [slow] at 3/4 to show 1 and 3 copies of 1/4.",
-    requirements: {
-      segments: { "1/4": 4 },
-      codes: [
-        { codeId: "fast", position: 1 / 4 },
-        { codeId: "slow", position: 3 / 4 }
-      ]
-    }
-  },
-  {
-    title: "Length model: partition into thirds. Place [spin] at 1/3 and [play_again] at 3/3 (1 whole).",
-    requirements: {
-      segments: { "1/3": 3 },
-      codes: [
-        { codeId: "spin", position: 1 / 3 },
-        { codeId: "play_again", position: 1 }
-      ]
-    }
-  },
-  {
-    title: "Length model: partition into halves. Place [zigzag] at 1/2 and [play_again] at 2/2 (1 whole).",
-    requirements: {
-      segments: { "1/2": 2 },
-      codes: [
-        { codeId: "zigzag", position: 1 / 2 },
-        { codeId: "play_again", position: 1 }
-      ]
-    }
-  },
-  {
-    title: "Length model: with sixths, place [fast] at 1/6 and [slow] at 5/6. Explain: numerator is number of unit lengths from 0.",
-    requirements: {
-      segments: { "1/6": 6 },
-      codes: [
-        { codeId: "fast", position: 1 / 6 },
-        { codeId: "slow", position: 5 / 6 }
-      ]
-    }
-  },
-  {
-    title: "Garden task (from NC example): using eighths, mark [fast] at 1/8, [spin] at 3/8, and [zigzag] at 4/8.",
+    title: "Make 1 whole with eighths. Put an action code block at 1/8 and another at 3/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
-        { codeId: "fast", position: 1 / 8 },
-        { codeId: "spin", position: 3 / 8 },
-        { codeId: "zigzag", position: 4 / 8 }
+        { numerator: 1, denominator: 8 },
+        { numerator: 3, denominator: 8 }
       ]
     }
   },
   {
-    title: "Road task (from NC example): partition into thirds and place [slow] at 2/3.",
+    title: "Make 1 whole with thirds. Put an action code block at 2/3.",
     requirements: {
       segments: { "1/3": 3 },
-      codes: [
-        { codeId: "slow", position: 2 / 3 }
-      ]
+      codes: [{ numerator: 2, denominator: 3 }]
     }
   },
   {
-    title: "Final mixed challenge: build 1 whole in fourths and place [fast] at 1/4, [zigzag] at 2/4, [slow] at 3/4, and [play_again] at 4/4.",
+    title: "Make 1 whole with halves. Put an action code block at 1/2.",
+    requirements: {
+      segments: { "1/2": 2 },
+      codes: [{ numerator: 1, denominator: 2 }]
+    }
+  },
+  {
+    title: "Make 1 whole with fourths. Put action code blocks at 1/4 and 3/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
-        { codeId: "fast", position: 1 / 4 },
-        { codeId: "zigzag", position: 1 / 2 },
-        { codeId: "slow", position: 3 / 4 },
-        { codeId: "play_again", position: 1 }
+        { numerator: 1, denominator: 4 },
+        { numerator: 3, denominator: 4 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole with sixths. Put action code blocks at 1/6 and 5/6.",
+    requirements: {
+      segments: { "1/6": 6 },
+      codes: [
+        { numerator: 1, denominator: 6 },
+        { numerator: 5, denominator: 6 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole with eighths. Put action code blocks at 4/8 and 6/8.",
+    requirements: {
+      segments: { "1/8": 8 },
+      codes: [
+        { numerator: 4, denominator: 8 },
+        { numerator: 6, denominator: 8 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole with thirds. Put action code blocks at 2/3 and 3/3.",
+    requirements: {
+      segments: { "1/3": 3 },
+      codes: [
+        { numerator: 2, denominator: 3 },
+        { numerator: 3, denominator: 3 }
+      ]
+    }
+  },
+  {
+    title: "Final mission: make 1 whole with fourths. Put action code blocks at 1/4, 2/4, 3/4, and 4/4.",
+    requirements: {
+      segments: { "1/4": 4 },
+      codes: [
+        { numerator: 1, denominator: 4 },
+        { numerator: 2, denominator: 4 },
+        { numerator: 3, denominator: 4 },
+        { numerator: 4, denominator: 4 }
       ]
     }
   }
@@ -114,7 +112,7 @@ const state = {
   placedCodes: [],
   history: [],
   isCheckedCorrect: false,
-  hasTriedOzobot: false
+  celebrationTimer: null
 };
 
 const el = {
@@ -124,24 +122,34 @@ const el = {
   checkDetails: document.getElementById("checkDetails"),
   pieSlices: document.getElementById("pieSlices"),
   pieLabel: document.getElementById("pieLabel"),
-  trackFill: document.getElementById("trackFill"),
   segmentOverlay: document.getElementById("segmentOverlay"),
   codesLayer: document.getElementById("codesLayer"),
+  axis: document.getElementById("axis"),
   progressValue: document.getElementById("progressValue"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
-  calibrateBtn: document.getElementById("calibrateBtn"),
-  calibrationModal: document.getElementById("calibrationModal"),
-  closeCalibrationBtn: document.getElementById("closeCalibrationBtn"),
+  codePanelHeader: document.getElementById("codePanelHeader"),
+  codeUnlockText: document.getElementById("codeUnlockText"),
+  hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
   resetBtn: document.getElementById("resetBtn"),
   checkBtn: document.getElementById("checkBtn"),
-  triedBtn: document.getElementById("triedBtn"),
-  nextBtn: document.getElementById("nextBtn")
+  successModal: document.getElementById("successModal"),
+  modalConfetti: document.getElementById("modalConfetti"),
+  modalCelebrateText: document.getElementById("modalCelebrateText"),
+  modalRunCodes: document.getElementById("modalRunCodes"),
+  nextFromModalBtn: document.getElementById("nextFromModalBtn")
 };
 
-function totalLength() {
-  return state.placedSegments.reduce((sum, s) => sum + s.value, 0);
+function gcd(a, b) {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x || 1;
 }
 
 function makeId() {
@@ -156,6 +164,53 @@ function findCodeById(codeId) {
   return OZOBOT_CODES.find((code) => code.id === codeId);
 }
 
+function totalUnits() {
+  return state.placedSegments.reduce((sum, s) => sum + s.units, 0);
+}
+
+function simplifyFraction(numerator, denominator) {
+  const divisor = gcd(numerator, denominator);
+  return { numerator: numerator / divisor, denominator: denominator / divisor };
+}
+
+function formatUnitsAsFraction(units) {
+  if (units === BASE_UNITS) return "1 whole";
+  const simplified = simplifyFraction(units, BASE_UNITS);
+  return `${simplified.numerator}/${simplified.denominator}`;
+}
+
+function getPrimarySegmentDenominator() {
+  if (state.placedSegments.length > 0) {
+    const firstDenominator = state.placedSegments[0].denominator;
+    const sameDenominator = state.placedSegments.every((s) => s.denominator === firstDenominator);
+    if (sameDenominator) return firstDenominator;
+  }
+
+  const requiredSegments = Object.keys(currentProblem().requirements.segments);
+  if (requiredSegments.length === 1) {
+    const parts = requiredSegments[0].split("/");
+    return Number(parts[1]);
+  }
+
+  return null;
+}
+
+function formatAxisLabel(units, denominatorHint) {
+  if (units === 0) return "0";
+  if (denominatorHint && BASE_UNITS % denominatorHint === 0) {
+    const unitsPerPart = BASE_UNITS / denominatorHint;
+    if (units % unitsPerPart === 0) {
+      const numerator = units / unitsPerPart;
+      return `${numerator}/${denominatorHint}`;
+    }
+  }
+  return formatUnitsAsFraction(units);
+}
+
+function reqToUnits(req) {
+  return (req.numerator * BASE_UNITS) / req.denominator;
+}
+
 function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
   return colors
     .map(
@@ -163,16 +218,6 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
         `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:0"></span>`
     )
     .join("");
-}
-
-function codeBadgeHTML(codeId) {
-  const code = findCodeById(codeId);
-  if (!code) return `<span style="padding:0 4px;border:1px dashed #94a3b8;border-radius:4px;">${codeId}</span>`;
-  return `<span class="inline-code-badge" aria-label="${code.name} action code" style="display:inline-flex;align-items:center;vertical-align:middle;margin:0 3px;"><span class="inline-code-image" style="display:inline-flex;gap:0;">${codeStripesHTML(code.colors, 18, 9)}</span></span>`;
-}
-
-function missionHTML(title) {
-  return title.replace(/\[([a-z_]+)\]/g, (_, codeId) => codeBadgeHTML(codeId));
 }
 
 function setFeedback(type, message) {
@@ -197,17 +242,18 @@ function setCheckDetails(lines, pass) {
   el.checkDetails.innerHTML = lines.map((line) => `<div>${line}</div>`).join("");
 }
 
-function updateProgressControls() {
-  const unlocked = state.isCheckedCorrect && state.hasTriedOzobot;
-  el.nextBtn.disabled = !unlocked;
-  el.triedBtn.classList.toggle("tried", state.hasTriedOzobot);
-  el.triedBtn.textContent = state.hasTriedOzobot ? "Ozobot Tried ✓" : "I Tried Ozobot";
+function unlockedCodeCount() {
+  return Math.min(OZOBOT_CODES.length, Math.floor(state.currentProblemIdx / 2) + 1);
+}
+
+function triggerUnlockCelebration() {
+  el.codePanelHeader.classList.remove("unlock-pop");
+  void el.codePanelHeader.offsetWidth;
+  el.codePanelHeader.classList.add("unlock-pop");
 }
 
 function clearCheckProgress() {
   state.isCheckedCorrect = false;
-  state.hasTriedOzobot = false;
-  updateProgressControls();
 }
 
 function resetBoard() {
@@ -222,8 +268,8 @@ function resetBoard() {
 }
 
 function addSegment(fraction) {
-  const currentTotal = totalLength();
-  if (currentTotal + fraction.value > 1.001) return;
+  const currentTotal = totalUnits();
+  if (currentTotal + fraction.units > BASE_UNITS) return;
 
   state.placedSegments.push({ ...fraction, uid: makeId() });
   state.history.push("segment");
@@ -236,7 +282,7 @@ function addSegment(fraction) {
 function addCode(code) {
   state.placedCodes.push({
     ...code,
-    position: totalLength(),
+    positionUnits: totalUnits(),
     uid: makeId()
   });
 
@@ -264,21 +310,29 @@ function evaluateStudentWork() {
   const errors = [];
   const passes = [];
   const hints = [];
+  const remainingCodeIndexes = new Set(state.placedCodes.map((_, idx) => idx));
 
   problem.requirements.codes.forEach((req) => {
-    const match = state.placedCodes.find(
-      (pc) => pc.id === req.codeId && Math.abs(pc.position - req.position) < 0.01
-    );
+    const reqUnits = reqToUnits(req);
+    let matchedIndex = -1;
+    for (const idx of remainingCodeIndexes) {
+      const placed = state.placedCodes[idx];
+      const positionMatches = placed.positionUnits === reqUnits;
+      const typeMatches = !req.codeId || placed.id === req.codeId;
+      if (positionMatches && typeMatches) {
+        matchedIndex = idx;
+        break;
+      }
+    }
 
-    const code = findCodeById(req.codeId);
-    const asFraction = FRACTIONS.find((f) => Math.abs(f.value - req.position) < 0.01);
-    const label = asFraction ? asFraction.label : req.position.toFixed(2);
+    const label = `${req.numerator}/${req.denominator}`;
 
-    if (!match) {
-      errors.push(`Missing ${code ? code.name : "action code"} at ${label}.`);
-      hints.push(`Try this: Place ${codeBadgeHTML(req.codeId)} at ${label}.`);
+    if (matchedIndex === -1) {
+      errors.push(`Missing an action code block at ${label}.`);
+      hints.push(`Try placing an action code block at ${label}.`);
     } else {
-      passes.push(`Action code ${codeBadgeHTML(req.codeId)} is in the right spot at ${label}.`);
+      remainingCodeIndexes.delete(matchedIndex);
+      passes.push(`An action code block is at ${label}.`);
     }
   });
 
@@ -286,85 +340,141 @@ function evaluateStudentWork() {
   Object.entries(requiredSegments).forEach(([segmentLabel, needed]) => {
     const count = state.placedSegments.filter((s) => s.label === segmentLabel).length;
     if (count < needed) {
-      errors.push(`Need ${needed} total ${segmentLabel} segments (currently ${count}).`);
-      hints.push(`Try this: Add more ${segmentLabel} segments until you have ${needed}.`);
+      errors.push(`Need ${needed} total ${segmentLabel} segments (now ${count}).`);
+      hints.push(`Add ${segmentLabel} segments until you have ${needed}.`);
+    } else if (count > needed) {
+      errors.push(`Too many ${segmentLabel} segments (now ${count}, need ${needed}).`);
+      hints.push(`Remove extra ${segmentLabel} segments.`);
     } else {
-      passes.push(`Great partitioning with ${segmentLabel} segments (${count}).`);
+      passes.push(`Correct number of ${segmentLabel} segments.`);
     }
   });
 
-  if (totalLength() > 1.001) {
+  if (totalUnits() > BASE_UNITS) {
     errors.push("The line is longer than 1 whole.");
-    hints.push("Try this: Remove one segment so your total is exactly 1 whole.");
+    hints.push("Remove one segment so the line ends at 1 whole.");
   }
 
   return { passed: errors.length === 0, errors, passes, hints };
 }
 
+function showHint() {
+  const result = evaluateStudentWork();
+  if (result.passed) {
+    setFeedback("success", "Everything looks correct. Check your answer.");
+    setCheckDetails(["Hint: Your setup looks right. Tap Check Answer."], true);
+    return;
+  }
+
+  const fallbackHint = "Build exactly one whole, then place each action code at the named fraction.";
+  const hintLine = result.hints[0] || fallbackHint;
+  setFeedback("error", "Use this hint and try one move.");
+  setCheckDetails([`Hint: ${hintLine}`], false);
+}
+
+function launchConfettiBurst() {
+  const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
+  el.modalConfetti.innerHTML = "";
+  for (let i = 0; i < 38; i += 1) {
+    const piece = document.createElement("span");
+    piece.className = "modal-confetti-piece";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[i % colors.length];
+    piece.style.animationDelay = `${Math.random() * 260}ms`;
+    el.modalConfetti.appendChild(piece);
+  }
+}
+
+function openSuccessModal() {
+  renderModalRunTrack();
+  launchConfettiBurst();
+  const celebrates = [
+    "Perfect build! You nailed it.",
+    "Great job! That is correct.",
+    "Excellent work! Ready for the Ozobot run."
+  ];
+  el.modalCelebrateText.textContent = celebrates[Math.floor(Math.random() * celebrates.length)];
+  el.successModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSuccessModalAndAdvance() {
+  el.successModal.classList.add("hidden");
+  document.body.style.overflow = "";
+  nextProblem(true);
+}
+
+function renderModalRunTrack() {
+  el.modalRunCodes.innerHTML = "";
+
+  state.placedCodes.forEach((placedCode) => {
+    const chip = document.createElement("div");
+    chip.className = "modal-run-code";
+
+    const ratio = placedCode.positionUnits / BASE_UNITS;
+    chip.style.left = `${ratio * 100}%`;
+    if (placedCode.positionUnits === 0) {
+      chip.style.transform = "translateX(0)";
+    } else if (placedCode.positionUnits === BASE_UNITS) {
+      chip.style.transform = "translateX(-100%)";
+    }
+
+    chip.innerHTML = placedCode.colors
+      .map((color) => `<span class="modal-run-stripe" style="background:${color}"></span>`)
+      .join("");
+
+    el.modalRunCodes.appendChild(chip);
+  });
+}
+
 function checkAnswer() {
   const result = evaluateStudentWork();
   const successMessages = [
-    "Awesome job! Math mission complete.",
-    "Boom! You built that fraction path.",
-    "You got it! Ozobot is ready to test."
+    "Awesome job. Math mission complete.",
+    "Great work. Your fraction track is correct.",
+    "You got it. Your Ozobot path is ready."
   ];
   const tryAgainMessages = [
-    "Nice try! You are super close.",
-    "Keep going! Fix one clue at a time.",
-    "Good effort! Let's tune it up."
+    "Nice try. You are close.",
+    "Keep going. Fix one clue at a time.",
+    "Good effort. Tune one part and recheck."
   ];
 
   if (result.passed) {
     const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
     state.isCheckedCorrect = true;
-    updateProgressControls();
-    setFeedback("success", `${msg} Now run Ozobot, then tap 'I Tried Ozobot'.`);
-    setCheckDetails(["Star work! Everything matches the mission.", ...result.passes], true);
+    setFeedback("success", msg);
+    setCheckDetails(["Everything matches the mission.", ...result.passes], true);
+    openSuccessModal();
   } else {
     const msg = tryAgainMessages[Math.floor(Math.random() * tryAgainMessages.length)];
     state.isCheckedCorrect = false;
-    updateProgressControls();
     setFeedback("error", `${msg} ${result.errors[0]}`);
     setCheckDetails(["Mission hints:", ...result.hints], false);
   }
 }
 
-function confirmTriedOzobot() {
-  if (!state.isCheckedCorrect) {
-    setFeedback("error", "First tap 'Check Answer' and get a correct answer.");
-    return;
-  }
-
-  state.hasTriedOzobot = true;
-  updateProgressControls();
-  setFeedback("success", "Great testing! Tap 'Next Problem' when you're ready.");
-}
-
-function nextProblem() {
-  if (!(state.isCheckedCorrect && state.hasTriedOzobot)) {
-    setFeedback("error", "Check the answer, then try Ozobot, then move to the next problem.");
+function nextProblem(fromModal = false) {
+  if (!fromModal && !state.isCheckedCorrect) {
+    setFeedback("error", "Check the answer first.");
     return;
   }
 
   if (state.currentProblemIdx < CHALLENGES.length - 1) {
+    const priorUnlockCount = unlockedCodeCount();
     state.currentProblemIdx += 1;
     resetBoard();
+    const newUnlockCount = unlockedCodeCount();
+    if (newUnlockCount > priorUnlockCount) {
+      triggerUnlockCelebration();
+      setFeedback("success", `Celebration: you unlocked a new action code block. ${newUnlockCount} of ${OZOBOT_CODES.length} codes unlocked.`);
+    }
     return;
   }
 
   state.currentProblemIdx = 0;
   resetBoard();
-  setFeedback("success", "You finished all 10 problems. Amazing work! Starting again at Problem 1.");
-}
-
-function openCalibrationModal() {
-  el.calibrationModal.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-}
-
-function closeCalibrationModal() {
-  el.calibrationModal.classList.add("hidden");
-  document.body.style.overflow = "";
+  setFeedback("success", "You finished all 10 problems. Starting again at Problem 1.");
 }
 
 function polarPoint(cx, cy, r, degrees) {
@@ -387,7 +497,7 @@ function renderPieChart() {
   let currentAngle = 0;
 
   state.placedSegments.forEach((segment) => {
-    const sliceAngle = segment.value * 360;
+    const sliceAngle = (segment.units / BASE_UNITS) * 360;
     if (sliceAngle <= 0) return;
 
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -415,17 +525,17 @@ function renderPieChart() {
     currentAngle += sliceAngle;
   });
 
-  el.pieLabel.textContent = `${totalLength().toFixed(2)} of 1.00`;
+  el.pieLabel.textContent = `${formatUnitsAsFraction(totalUnits())} of 1 whole`;
 }
 
 function renderFractionButtons() {
   el.fractionButtons.innerHTML = "";
-  const currentTotal = totalLength();
+  const currentTotal = totalUnits();
 
   FRACTIONS.forEach((fraction) => {
     const btn = document.createElement("button");
     btn.className = "tile";
-    btn.disabled = currentTotal + fraction.value > 1.001;
+    btn.disabled = currentTotal + fraction.units > BASE_UNITS;
     btn.style.borderColor = `${fraction.color}66`;
     btn.innerHTML = `<div style="font-size:22px;color:${fraction.color}">${fraction.label}</div><div class="small">${fraction.name}</div>`;
     btn.addEventListener("click", () => addSegment(fraction));
@@ -435,25 +545,87 @@ function renderFractionButtons() {
 
 function renderCodeButtons() {
   el.codeButtons.innerHTML = "";
-  OZOBOT_CODES.forEach((code) => {
+  const visibleCodes = OZOBOT_CODES.slice(0, unlockedCodeCount());
+  const lockedCount = OZOBOT_CODES.length - visibleCodes.length;
+
+  el.codeUnlockText.textContent = `${visibleCodes.length} of ${OZOBOT_CODES.length} codes unlocked`;
+
+  visibleCodes.forEach((code) => {
     const btn = document.createElement("button");
     btn.className = "tile";
     btn.innerHTML = `<div style="display:flex;gap:0;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
     btn.addEventListener("click", () => addCode(code));
     el.codeButtons.appendChild(btn);
   });
+
+  for (let i = 0; i < lockedCount; i += 1) {
+    const locked = document.createElement("button");
+    locked.className = "tile tile-locked";
+    locked.disabled = true;
+    locked.innerHTML = `<div style="font-size:18px;">?</div><div class="small">Locked</div>`;
+    el.codeButtons.appendChild(locked);
+  }
+}
+
+function renderAxis() {
+  el.axis.innerHTML = "";
+  const denominatorHint = getPrimarySegmentDenominator();
+
+  const points = [{ units: 0 }];
+  let running = 0;
+  state.placedSegments.forEach((segment) => {
+    running += segment.units;
+    points.push({ units: running });
+  });
+
+  if (!points.some((p) => p.units === BASE_UNITS)) {
+    points.push({ units: BASE_UNITS });
+  }
+
+  const unique = [];
+  const seen = new Set();
+  points.forEach((point) => {
+    if (point.units < 0 || point.units > BASE_UNITS) return;
+    if (seen.has(point.units)) return;
+    seen.add(point.units);
+    unique.push(point);
+  });
+
+  unique.forEach((point) => {
+    const label = document.createElement("span");
+    label.className = "axis-label";
+    label.style.left = `${(point.units / BASE_UNITS) * 100}%`;
+    label.textContent = formatAxisLabel(point.units, denominatorHint);
+    el.axis.appendChild(label);
+  });
 }
 
 function renderTrack() {
-  const length = totalLength();
-  el.trackFill.style.transform = `translateY(-50%) scaleX(${Math.min(1, length)})`;
   el.segmentOverlay.innerHTML = "";
+  let startUnits = 0;
+
+  state.placedSegments.forEach((segment) => {
+    const block = document.createElement("div");
+    block.className = "overlay-segment";
+    block.style.left = `${(startUnits / BASE_UNITS) * 100}%`;
+    block.style.width = `${(segment.units / BASE_UNITS) * 100}%`;
+    block.style.borderColor = `${segment.color}99`;
+    block.style.background = `${segment.color}22`;
+
+    const segLabel = document.createElement("span");
+    segLabel.className = "overlay-segment-label";
+    segLabel.textContent = segment.label;
+    block.appendChild(segLabel);
+
+    el.segmentOverlay.appendChild(block);
+    startUnits += segment.units;
+  });
 
   el.codesLayer.innerHTML = "";
   state.placedCodes.forEach((placedCode) => {
     const chip = document.createElement("div");
     chip.className = "code-chip";
-    chip.style.left = `${placedCode.position * 100}%`;
+    chip.style.left = `${(placedCode.positionUnits / BASE_UNITS) * 100}%`;
     chip.innerHTML = placedCode.colors
       .map(
         (color) =>
@@ -463,35 +635,34 @@ function renderTrack() {
 
     el.codesLayer.appendChild(chip);
   });
+
+  renderAxis();
 }
 
 function render() {
   const problem = currentProblem();
   el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
-  el.missionText.innerHTML = missionHTML(problem.title);
-  el.progressValue.textContent = totalLength().toFixed(2);
+  el.missionText.textContent = problem.title;
+  el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
 
   renderFractionButtons();
   renderCodeButtons();
   renderTrack();
   renderPieChart();
-  updateProgressControls();
 }
 
-el.calibrateBtn.addEventListener("click", openCalibrationModal);
-el.closeCalibrationBtn.addEventListener("click", closeCalibrationModal);
-el.calibrationModal.addEventListener("click", (event) => {
-  if (event.target === el.calibrationModal) closeCalibrationModal();
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !el.calibrationModal.classList.contains("hidden")) {
-    closeCalibrationModal();
-  }
-});
+el.hintBtn.addEventListener("click", showHint);
 el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
 el.checkBtn.addEventListener("click", checkAnswer);
-el.triedBtn.addEventListener("click", confirmTriedOzobot);
-el.nextBtn.addEventListener("click", nextProblem);
+el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
+el.successModal.addEventListener("click", (event) => {
+  if (event.target === el.successModal) closeSuccessModalAndAdvance();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !el.successModal.classList.contains("hidden")) {
+    closeSuccessModalAndAdvance();
+  }
+});
 
 render();

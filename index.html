@@ -17,69 +17,95 @@
             <div id="feedback" class="feedback hidden"></div>
           </div>
           <div class="pie-card">
-            <p class="eyebrow">Segment Pie Chart</p>
-            <svg id="pieChart" viewBox="0 0 140 140" aria-label="Segment pie chart">
-              <circle cx="70" cy="70" r="64" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"></circle>
+            <svg
+              id="pieChart"
+              viewBox="0 0 140 140"
+              aria-label="Segment pie chart"
+            >
+              <circle
+                cx="70"
+                cy="70"
+                r="64"
+                fill="#f8fafc"
+                stroke="#e2e8f0"
+                stroke-width="2"
+              ></circle>
               <g id="pieSlices"></g>
             </svg>
-            <div id="pieLabel" class="pie-label">0.00 of 1.00</div>
+            <div id="pieLabel" class="pie-label">0/1 of 1 whole</div>
           </div>
         </section>
         <section id="checkDetails" class="check-details hidden"></section>
 
         <section class="track-wrap">
           <div class="track-bg"></div>
-          <div id="trackFill" class="track-fill"></div>
           <div id="segmentOverlay" class="segment-overlay"></div>
           <div id="codesLayer" class="codes-layer"></div>
-          <div class="axis">
-            <span>0</span>
-            <span>0.25</span>
-            <span>0.5</span>
-            <span>0.75</span>
-            <span>1 WHOLE</span>
-          </div>
+          <div id="axis" class="axis"></div>
         </section>
 
         <section class="actions-row">
           <div class="progress-card">
             <div class="label">Total Progress</div>
-            <div id="progressValue" class="value">0.00</div>
+            <div id="progressValue" class="value">0/1</div>
           </div>
           <div class="controls">
-            <button id="calibrateBtn" class="btn btn-light">Calibration Circle</button>
+            <button id="hintBtn" class="btn btn-light">Hint</button>
             <button id="undoBtn" class="btn btn-light">Undo</button>
             <button id="resetBtn" class="btn btn-light danger">Clear</button>
             <button id="checkBtn" class="btn btn-primary">Check Answer</button>
-            <button id="triedBtn" class="btn btn-light">I Tried Ozobot</button>
-            <button id="nextBtn" class="btn btn-light" disabled>Next Problem</button>
           </div>
         </section>
       </main>
 
       <footer class="toolbar">
         <section class="panel">
-          <h2>Add Fraction Segment</h2>
+          <h2>Fraction Segments</h2>
           <div id="fractionButtons" class="button-grid"></div>
         </section>
         <section class="panel">
-          <h2>Add Action Code</h2>
+          <div id="codePanelHeader" class="code-panel-header">
+            <h2 class="code-panel-title">Action Codes</h2>
+            <p id="codeUnlockText" class="unlock-note"></p>
+          </div>
           <div id="codeButtons" class="button-grid"></div>
         </section>
       </footer>
     </div>
-    <div id="calibrationModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="calibrationTitle">
+    <div
+      id="successModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="successTitle"
+    >
       <div class="modal-card">
-        <h2 id="calibrationTitle">Ozobot Calibration Circle</h2>
-        <p class="modal-text">For screen use: set display brightness to 100%, turn off Night Shift/True Tone/blue light filters, then place Ozobot inside the black circle.</p>
+        <div id="modalConfetti" class="modal-confetti" aria-hidden="true"></div>
+        <p id="modalCelebrateText" class="modal-celebrate">Outstanding work!</p>
+        <h2 id="successTitle">Mission Complete</h2>
+        <p class="modal-text">
+          Great work. Run your Ozobot on your track now. When you are done,
+          choose Next Problem.
+        </p>
         <ol class="modal-steps">
-          <li>Press and hold the power button for 5 seconds (or until the top LED flashes white), then let go.</li>
-          <li>Ozobot will wiggle left and right and move out of the circle.</li>
-          <li>If it blinks green, calibration worked.</li>
-          <li>If it blinks red, start over and try again.</li>
+          <li>Place Ozobot at the start of your line.</li>
+          <li>Watch it read your color codes.</li>
+          <li>When finished, move to the next challenge.</li>
         </ol>
-        <div class="calibration-circle" aria-hidden="true"></div>
-        <button id="closeCalibrationBtn" class="btn btn-primary">Done</button>
+        <div class="modal-run-wrap">
+          <p class="modal-run-title">Ozobot Run Line</p>
+          <div
+            id="modalRunTrack"
+            class="modal-run-track"
+            aria-label="Ozobot run line"
+          >
+            <div class="modal-run-line"></div>
+            <div id="modalRunCodes" class="modal-run-codes"></div>
+          </div>
+        </div>
+        <button id="nextFromModalBtn" class="btn btn-primary">
+          Next Problem
+        </button>
       </div>
     </div>
 
