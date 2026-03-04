@@ -112,7 +112,8 @@ const state = {
   placedCodes: [],
   history: [],
   isCheckedCorrect: false,
-  celebrationTimer: null
+  celebrationTimer: null,
+  showLineHints: false
 };
 
 const el = {
@@ -130,6 +131,8 @@ const el = {
   codeButtons: document.getElementById("codeButtons"),
   codePanelHeader: document.getElementById("codePanelHeader"),
   codeUnlockText: document.getElementById("codeUnlockText"),
+  liveMarkers: document.getElementById("liveMarkers"),
+  successToast: document.getElementById("successToast"),
   hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
   resetBtn: document.getElementById("resetBtn"),
@@ -227,8 +230,26 @@ function setFeedback(type, message) {
     return;
   }
 
+  if (type === "success") {
+    showSuccessToast(message);
+    el.feedback.className = "feedback hidden";
+    el.feedback.textContent = "";
+    return;
+  }
+
   el.feedback.className = `feedback ${type}`;
   el.feedback.textContent = message;
+}
+
+function showSuccessToast(message) {
+  if (state.celebrationTimer) {
+    window.clearTimeout(state.celebrationTimer);
+  }
+  el.successToast.textContent = message;
+  el.successToast.classList.add("show");
+  state.celebrationTimer = window.setTimeout(() => {
+    el.successToast.classList.remove("show");
+  }, 2200);
 }
 
 function setCheckDetails(lines, pass) {
@@ -246,10 +267,39 @@ function unlockedCodeCount() {
   return Math.min(OZOBOT_CODES.length, Math.floor(state.currentProblemIdx / 2) + 1);
 }
 
-function triggerUnlockCelebration() {
+function triggerUnlockCelebration(newlyUnlockedIndex) {
   el.codePanelHeader.classList.remove("unlock-pop");
   void el.codePanelHeader.offsetWidth;
   el.codePanelHeader.classList.add("unlock-pop");
+
+  el.codeButtons.classList.remove("unlock-burst");
+  void el.codeButtons.offsetWidth;
+  el.codeButtons.classList.add("unlock-burst");
+
+  const unlockedTile = el.codeButtons.querySelector(`.tile[data-code-idx="${newlyUnlockedIndex}"]`);
+  if (unlockedTile) {
+    unlockedTile.classList.remove("unlock-target");
+    void unlockedTile.offsetWidth;
+    unlockedTile.classList.add("unlock-target");
+  }
+
+  const burstColors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
+  const sparkCount = 16;
+  const gridRect = el.codeButtons.getBoundingClientRect();
+  const tileRect = unlockedTile ? unlockedTile.getBoundingClientRect() : null;
+  const centerX = tileRect ? tileRect.left - gridRect.left + tileRect.width / 2 : gridRect.width / 2;
+  const centerY = tileRect ? tileRect.top - gridRect.top + tileRect.height / 2 : gridRect.height / 2;
+  for (let i = 0; i < sparkCount; i += 1) {
+    const spark = document.createElement("span");
+    spark.className = "unlock-spark";
+    spark.style.background = burstColors[i % burstColors.length];
+    spark.style.left = `${centerX}px`;
+    spark.style.top = `${centerY}px`;
+    spark.style.setProperty("--dx", `${Math.random() * 170 - 85}px`);
+    spark.style.setProperty("--dy", `${Math.random() * 110 - 55}px`);
+    el.codeButtons.appendChild(spark);
+    window.setTimeout(() => spark.remove(), 760);
+  }
 }
 
 function clearCheckProgress() {
@@ -260,6 +310,7 @@ function resetBoard() {
   state.placedSegments = [];
   state.placedCodes = [];
   state.history = [];
+  state.showLineHints = false;
 
   setFeedback(null, "");
   setCheckDetails([], false);
@@ -273,6 +324,7 @@ function addSegment(fraction) {
 
   state.placedSegments.push({ ...fraction, uid: makeId() });
   state.history.push("segment");
+  state.showLineHints = false;
   setFeedback(null, "");
   setCheckDetails([], false);
   clearCheckProgress();
@@ -287,6 +339,7 @@ function addCode(code) {
   });
 
   state.history.push("code");
+  state.showLineHints = false;
   setFeedback(null, "");
   setCheckDetails([], false);
   clearCheckProgress();
@@ -298,6 +351,7 @@ function undo() {
   const last = state.history.pop();
   if (last === "segment") state.placedSegments.pop();
   if (last === "code") state.placedCodes.pop();
+  state.showLineHints = false;
 
   setFeedback(null, "");
   setCheckDetails([], false);
@@ -359,6 +413,7 @@ function evaluateStudentWork() {
 }
 
 function showHint() {
+  state.showLineHints = true;
   const result = evaluateStudentWork();
   if (result.passed) {
     setFeedback("success", "Everything looks correct. Check your answer.");
@@ -466,7 +521,7 @@ function nextProblem(fromModal = false) {
     resetBoard();
     const newUnlockCount = unlockedCodeCount();
     if (newUnlockCount > priorUnlockCount) {
-      triggerUnlockCelebration();
+      triggerUnlockCelebration(newUnlockCount - 1);
       setFeedback("success", `Celebration: you unlocked a new action code block. ${newUnlockCount} of ${OZOBOT_CODES.length} codes unlocked.`);
     }
     return;
@@ -553,6 +608,7 @@ function renderCodeButtons() {
   visibleCodes.forEach((code) => {
     const btn = document.createElement("button");
     btn.className = "tile";
+    btn.dataset.codeIdx = String(OZOBOT_CODES.findIndex((c) => c.id === code.id));
     btn.innerHTML = `<div style="display:flex;gap:0;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
     btn.addEventListener("click", () => addCode(code));
     el.codeButtons.appendChild(btn);
@@ -562,9 +618,106 @@ function renderCodeButtons() {
     const locked = document.createElement("button");
     locked.className = "tile tile-locked";
     locked.disabled = true;
-    locked.innerHTML = `<div style="font-size:18px;">?</div><div class="small">Locked</div>`;
+    locked.innerHTML = `<div style="font-size:20px;">?</div><div class="small">???</div>`;
     el.codeButtons.appendChild(locked);
   }
+}
+
+function renderLiveMarkers() {
+  el.liveMarkers.innerHTML = "";
+
+  const problem = currentProblem();
+  if (state.placedSegments.length === 0 && state.showLineHints) {
+    const hintA = document.createElement("div");
+    hintA.className = "live-hint";
+    hintA.textContent = "Hint: Add fraction segments first.";
+    el.liveMarkers.appendChild(hintA);
+
+    if (problem.requirements.codes.length > 0) {
+      const targets = problem.requirements.codes
+        .map((req) => `${req.numerator}/${req.denominator}`)
+        .join(", ");
+      const hintB = document.createElement("div");
+      hintB.className = "live-hint";
+      hintB.textContent = `Then add action code blocks at ${targets}.`;
+      el.liveMarkers.appendChild(hintB);
+    }
+    return;
+  }
+  if (state.placedSegments.length === 0 && !state.showLineHints) return;
+
+  const segmentRule = Object.entries(problem.requirements.segments)[0];
+  if (segmentRule) {
+    const requiredLabel = segmentRule[0];
+    const needed = segmentRule[1];
+    const unitsPerPart = BASE_UNITS / needed;
+    const matchedBoundaryIndexes = new Set();
+    const wrongEndpoints = [];
+    let running = 0;
+    let prefixStillValid = true;
+
+    state.placedSegments.forEach((segment, idx) => {
+      running += segment.units;
+      const boundaryIndex = idx + 1;
+      const segmentMatchesRule = segment.label === requiredLabel;
+      const boundaryMatchesRule =
+        prefixStillValid &&
+        segmentMatchesRule &&
+        boundaryIndex <= needed &&
+        running === boundaryIndex * unitsPerPart;
+
+      if (boundaryMatchesRule) {
+        matchedBoundaryIndexes.add(boundaryIndex);
+      } else {
+        prefixStillValid = false;
+      }
+
+      if (!segmentMatchesRule) {
+        wrongEndpoints.push({ units: running, label: segment.label });
+      }
+    });
+
+    for (let i = 1; i <= needed; i += 1) {
+      const units = (i * BASE_UNITS) / needed;
+      const matched = matchedBoundaryIndexes.has(i);
+      if (!matched && !state.showLineHints) continue;
+      const marker = document.createElement("div");
+      marker.className = `live-marker boundary ${matched ? "matched" : "pending"}`;
+      marker.style.left = `${(units / BASE_UNITS) * 100}%`;
+      marker.textContent = matched ? "✓" : "•";
+      marker.title = `${i}/${needed}`;
+      el.liveMarkers.appendChild(marker);
+    }
+
+    wrongEndpoints.forEach((wrong) => {
+      const marker = document.createElement("div");
+      marker.className = "live-marker boundary wrong";
+      marker.style.left = `${(wrong.units / BASE_UNITS) * 100}%`;
+      marker.textContent = "↺";
+      marker.title = `${wrong.label} is not needed here. Use ${requiredLabel}.`;
+      el.liveMarkers.appendChild(marker);
+    });
+
+    if (wrongEndpoints.length > 0) {
+      const warning = document.createElement("div");
+      warning.className = "live-hint warning";
+      warning.textContent = `Try using only ${requiredLabel} segments for this mission.`;
+      el.liveMarkers.appendChild(warning);
+    }
+  }
+
+  const placedAt = new Set(state.placedCodes.map((code) => code.positionUnits));
+  problem.requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    const matched = placedAt.has(units);
+    if (!matched && !state.showLineHints) return;
+    const marker = document.createElement("div");
+    marker.className = `live-marker code ${matched ? "matched" : "pending"}`;
+    marker.style.left = `${(units / BASE_UNITS) * 100}%`;
+    marker.textContent = matched ? "✓" : "⭐";
+    marker.title = `Action code at ${req.numerator}/${req.denominator}`;
+    el.liveMarkers.appendChild(marker);
+  });
 }
 
 function renderAxis() {
@@ -637,6 +790,7 @@ function renderTrack() {
   });
 
   renderAxis();
+  renderLiveMarkers();
 }
 
 function render() {

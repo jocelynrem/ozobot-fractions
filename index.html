@@ -36,12 +36,26 @@
           </div>
         </section>
         <section id="checkDetails" class="check-details hidden"></section>
+        <section class="toolbar toolbar-inline">
+          <section class="panel">
+            <h2>Fraction Segments</h2>
+            <div id="fractionButtons" class="button-grid"></div>
+          </section>
+          <section class="panel">
+            <div id="codePanelHeader" class="code-panel-header">
+              <h2 class="code-panel-title">Action Codes</h2>
+              <p id="codeUnlockText" class="unlock-note"></p>
+            </div>
+            <div id="codeButtons" class="button-grid"></div>
+          </section>
+        </section>
 
         <section class="track-wrap">
           <div class="track-bg"></div>
           <div id="segmentOverlay" class="segment-overlay"></div>
           <div id="codesLayer" class="codes-layer"></div>
           <div id="axis" class="axis"></div>
+          <div id="liveMarkers" class="live-markers"></div>
         </section>
 
         <section class="actions-row">
@@ -57,21 +71,8 @@
           </div>
         </section>
       </main>
-
-      <footer class="toolbar">
-        <section class="panel">
-          <h2>Fraction Segments</h2>
-          <div id="fractionButtons" class="button-grid"></div>
-        </section>
-        <section class="panel">
-          <div id="codePanelHeader" class="code-panel-header">
-            <h2 class="code-panel-title">Action Codes</h2>
-            <p id="codeUnlockText" class="unlock-note"></p>
-          </div>
-          <div id="codeButtons" class="button-grid"></div>
-        </section>
-      </footer>
     </div>
+    <div id="successToast" class="success-toast" role="status" aria-live="polite"></div>
     <div
       id="successModal"
       class="modal hidden"
