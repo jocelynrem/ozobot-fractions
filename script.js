@@ -10,9 +10,11 @@ const FRACTIONS = [
 
 const OZOBOT_CODES = [
   { id: "spin", name: "Spin", colors: ["#00FF00", "#FF0000", "#00FF00", "#FF0000"] },
-  { id: "slow", name: "Slow", colors: ["#FF0000", "#000000", "#FF0000"] },
+  { id: "super_slow", name: "Super Slow", colors: ["#FF0000", "#000000", "#FF0000"] },
   { id: "fast", name: "Fast", colors: ["#0000FF", "#000000", "#0000FF"] },
   { id: "zigzag", name: "Zigzag", colors: ["#0000FF", "#000000", "#00FF00", "#FF0000"] },
+  { id: "tornado", name: "Tornado", colors: ["#00FF00", "#0000FF", "#FF0000", "#000000"] },
+  { id: "nitro_boost", name: "Nitro Boost", colors: ["#0000FF", "#00FF00", "#0000FF", "#FF0000"] },
   { id: "play_again", name: "Play Again", colors: ["#00FF00", "#0000FF"] }
 ];
 
