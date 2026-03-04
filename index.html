@@ -14,7 +14,18 @@
             <p class="eyebrow">Mission Objective</p>
             <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
             <p id="missionText" class="mission"></p>
-            <div id="feedback" class="feedback hidden"></div>
+            <section class="actions-row">
+              <div class="progress-card">
+                <div class="label">Total Progress</div>
+                <div id="progressValue" class="value">0/1</div>
+              </div>
+              <div class="controls">
+                <button id="hintBtn" class="btn btn-light">Hint</button>
+                <button id="undoBtn" class="btn btn-light">Undo</button>
+                <button id="resetBtn" class="btn btn-light danger">Clear</button>
+                <button id="checkBtn" class="btn btn-primary">Check Answer</button>
+              </div>
+            </section>
           </div>
           <div class="pie-card">
             <svg
@@ -57,21 +68,9 @@
           <div id="axis" class="axis"></div>
           <div id="liveMarkers" class="live-markers"></div>
         </section>
-
-        <section class="actions-row">
-          <div class="progress-card">
-            <div class="label">Total Progress</div>
-            <div id="progressValue" class="value">0/1</div>
-          </div>
-          <div class="controls">
-            <button id="hintBtn" class="btn btn-light">Hint</button>
-            <button id="undoBtn" class="btn btn-light">Undo</button>
-            <button id="resetBtn" class="btn btn-light danger">Clear</button>
-            <button id="checkBtn" class="btn btn-primary">Check Answer</button>
-          </div>
-        </section>
       </main>
     </div>
+    <div id="quickCue" class="quick-cue" role="status" aria-live="polite"></div>
     <div id="successToast" class="success-toast" role="status" aria-live="polite"></div>
     <div
       id="successModal"
@@ -80,10 +79,10 @@
       aria-modal="true"
       aria-labelledby="successTitle"
     >
-      <div class="modal-card">
+      <div class="modal-card success-card">
         <div id="modalConfetti" class="modal-confetti" aria-hidden="true"></div>
-        <p id="modalCelebrateText" class="modal-celebrate">Outstanding work!</p>
-        <h2 id="successTitle">Mission Complete</h2>
+        <p id="modalCelebrateText" class="modal-celebrate">You did it!</p>
+        <h2 id="successTitle" class="success-title">Mission Complete</h2>
         <p class="modal-text">
           Great work. Run your Ozobot on your track now. When you are done,
           choose Next Problem.
@@ -104,9 +103,7 @@
             <div id="modalRunCodes" class="modal-run-codes"></div>
           </div>
         </div>
-        <button id="nextFromModalBtn" class="btn btn-primary">
-          Next Problem
-        </button>
+        <button id="nextFromModalBtn" class="btn btn-primary">Run Complete - Next Problem</button>
       </div>
     </div>
 

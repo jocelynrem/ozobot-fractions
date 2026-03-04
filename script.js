@@ -113,6 +113,7 @@ const state = {
   history: [],
   isCheckedCorrect: false,
   celebrationTimer: null,
+  cueTimer: null,
   showLineHints: false
 };
 
@@ -132,6 +133,7 @@ const el = {
   codePanelHeader: document.getElementById("codePanelHeader"),
   codeUnlockText: document.getElementById("codeUnlockText"),
   liveMarkers: document.getElementById("liveMarkers"),
+  quickCue: document.getElementById("quickCue"),
   successToast: document.getElementById("successToast"),
   hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
@@ -225,20 +227,28 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
 
 function setFeedback(type, message) {
   if (!message) {
-    el.feedback.className = "feedback hidden";
-    el.feedback.textContent = "";
+    if (el.feedback) {
+      el.feedback.className = "feedback hidden";
+      el.feedback.textContent = "";
+    }
     return;
   }
 
   if (type === "success") {
     showSuccessToast(message);
-    el.feedback.className = "feedback hidden";
-    el.feedback.textContent = "";
+    showQuickCue("success", message);
+    if (el.feedback) {
+      el.feedback.className = "feedback hidden";
+      el.feedback.textContent = "";
+    }
     return;
   }
+  showQuickCue("error", message);
 
-  el.feedback.className = `feedback ${type}`;
-  el.feedback.textContent = message;
+  if (el.feedback) {
+    el.feedback.className = `feedback ${type}`;
+    el.feedback.textContent = message;
+  }
 }
 
 function showSuccessToast(message) {
@@ -250,6 +260,38 @@ function showSuccessToast(message) {
   state.celebrationTimer = window.setTimeout(() => {
     el.successToast.classList.remove("show");
   }, 2200);
+}
+
+function quickCueText(type, message) {
+  if (type === "success") return "Nice work!";
+  if (!message) return "Try again.";
+  const codeTargets = currentProblem().requirements.codes
+    .map((req) => `${req.numerator}/${req.denominator}`);
+  const codeTargetCue =
+    codeTargets.length === 1
+      ? `Put the action code at ${codeTargets[0]}.`
+      : `Put action codes at ${codeTargets.join(" and ")}.`;
+  if (message.includes("not on a target location")) return codeTargetCue;
+  if (message.includes("mission uses")) return codeTargetCue;
+  if (message.includes("Check the answer first")) return "Tap Check Answer first.";
+  if (message.includes("Need")) return "Add more fraction pieces.";
+  if (message.includes("Too many")) return "Remove one piece.";
+  if (message.includes("longer than 1 whole")) return "Stop at 1 whole.";
+  return "Try one small fix.";
+}
+
+function showQuickCue(type, message) {
+  if (state.cueTimer) {
+    window.clearTimeout(state.cueTimer);
+  }
+  el.quickCue.classList.remove("error", "success", "show");
+  el.quickCue.textContent = quickCueText(type, message);
+  el.quickCue.classList.add(type === "success" ? "success" : "error");
+  void el.quickCue.offsetWidth;
+  el.quickCue.classList.add("show");
+  state.cueTimer = window.setTimeout(() => {
+    el.quickCue.classList.remove("show");
+  }, 1350);
 }
 
 function setCheckDetails(lines, pass) {
@@ -332,15 +374,51 @@ function addSegment(fraction) {
 }
 
 function addCode(code) {
-  state.placedCodes.push({
-    ...code,
-    positionUnits: totalUnits(),
-    uid: makeId()
+  const requiredCodeCount = currentProblem().requirements.codes.length;
+  if (state.placedCodes.length >= requiredCodeCount) {
+    const plural = requiredCodeCount === 1 ? "" : "s";
+    setFeedback("error", `This mission uses ${requiredCodeCount} action code block${plural}.`);
+    return;
+  }
+
+  const positionUnits = totalUnits();
+  const requiredCounts = new Map();
+  currentProblem().requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    requiredCounts.set(units, (requiredCounts.get(units) || 0) + 1);
   });
+  const alreadyPlacedAtPosition = state.placedCodes.filter((c) => c.positionUnits === positionUnits).length;
+  const allowedAtPosition = requiredCounts.get(positionUnits) || 0;
+
+  const newCode = {
+    ...code,
+    positionUnits,
+    uid: makeId()
+  };
+  state.placedCodes.push(newCode);
 
   state.history.push("code");
   state.showLineHints = false;
-  setFeedback(null, "");
+  if (allowedAtPosition === 0 || alreadyPlacedAtPosition >= allowedAtPosition) {
+    setFeedback("error", "That action code block is not on a target location for this mission.");
+    newCode.isWrongPlacement = true;
+    const wrongUid = newCode.uid;
+    window.setTimeout(() => {
+      const idx = state.placedCodes.findIndex((c) => c.uid === wrongUid);
+      if (idx === -1) return;
+      state.placedCodes.splice(idx, 1);
+
+      for (let i = state.history.length - 1; i >= 0; i -= 1) {
+        if (state.history[i] === "code") {
+          state.history.splice(i, 1);
+          break;
+        }
+      }
+      render();
+    }, 620);
+  } else {
+    setFeedback(null, "");
+  }
   setCheckDetails([], false);
   clearCheckProgress();
   render();
@@ -445,8 +523,8 @@ function openSuccessModal() {
   launchConfettiBurst();
   const celebrates = [
     "Perfect build! You nailed it.",
-    "Great job! That is correct.",
-    "Excellent work! Ready for the Ozobot run."
+    "Great job! You got it right.",
+    "Excellent work! Ready for your Ozobot run."
   ];
   el.modalCelebrateText.textContent = celebrates[Math.floor(Math.random() * celebrates.length)];
   el.successModal.classList.remove("hidden");
@@ -522,7 +600,7 @@ function nextProblem(fromModal = false) {
     const newUnlockCount = unlockedCodeCount();
     if (newUnlockCount > priorUnlockCount) {
       triggerUnlockCelebration(newUnlockCount - 1);
-      setFeedback("success", `Celebration: you unlocked a new action code block. ${newUnlockCount} of ${OZOBOT_CODES.length} codes unlocked.`);
+      setFeedback("success", `You unlocked a new action code block. ${newUnlockCount} of ${OZOBOT_CODES.length} codes unlocked.`);
     }
     return;
   }
@@ -625,6 +703,14 @@ function renderCodeButtons() {
 
 function renderLiveMarkers() {
   el.liveMarkers.innerHTML = "";
+  const setMarkerLeft = (marker, units) => {
+    marker.style.left = `${(units / BASE_UNITS) * 100}%`;
+    if (units === 0) {
+      marker.style.transform = "translateX(0)";
+    } else if (units === BASE_UNITS) {
+      marker.style.transform = "translateX(-100%)";
+    }
+  };
 
   const problem = currentProblem();
   if (state.placedSegments.length === 0 && state.showLineHints) {
@@ -683,7 +769,7 @@ function renderLiveMarkers() {
       if (!matched && !state.showLineHints) continue;
       const marker = document.createElement("div");
       marker.className = `live-marker boundary ${matched ? "matched" : "pending"}`;
-      marker.style.left = `${(units / BASE_UNITS) * 100}%`;
+      setMarkerLeft(marker, units);
       marker.textContent = matched ? "✓" : "•";
       marker.title = `${i}/${needed}`;
       el.liveMarkers.appendChild(marker);
@@ -692,7 +778,7 @@ function renderLiveMarkers() {
     wrongEndpoints.forEach((wrong) => {
       const marker = document.createElement("div");
       marker.className = "live-marker boundary wrong";
-      marker.style.left = `${(wrong.units / BASE_UNITS) * 100}%`;
+      setMarkerLeft(marker, wrong.units);
       marker.textContent = "↺";
       marker.title = `${wrong.label} is not needed here. Use ${requiredLabel}.`;
       el.liveMarkers.appendChild(marker);
@@ -706,18 +792,60 @@ function renderLiveMarkers() {
     }
   }
 
-  const placedAt = new Set(state.placedCodes.map((code) => code.positionUnits));
+  const requiredCodeCounts = new Map();
   problem.requirements.codes.forEach((req) => {
     const units = reqToUnits(req);
-    const matched = placedAt.has(units);
+    requiredCodeCounts.set(units, (requiredCodeCounts.get(units) || 0) + 1);
+  });
+
+  const availablePlacedCounts = new Map();
+  state.placedCodes.forEach((code) => {
+    availablePlacedCounts.set(code.positionUnits, (availablePlacedCounts.get(code.positionUnits) || 0) + 1);
+  });
+
+  problem.requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    const available = availablePlacedCounts.get(units) || 0;
+    const matched = available > 0;
+    if (matched) availablePlacedCounts.set(units, available - 1);
     if (!matched && !state.showLineHints) return;
     const marker = document.createElement("div");
     marker.className = `live-marker code ${matched ? "matched" : "pending"}`;
-    marker.style.left = `${(units / BASE_UNITS) * 100}%`;
+    setMarkerLeft(marker, units);
     marker.textContent = matched ? "✓" : "⭐";
     marker.title = `Action code at ${req.numerator}/${req.denominator}`;
     el.liveMarkers.appendChild(marker);
   });
+
+  const requiredLeftByPosition = new Map(requiredCodeCounts);
+  const wrongCodePlacements = [];
+  state.placedCodes.forEach((code) => {
+    const neededLeft = requiredLeftByPosition.get(code.positionUnits) || 0;
+    if (neededLeft > 0) {
+      requiredLeftByPosition.set(code.positionUnits, neededLeft - 1);
+    } else {
+      wrongCodePlacements.push(code.positionUnits);
+    }
+  });
+
+  wrongCodePlacements.forEach((units) => {
+    const marker = document.createElement("div");
+    marker.className = "live-marker code wrong";
+    setMarkerLeft(marker, units);
+    marker.textContent = "!";
+    marker.title = "This action code block is not at a target location.";
+    el.liveMarkers.appendChild(marker);
+  });
+
+  if (wrongCodePlacements.length > 0) {
+    const requiredTargets = problem.requirements.codes
+      .map((req) => `${req.numerator}/${req.denominator}`)
+      .join(", ");
+    const warning = document.createElement("div");
+    warning.className = "live-hint warning";
+    warning.textContent = `Move action code blocks to: ${requiredTargets}.`;
+    el.liveMarkers.appendChild(warning);
+  }
 }
 
 function renderAxis() {
@@ -778,6 +906,7 @@ function renderTrack() {
   state.placedCodes.forEach((placedCode) => {
     const chip = document.createElement("div");
     chip.className = "code-chip";
+    if (placedCode.isWrongPlacement) chip.classList.add("code-chip-wrong");
     chip.style.left = `${(placedCode.positionUnits / BASE_UNITS) * 100}%`;
     chip.innerHTML = placedCode.colors
       .map(
