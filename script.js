@@ -114,7 +114,8 @@ const state = {
   isCheckedCorrect: false,
   celebrationTimer: null,
   cueTimer: null,
-  showLineHints: false
+  showLineHints: false,
+  hintStep: 0
 };
 
 const el = {
@@ -133,6 +134,7 @@ const el = {
   codePanelHeader: document.getElementById("codePanelHeader"),
   codeUnlockText: document.getElementById("codeUnlockText"),
   liveMarkers: document.getElementById("liveMarkers"),
+  lineHintBanner: document.getElementById("lineHintBanner"),
   quickCue: document.getElementById("quickCue"),
   successToast: document.getElementById("successToast"),
   hintBtn: document.getElementById("hintBtn"),
@@ -263,8 +265,15 @@ function showSuccessToast(message) {
 }
 
 function quickCueText(type, message) {
-  if (type === "success") return "Nice work!";
+  if (type === "success") {
+    if (!message) return "Done.";
+    if (message.startsWith("No more segment hints")) return "No more hints. Try Check Answer.";
+    if (message.includes("unlocked")) return "New action code unlocked!";
+    if (message.includes("finished all 10")) return "You finished all missions!";
+    return message;
+  }
   if (!message) return "Try again.";
+  if (message.startsWith("Hint")) return message;
   const codeTargets = currentProblem().requirements.codes
     .map((req) => `${req.numerator}/${req.denominator}`);
   const codeTargetCue =
@@ -353,6 +362,7 @@ function resetBoard() {
   state.placedCodes = [];
   state.history = [];
   state.showLineHints = false;
+  state.hintStep = 0;
 
   setFeedback(null, "");
   setCheckDetails([], false);
@@ -367,6 +377,7 @@ function addSegment(fraction) {
   state.placedSegments.push({ ...fraction, uid: makeId() });
   state.history.push("segment");
   state.showLineHints = false;
+  state.hintStep = 0;
   setFeedback(null, "");
   setCheckDetails([], false);
   clearCheckProgress();
@@ -399,6 +410,7 @@ function addCode(code) {
 
   state.history.push("code");
   state.showLineHints = false;
+  state.hintStep = 0;
   if (allowedAtPosition === 0 || alreadyPlacedAtPosition >= allowedAtPosition) {
     setFeedback("error", "That action code block is not on a target location for this mission.");
     newCode.isWrongPlacement = true;
@@ -430,6 +442,7 @@ function undo() {
   if (last === "segment") state.placedSegments.pop();
   if (last === "code") state.placedCodes.pop();
   state.showLineHints = false;
+  state.hintStep = 0;
 
   setFeedback(null, "");
   setCheckDetails([], false);
@@ -490,19 +503,154 @@ function evaluateStudentWork() {
   return { passed: errors.length === 0, errors, passes, hints };
 }
 
+function getSegmentProgress(problem) {
+  const segmentRule = Object.entries(problem.requirements.segments)[0];
+  if (!segmentRule) {
+    return {
+      requiredLabel: "unit",
+      needed: 0,
+      matchedBoundaryIndexes: new Set(),
+      wrongEndpoints: [],
+      pendingBoundaries: []
+    };
+  }
+
+  const requiredLabel = segmentRule[0];
+  const needed = segmentRule[1];
+  const unitsPerPart = BASE_UNITS / needed;
+  const matchedBoundaryIndexes = new Set();
+  const wrongEndpoints = [];
+  let running = 0;
+  let prefixStillValid = true;
+
+  state.placedSegments.forEach((segment, idx) => {
+    running += segment.units;
+    const boundaryIndex = idx + 1;
+    const segmentMatchesRule = segment.label === requiredLabel;
+    const boundaryMatchesRule =
+      prefixStillValid &&
+      segmentMatchesRule &&
+      boundaryIndex <= needed &&
+      running === boundaryIndex * unitsPerPart;
+
+    if (boundaryMatchesRule) {
+      matchedBoundaryIndexes.add(boundaryIndex);
+    } else {
+      prefixStillValid = false;
+    }
+
+    if (!segmentMatchesRule) {
+      wrongEndpoints.push({ units: running, label: segment.label, uid: segment.uid });
+    }
+  });
+
+  const pendingBoundaries = [];
+  for (let i = 1; i <= needed; i += 1) {
+    if (!matchedBoundaryIndexes.has(i)) {
+      pendingBoundaries.push({ index: i, units: i * unitsPerPart, label: `${i}/${needed}` });
+    }
+  }
+
+  return { requiredLabel, needed, matchedBoundaryIndexes, wrongEndpoints, pendingBoundaries };
+}
+
+function getCodeProgress(problem) {
+  const availablePlacedCounts = new Map();
+  state.placedCodes.forEach((code) => {
+    availablePlacedCounts.set(code.positionUnits, (availablePlacedCounts.get(code.positionUnits) || 0) + 1);
+  });
+
+  const pendingTargets = [];
+  problem.requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    const available = availablePlacedCounts.get(units) || 0;
+    if (available > 0) {
+      availablePlacedCounts.set(units, available - 1);
+    } else {
+      pendingTargets.push({ units, label: `${req.numerator}/${req.denominator}` });
+    }
+  });
+
+  return { pendingTargets };
+}
+
 function showHint() {
   state.showLineHints = true;
-  const result = evaluateStudentWork();
-  if (result.passed) {
-    setFeedback("success", "Everything looks correct. Check your answer.");
-    setCheckDetails(["Hint: Your setup looks right. Tap Check Answer."], true);
+  state.hintStep += 1;
+  const problem = currentProblem();
+  const segmentProgress = getSegmentProgress(problem);
+  const codeProgress = getCodeProgress(problem);
+  const matchingCount = state.placedSegments.filter((s) => s.label === segmentProgress.requiredLabel).length;
+  const wrongCount = state.placedSegments.filter((s) => s.label !== segmentProgress.requiredLabel).length;
+  const segmentMarkerSteps = segmentProgress.pendingBoundaries.length;
+  const codeIntroStep = 2 + segmentMarkerSteps;
+  const codeMarkerStartStep = codeIntroStep + 1;
+
+  if (state.hintStep === 1) {
+    let hintLine = "";
+    if (state.placedSegments.length === 0) {
+      hintLine = `Start by adding ${segmentProgress.needed} pieces of ${segmentProgress.requiredLabel}.`;
+    } else if (wrongCount > 0) {
+      hintLine = `Use only ${segmentProgress.requiredLabel} pieces on this mission.`;
+    } else if (matchingCount < segmentProgress.needed) {
+      hintLine = `Add ${segmentProgress.requiredLabel} pieces until you have ${segmentProgress.needed} total.`;
+    } else if (matchingCount > segmentProgress.needed) {
+      hintLine = `Remove extra pieces. You need exactly ${segmentProgress.needed} ${segmentProgress.requiredLabel} pieces.`;
+    } else if (totalUnits() > BASE_UNITS) {
+      hintLine = "Remove one piece so the line ends at 1 whole.";
+    } else {
+      if (codeProgress.pendingTargets.length > 0) {
+        const nextCodeTarget = codeProgress.pendingTargets[0].label;
+        const readyMessage = `Hint 1: Your segments look good. Next, place an action code at ${nextCodeTarget}.`;
+        setFeedback("error", readyMessage);
+        setCheckDetails([readyMessage], false);
+      } else {
+        setFeedback("success", "Your fraction segments look good.");
+        setCheckDetails(["Hint: Your fraction segments are right. Tap Check Answer."], false);
+      }
+      render();
+      return;
+    }
+
+    const hintMessage = `Hint 1: ${hintLine}`;
+    setFeedback("error", hintMessage);
+    setCheckDetails([hintMessage], false);
+    render();
     return;
   }
 
-  const fallbackHint = "Build exactly one whole, then place each action code at the named fraction.";
-  const hintLine = result.hints[0] || fallbackHint;
-  setFeedback("error", "Use this hint and try one move.");
-  setCheckDetails([`Hint: ${hintLine}`], false);
+  if (state.hintStep >= 2 && state.hintStep <= 1 + segmentMarkerSteps) {
+    const markerHintIndex = state.hintStep - 2;
+    const nextHint = segmentProgress.pendingBoundaries[markerHintIndex];
+    const markerMessage = `Hint ${state.hintStep}: Watch the glowing dot at ${nextHint.label}.`;
+    setFeedback("error", markerMessage);
+    setCheckDetails([markerMessage], false);
+    render();
+    return;
+  }
+
+  if (state.hintStep === codeIntroStep && codeProgress.pendingTargets.length > 0) {
+    const introMessage = `Hint ${state.hintStep}: Great segments. Now add action codes at the target fractions.`;
+    setFeedback("error", introMessage);
+    setCheckDetails([introMessage], false);
+    render();
+    return;
+  }
+
+  const codeMarkerIdx = state.hintStep - codeMarkerStartStep;
+  if (codeMarkerIdx >= 0 && codeMarkerIdx < codeProgress.pendingTargets.length) {
+    const nextCodeHint = codeProgress.pendingTargets[codeMarkerIdx];
+    const codeMarkerMessage = `Hint ${state.hintStep}: Watch the glowing code dot at ${nextCodeHint.label}.`;
+    setFeedback("error", codeMarkerMessage);
+    setCheckDetails([codeMarkerMessage], false);
+    render();
+    return;
+  }
+
+  const noMoreMessage = "No more hints left. Try Check Answer.";
+  setFeedback("success", noMoreMessage);
+  setCheckDetails([noMoreMessage], false);
+  render();
 }
 
 function launchConfettiBurst() {
@@ -577,7 +725,7 @@ function checkAnswer() {
     const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
     state.isCheckedCorrect = true;
     setFeedback("success", msg);
-    setCheckDetails(["Everything matches the mission.", ...result.passes], true);
+    setCheckDetails([], true);
     openSuccessModal();
   } else {
     const msg = tryAgainMessages[Math.floor(Math.random() * tryAgainMessages.length)];
@@ -703,6 +851,26 @@ function renderCodeButtons() {
 
 function renderLiveMarkers() {
   el.liveMarkers.innerHTML = "";
+  el.lineHintBanner.innerHTML = "";
+  const removeSegmentByUid = (segmentUid) => {
+    const idx = state.placedSegments.findIndex((seg) => seg.uid === segmentUid);
+    if (idx === -1) return;
+    state.placedSegments.splice(idx, 1);
+    state.history = [];
+    state.showLineHints = false;
+    state.hintStep = 0;
+    const undoMessages = [
+      "Nice fix! 😊",
+      "Great catch! ⭐",
+      "Smart undo! 👍",
+      "You got this! 🚀"
+    ];
+    const msg = undoMessages[Math.floor(Math.random() * undoMessages.length)];
+    showQuickCue("success", msg);
+    setCheckDetails([], false);
+    clearCheckProgress();
+    render();
+  };
   const setMarkerLeft = (marker, units) => {
     marker.style.left = `${(units / BASE_UNITS) * 100}%`;
     if (units === 0) {
@@ -713,82 +881,74 @@ function renderLiveMarkers() {
   };
 
   const problem = currentProblem();
-  if (state.placedSegments.length === 0 && state.showLineHints) {
+  const progress = getSegmentProgress(problem);
+  const codeProgress = getCodeProgress(problem);
+  const segmentMarkerSteps = progress.pendingBoundaries.length;
+  const codeMarkerStartStep = 3 + segmentMarkerSteps;
+  const focusedSegmentHintIdx =
+    state.showLineHints && state.hintStep >= 2 && state.hintStep <= 1 + segmentMarkerSteps
+      ? state.hintStep - 2
+      : -1;
+  const focusedCodeHintIdx =
+    state.showLineHints && state.hintStep >= codeMarkerStartStep
+      ? state.hintStep - codeMarkerStartStep
+      : -1;
+
+  if (state.placedSegments.length === 0 && state.showLineHints && state.hintStep === 1) {
     const hintA = document.createElement("div");
     hintA.className = "live-hint";
-    hintA.textContent = "Hint: Add fraction segments first.";
+    hintA.textContent = `Hint 1: Start by adding ${progress.needed} pieces of ${progress.requiredLabel}.`;
     el.liveMarkers.appendChild(hintA);
-
-    if (problem.requirements.codes.length > 0) {
-      const targets = problem.requirements.codes
-        .map((req) => `${req.numerator}/${req.denominator}`)
-        .join(", ");
-      const hintB = document.createElement("div");
-      hintB.className = "live-hint";
-      hintB.textContent = `Then add action code blocks at ${targets}.`;
-      el.liveMarkers.appendChild(hintB);
-    }
     return;
   }
   if (state.placedSegments.length === 0 && !state.showLineHints) return;
 
-  const segmentRule = Object.entries(problem.requirements.segments)[0];
-  if (segmentRule) {
-    const requiredLabel = segmentRule[0];
-    const needed = segmentRule[1];
-    const unitsPerPart = BASE_UNITS / needed;
-    const matchedBoundaryIndexes = new Set();
-    const wrongEndpoints = [];
-    let running = 0;
-    let prefixStillValid = true;
-
-    state.placedSegments.forEach((segment, idx) => {
-      running += segment.units;
-      const boundaryIndex = idx + 1;
-      const segmentMatchesRule = segment.label === requiredLabel;
-      const boundaryMatchesRule =
-        prefixStillValid &&
-        segmentMatchesRule &&
-        boundaryIndex <= needed &&
-        running === boundaryIndex * unitsPerPart;
-
-      if (boundaryMatchesRule) {
-        matchedBoundaryIndexes.add(boundaryIndex);
-      } else {
-        prefixStillValid = false;
-      }
-
-      if (!segmentMatchesRule) {
-        wrongEndpoints.push({ units: running, label: segment.label });
-      }
-    });
-
-    for (let i = 1; i <= needed; i += 1) {
-      const units = (i * BASE_UNITS) / needed;
-      const matched = matchedBoundaryIndexes.has(i);
-      if (!matched && !state.showLineHints) continue;
+  if (progress.needed > 0) {
+    for (let i = 1; i <= progress.needed; i += 1) {
+      const units = (i * BASE_UNITS) / progress.needed;
+      const matched = progress.matchedBoundaryIndexes.has(i);
       const marker = document.createElement("div");
-      marker.className = `live-marker boundary ${matched ? "matched" : "pending"}`;
+
+      if (matched) {
+        marker.className = "live-marker boundary matched";
+        marker.textContent = "✓";
+      } else if (focusedSegmentHintIdx >= 0) {
+        if (
+          progress.pendingBoundaries[focusedSegmentHintIdx] &&
+          progress.pendingBoundaries[focusedSegmentHintIdx].index === i
+        ) {
+          marker.className = "live-marker boundary pending hint-focus";
+          marker.textContent = "💡";
+        } else {
+          continue;
+        }
+      } else {
+        continue;
+      }
+
       setMarkerLeft(marker, units);
-      marker.textContent = matched ? "✓" : "•";
-      marker.title = `${i}/${needed}`;
+      marker.title = `${i}/${progress.needed}`;
       el.liveMarkers.appendChild(marker);
     }
 
-    wrongEndpoints.forEach((wrong) => {
+    progress.wrongEndpoints.forEach((wrong) => {
       const marker = document.createElement("div");
       marker.className = "live-marker boundary wrong";
       setMarkerLeft(marker, wrong.units);
       marker.textContent = "↺";
-      marker.title = `${wrong.label} is not needed here. Use ${requiredLabel}.`;
+      const tooltipText = `${wrong.label} is not needed here. Use ${progress.requiredLabel}.`;
+      marker.title = tooltipText;
+      marker.dataset.tooltip = tooltipText;
+      marker.classList.add("has-tooltip");
+      marker.addEventListener("click", () => removeSegmentByUid(wrong.uid));
       el.liveMarkers.appendChild(marker);
     });
 
-    if (wrongEndpoints.length > 0) {
+    if (progress.wrongEndpoints.length > 0) {
       const warning = document.createElement("div");
       warning.className = "live-hint warning";
-      warning.textContent = `Try using only ${requiredLabel} segments for this mission.`;
-      el.liveMarkers.appendChild(warning);
+      warning.textContent = `Try using only ${progress.requiredLabel} segments for this mission.`;
+      el.lineHintBanner.appendChild(warning);
     }
   }
 
@@ -808,14 +968,24 @@ function renderLiveMarkers() {
     const available = availablePlacedCounts.get(units) || 0;
     const matched = available > 0;
     if (matched) availablePlacedCounts.set(units, available - 1);
-    if (!matched && !state.showLineHints) return;
+    if (!matched) return;
     const marker = document.createElement("div");
-    marker.className = `live-marker code ${matched ? "matched" : "pending"}`;
+    marker.className = "live-marker code matched";
     setMarkerLeft(marker, units);
-    marker.textContent = matched ? "✓" : "⭐";
+    marker.textContent = "✓";
     marker.title = `Action code at ${req.numerator}/${req.denominator}`;
     el.liveMarkers.appendChild(marker);
   });
+
+  if (focusedCodeHintIdx >= 0 && codeProgress.pendingTargets[focusedCodeHintIdx]) {
+    const pendingCode = codeProgress.pendingTargets[focusedCodeHintIdx];
+    const marker = document.createElement("div");
+    marker.className = "live-marker code pending hint-focus";
+    setMarkerLeft(marker, pendingCode.units);
+    marker.textContent = "💡";
+    marker.title = `Action code target at ${pendingCode.label}`;
+    el.liveMarkers.appendChild(marker);
+  }
 
   const requiredLeftByPosition = new Map(requiredCodeCounts);
   const wrongCodePlacements = [];
@@ -844,7 +1014,7 @@ function renderLiveMarkers() {
     const warning = document.createElement("div");
     warning.className = "live-hint warning";
     warning.textContent = `Move action code blocks to: ${requiredTargets}.`;
-    el.liveMarkers.appendChild(warning);
+    el.lineHintBanner.appendChild(warning);
   }
 }
 

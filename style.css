@@ -153,23 +153,29 @@ body {
 }
 
 .check-details {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-left: 6px solid #94a3b8;
+  border-radius: 12px;
+  background: #ffffff;
   padding: 10px 12px;
   font-size: 13px;
-  font-weight: 700;
-  color: #334155;
+  font-weight: 800;
+  color: #0f172a;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
 }
 
 .check-details.pass {
   border-color: #86efac;
-  background: #f0fdf4;
+  border-left-color: #22c55e;
+  background: #ecfdf5;
+  color: #166534;
 }
 
 .check-details.fail {
-  border-color: #fda4af;
-  background: #fff1f2;
+  border-color: #cbd5e1;
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+  color: #334155;
 }
 
 .track-wrap {
@@ -177,6 +183,19 @@ body {
   min-height: 180px;
   display: flex;
   align-items: center;
+}
+
+.line-hint-banner {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 6px;
+  min-height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 6;
+  pointer-events: none;
 }
 
 .track-bg,
@@ -346,6 +365,13 @@ body {
   color: #166534;
   border-color: #86efac;
   background: #f0fdf4;
+  min-width: 22px;
+  height: 22px;
+  font-size: 13px;
+  box-shadow:
+    0 0 0 2px rgba(34, 197, 94, 0.18),
+    0 3px 10px rgba(22, 101, 52, 0.2);
+  animation: matched-burst 450ms ease-out;
 }
 
 .live-marker.pending {
@@ -354,12 +380,61 @@ body {
   background: #f8fafc;
 }
 
+.live-marker.pending.hint-focus {
+  color: #1d4ed8;
+  border-color: #60a5fa;
+  background: #eff6ff;
+  min-width: 24px;
+  height: 24px;
+  font-size: 14px;
+  box-shadow:
+    0 0 0 3px rgba(96, 165, 250, 0.24),
+    0 4px 12px rgba(29, 78, 216, 0.26);
+  animation: hint-pulse 800ms ease-in-out infinite;
+}
+
 .live-marker.wrong {
   color: #b45309;
   border-color: #fcd34d;
   background: #fffbeb;
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22);
   animation: wrong-marker-pop 360ms ease-out;
+  cursor: pointer;
+}
+
+.live-marker.wrong:hover {
+  transform: translateX(-50%) scale(1.08);
+}
+
+.live-marker.has-tooltip {
+  position: absolute;
+}
+
+.live-marker.has-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  width: max-content;
+  max-width: 230px;
+  white-space: normal;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+  z-index: 8;
+}
+
+.live-marker.has-tooltip:hover::after {
+  opacity: 1;
 }
 
 .success-toast {
@@ -436,6 +511,29 @@ body {
   }
 }
 
+@keyframes matched-burst {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(34, 197, 94, 0.45),
+      0 1px 4px rgba(22, 101, 52, 0.15);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(34, 197, 94, 0.18),
+      0 3px 10px rgba(22, 101, 52, 0.2);
+  }
+}
+
+@keyframes hint-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
 .actions-row {
   display: flex;
   justify-content: space-between;
@@ -446,9 +544,11 @@ body {
 }
 
 .progress-card {
-  border: 1px solid var(--border);
+  border: 2px solid #93c5fd;
   border-radius: 12px;
   padding: 10px 14px;
+  background: linear-gradient(160deg, #ffffff 0%, #e0f2fe 100%);
+  box-shadow: 0 6px 14px rgba(14, 116, 144, 0.14);
 }
 
 .progress-card .label {
