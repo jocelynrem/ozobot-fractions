@@ -1,4 +1,5 @@
 const BASE_UNITS = 24;
+const OZOBOT_SCREEN_BLUE = "#1DA1FF";
 
 const FRACTIONS = [
   { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", textColor: "#b91c1c", name: "Half" },
@@ -11,11 +12,11 @@ const FRACTIONS = [
 const OZOBOT_CODES = [
   { id: "spin", name: "Spin", colors: ["#00FF00", "#FF0000", "#00FF00", "#FF0000"] },
   { id: "super_slow", name: "Super Slow", colors: ["#FF0000", "#000000", "#FF0000"] },
-  { id: "fast", name: "Fast", colors: ["#0000FF", "#000000", "#0000FF"] },
-  { id: "zigzag", name: "Zigzag", colors: ["#0000FF", "#000000", "#00FF00", "#FF0000"] },
-  { id: "tornado", name: "Tornado", colors: ["#00FF00", "#0000FF", "#FF0000", "#000000"] },
-  { id: "nitro_boost", name: "Nitro Boost", colors: ["#0000FF", "#00FF00", "#0000FF", "#FF0000"] },
-  { id: "play_again", name: "Play Again", colors: ["#00FF00", "#0000FF"] }
+  { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
+  { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", "#FF0000"] },
+  { id: "tornado", name: "Tornado", colors: ["#00FF00", OZOBOT_SCREEN_BLUE, "#FF0000", "#000000"] },
+  { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_BLUE, "#FF0000"] },
+  { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
 ];
 
 const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
@@ -50,10 +51,10 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with halves. Put an action code block at 1/2.",
+    title: "Make 1 whole with fourths. Put an action code block at 2/4.",
     requirements: {
-      segments: { "1/2": 2 },
-      codes: [{ numerator: 1, denominator: 2 }]
+      segments: { "1/4": 4 },
+      codes: [{ numerator: 2, denominator: 4 }]
     }
   },
   {
