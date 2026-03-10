@@ -1,5 +1,6 @@
 const BASE_UNITS = 24;
 const OZOBOT_SCREEN_BLUE = "#1DA1FF";
+const OZOBOT_SCREEN_RED = "#FF6B6B";
 
 const FRACTIONS = [
   { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", textColor: "#b91c1c", name: "Half" },
@@ -10,12 +11,12 @@ const FRACTIONS = [
 ];
 
 const OZOBOT_CODES = [
-  { id: "spin", name: "Spin", colors: ["#00FF00", "#FF0000", "#00FF00", "#FF0000"] },
-  { id: "super_slow", name: "Super Slow", colors: ["#FF0000", "#000000", "#FF0000"] },
+  { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
+  { id: "super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#000000", OZOBOT_SCREEN_RED] },
   { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
-  { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", "#FF0000"] },
-  { id: "tornado", name: "Tornado", colors: ["#00FF00", OZOBOT_SCREEN_BLUE, "#FF0000", "#000000"] },
-  { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_BLUE, "#FF0000"] },
+  { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
+  { id: "tornado", name: "Tornado", colors: ["#00FF00", OZOBOT_SCREEN_BLUE, OZOBOT_SCREEN_RED, "#000000"] },
+  { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_BLUE, OZOBOT_SCREEN_RED] },
   { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
 ];
 
@@ -229,7 +230,7 @@ function reqToUnits(req) {
   return (req.numerator * BASE_UNITS) / req.denominator;
 }
 
-function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 8) {
+function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10) {
   return colors
     .map(
       (color) =>

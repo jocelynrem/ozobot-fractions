@@ -287,7 +287,7 @@ body {
 }
 
 .code-stripe {
-  width: 11px;
+  width: 14px;
   height: 24px;
   border-radius: 0;
 }
@@ -890,7 +890,7 @@ body {
 }
 
 .modal-run-stripe {
-  width: 16px;
+  width: 20px;
   height: var(--ozobot-line-size);
   border-radius: 0;
 }
