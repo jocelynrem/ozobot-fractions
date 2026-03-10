@@ -16,9 +16,10 @@
 
 body {
   margin: 0;
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
   background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 45%, #e2e8f0 100%);
   color: var(--text);
+  transition: background 260ms ease;
 }
 
 .app {
@@ -42,6 +43,10 @@ body {
   flex-direction: column;
   padding: 16px;
   gap: 16px;
+  transition:
+    background 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
 }
 
 .mission-row {
@@ -59,6 +64,180 @@ body {
   padding: 14px;
   display: flex;
   flex-direction: column;
+  transition:
+    background 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease,
+    transform 260ms ease;
+}
+
+body.playground-mode {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(34, 211, 238, 0.16),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(244, 114, 182, 0.14),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at bottom center,
+      rgba(168, 85, 247, 0.12),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #050816 0%, #0b1120 42%, #111827 100%);
+}
+
+body.playground-mode .workspace {
+  border-color: #22d3ee;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 15, 32, 0.96) 0%,
+    rgba(13, 20, 38, 0.96) 100%
+  );
+  box-shadow:
+    0 18px 42px rgba(2, 6, 23, 0.56),
+    0 0 0 1px rgba(34, 211, 238, 0.08);
+}
+
+body.playground-mode .mission-card {
+  border-color: #22d3ee;
+  background:
+    radial-gradient(
+      circle at 12% 12%,
+      rgba(34, 211, 238, 0.16),
+      transparent 22%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(10, 17, 36, 0.98) 0%,
+      rgba(17, 24, 39, 0.98) 58%,
+      rgba(22, 28, 45, 0.98) 100%
+    );
+  box-shadow:
+    0 14px 30px rgba(2, 6, 23, 0.46),
+    0 0 22px rgba(34, 211, 238, 0.08);
+  transform: translateY(-2px);
+}
+
+body.playground-mode .problem-counter {
+  background: rgba(34, 211, 238, 0.14);
+  color: #a5f3fc;
+  border-color: #22d3ee;
+}
+
+body.playground-mode .mission {
+  color: #f8fafc;
+}
+
+body.playground-mode .eyebrow,
+body.playground-mode .panel h2,
+body.playground-mode .code-panel-title,
+body.playground-mode .pie-label,
+body.playground-mode .unlock-note {
+  color: #cbd5e1;
+}
+
+body.playground-mode .progress-card {
+  border-color: #f472b6;
+  background: linear-gradient(
+    160deg,
+    rgba(24, 24, 41, 0.96) 0%,
+    rgba(30, 27, 75, 0.96) 100%
+  );
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.42),
+    0 0 20px rgba(244, 114, 182, 0.1);
+}
+
+body.playground-mode .progress-card .label {
+  color: #e9d5ff;
+}
+
+body.playground-mode .progress-card .value {
+  color: #f9a8d4;
+}
+
+body.playground-mode .toolbar {
+  border-color: #a855f7;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 18, 33, 0.98) 0%,
+    rgba(16, 23, 42, 0.98) 100%
+  );
+}
+
+body.playground-mode .pie-card {
+  border-color: #22d3ee;
+  background: linear-gradient(
+    180deg,
+    rgba(9, 15, 28, 0.98) 0%,
+    rgba(15, 23, 42, 0.98) 100%
+  );
+}
+
+body.playground-mode .track-bg {
+  border-color: #e2e8f0;
+  background: #ffffff;
+}
+
+body.playground-mode .playground-segment {
+  backdrop-filter: saturate(1.2);
+}
+
+body.playground-mode .playground-segment .overlay-segment-label {
+  color: #ffffff;
+  text-shadow:
+    0 0 10px rgba(15, 23, 42, 0.7),
+    0 1px 0 rgba(15, 23, 42, 0.7);
+}
+
+body.playground-mode .btn-light {
+  background: #111827;
+  color: #f8fafc;
+  border-color: #64748b;
+}
+
+body.playground-mode .btn-primary {
+  background: #be185d;
+  color: #ffffff;
+}
+
+body.playground-mode .btn-primary:hover {
+  background: #9d174d;
+}
+
+body.playground-mode .mode-nav .btn-light {
+  background: rgba(30, 41, 59, 0.96);
+  color: #f8fafc;
+  border-color: #22d3ee;
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.42),
+    0 0 16px rgba(34, 211, 238, 0.1);
+}
+
+body.playground-mode .check-details {
+  background: rgba(15, 23, 42, 0.96);
+  color: #e2e8f0;
+  border-color: #475569;
+  border-left-color: #22d3ee;
+}
+
+body.playground-mode .check-details.pass {
+  background: rgba(6, 78, 59, 0.92);
+  border-color: #34d399;
+  border-left-color: #6ee7b7;
+  color: #ecfdf5;
+}
+
+body.playground-mode .check-details.fail {
+  background: rgba(69, 26, 3, 0.92);
+  border-color: #fb923c;
+  border-left-color: #fdba74;
+  color: #fff7ed;
 }
 
 .eyebrow {
@@ -454,7 +633,9 @@ body {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-8px);
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
   z-index: 1200;
 }
 
@@ -480,7 +661,9 @@ body {
   letter-spacing: 0.01em;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
   z-index: 1250;
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
 }
 
 .quick-cue.show {
@@ -541,6 +724,13 @@ body {
   gap: 12px;
   margin-top: auto;
   padding-top: 10px;
+}
+
+.mode-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: -6px;
 }
 
 .progress-card {
@@ -662,19 +852,69 @@ body {
   box-shadow: 0 18px 46px rgba(109, 40, 217, 0.2);
 }
 
-.unlock-card::before {
-  content: "";
+.playground-intro-card {
+  width: min(92vw, 620px);
+  border: 3px solid #22d3ee;
+  background:
+    radial-gradient(
+      circle at 12% 14%,
+      rgba(34, 211, 238, 0.18),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 86% 16%,
+      rgba(244, 114, 182, 0.12),
+      transparent 22%
+    ),
+    linear-gradient(160deg, #0b1120 0%, #111827 50%, #1e1b4b 100%);
+  box-shadow:
+    0 20px 52px rgba(2, 6, 23, 0.58),
+    0 0 28px rgba(34, 211, 238, 0.14);
+}
+
+.playground-intro-card::before {
+  content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 14% 18%, rgba(139, 92, 246, 0.18), transparent 24%),
-    radial-gradient(circle at 84% 16%, rgba(59, 130, 246, 0.14), transparent 22%),
-    radial-gradient(circle at 78% 84%, rgba(16, 185, 129, 0.14), transparent 26%);
+    radial-gradient(
+      circle at 18% 82%,
+      rgba(45, 212, 191, 0.16),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle at 82% 78%,
+      rgba(168, 85, 247, 0.16),
+      transparent 18%
+    );
+  pointer-events: none;
+}
+
+.unlock-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 14% 18%,
+      rgba(139, 92, 246, 0.18),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 84% 16%,
+      rgba(59, 130, 246, 0.14),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 78% 84%,
+      rgba(16, 185, 129, 0.14),
+      transparent 26%
+    );
   pointer-events: none;
 }
 
 .success-card::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: transparent;
@@ -743,12 +983,29 @@ body {
   color: #7c3aed;
 }
 
+.playground-intro-eyebrow {
+  color: #67e8f9;
+}
+
 .unlock-title {
   color: #6d28d9;
   font-size: 32px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   animation: success-pop 420ms ease-out;
+}
+
+.modal-card h2.playground-intro-title {
+  color: #67e8f9;
+  font-size: 34px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  animation: playground-burst 520ms ease-out;
+}
+
+.playground-intro-card .modal-text,
+.playground-intro-card .modal-steps {
+  color: #e2e8f0;
 }
 
 @keyframes success-pop {
@@ -763,6 +1020,21 @@ body {
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes playground-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) rotate(-2deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.06) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 }
 
@@ -1040,7 +1312,7 @@ body {
 }
 
 .tile-locked::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: -30%;
   background: linear-gradient(
@@ -1154,6 +1426,11 @@ body {
 }
 
 @media (max-width: 700px) {
+  .mode-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .button-grid {
     gap: 4px;
   }

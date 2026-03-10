@@ -1,6 +1,7 @@
 const BASE_UNITS = 24;
 const OZOBOT_SCREEN_BLUE = "#1DA1FF";
 const OZOBOT_SCREEN_RED = "#FF6B6B";
+const STORAGE_KEY = "ozobot-fractions-progress";
 
 const FRACTIONS = [
   { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", textColor: "#b91c1c", name: "Half" },
@@ -114,6 +115,8 @@ const CHALLENGES = [
 
 const state = {
   currentProblemIdx: 0,
+  mode: "mission",
+  hasCompletedAllMissions: false,
   placedSegments: [],
   placedCodes: [],
   history: [],
@@ -134,6 +137,7 @@ const el = {
   segmentOverlay: document.getElementById("segmentOverlay"),
   codesLayer: document.getElementById("codesLayer"),
   axis: document.getElementById("axis"),
+  progressLabel: document.getElementById("progressLabel"),
   progressValue: document.getElementById("progressValue"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
@@ -146,19 +150,62 @@ const el = {
   hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
   resetBtn: document.getElementById("resetBtn"),
+  playgroundBtn: document.getElementById("playgroundBtn"),
+  restartMissionsBtn: document.getElementById("restartMissionsBtn"),
   checkBtn: document.getElementById("checkBtn"),
   successModal: document.getElementById("successModal"),
+  successModalText: document.getElementById("successModalText"),
+  successModalSteps: document.getElementById("successModalSteps"),
   modalConfetti: document.getElementById("modalConfetti"),
   modalCelebrateText: document.getElementById("modalCelebrateText"),
   modalRunCodes: document.getElementById("modalRunCodes"),
   nextFromModalBtn: document.getElementById("nextFromModalBtn"),
+  playgroundIntroModal: document.getElementById("playgroundIntroModal"),
+  playgroundIntroConfetti: document.getElementById("playgroundIntroConfetti"),
   unlockModal: document.getElementById("unlockModal"),
   unlockConfetti: document.getElementById("unlockConfetti"),
   unlockMessage: document.getElementById("unlockMessage"),
   unlockCodePreview: document.getElementById("unlockCodePreview"),
   unlockCodeName: document.getElementById("unlockCodeName"),
-  dismissUnlockBtn: document.getElementById("dismissUnlockBtn")
+  dismissUnlockBtn: document.getElementById("dismissUnlockBtn"),
+  enterPlaygroundBtn: document.getElementById("enterPlaygroundBtn")
 };
+
+function isPlaygroundMode() {
+  return state.mode === "playground";
+}
+
+function saveProgress() {
+  try {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        currentProblemIdx: state.currentProblemIdx,
+        mode: state.mode,
+        hasCompletedAllMissions: state.hasCompletedAllMissions
+      })
+    );
+  } catch {
+    // Ignore localStorage failures and continue with in-memory progress.
+  }
+}
+
+function loadProgress() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.mode === "playground" || saved.mode === "mission") {
+      state.mode = saved.mode;
+    }
+    if (Number.isInteger(saved.currentProblemIdx)) {
+      state.currentProblemIdx = Math.max(0, Math.min(CHALLENGES.length - 1, saved.currentProblemIdx));
+    }
+    state.hasCompletedAllMissions = Boolean(saved.hasCompletedAllMissions);
+  } catch {
+    // Ignore corrupt storage and use default progress.
+  }
+}
 
 function gcd(a, b) {
   let x = Math.abs(a);
@@ -204,6 +251,8 @@ function getPrimarySegmentDenominator() {
     const sameDenominator = state.placedSegments.every((s) => s.denominator === firstDenominator);
     if (sameDenominator) return firstDenominator;
   }
+
+  if (isPlaygroundMode()) return null;
 
   const requiredSegments = Object.keys(currentProblem().requirements.segments);
   if (requiredSegments.length === 1) {
@@ -285,6 +334,10 @@ function quickCueText(type, message) {
     return message;
   }
   if (!message) return "Try again.";
+  if (isPlaygroundMode()) {
+    if (message.includes("Build a line first")) return "Build a line first.";
+    return message;
+  }
   if (message.startsWith("Hint")) return message;
   const codeTargets = currentProblem().requirements.codes
     .map((req) => `${req.numerator}/${req.denominator}`);
@@ -327,6 +380,7 @@ function setCheckDetails(lines, pass) {
 }
 
 function unlockedCodeCount() {
+  if (isPlaygroundMode()) return OZOBOT_CODES.length;
   const scheduledCount = CODE_UNLOCK_COUNTS[state.currentProblemIdx] ?? OZOBOT_CODES.length;
   return Math.min(OZOBOT_CODES.length, scheduledCount);
 }
@@ -399,6 +453,23 @@ function addSegment(fraction) {
 }
 
 function addCode(code) {
+  if (isPlaygroundMode()) {
+    const newCode = {
+      ...code,
+      positionUnits: totalUnits(),
+      uid: makeId()
+    };
+    state.placedCodes.push(newCode);
+    state.history.push("code");
+    state.showLineHints = false;
+    state.hintStep = 0;
+    setFeedback(null, "");
+    setCheckDetails([], false);
+    clearCheckProgress();
+    render();
+    return;
+  }
+
   const requiredCodeCount = currentProblem().requirements.codes.length;
   if (state.placedCodes.length >= requiredCodeCount) {
     const plural = requiredCodeCount === 1 ? "" : "s";
@@ -590,6 +661,13 @@ function getCodeProgress(problem) {
 }
 
 function showHint() {
+  if (isPlaygroundMode()) {
+    setFeedback("success", "Playground mode: build any 1 whole line you want, then tap Run Line.");
+    setCheckDetails([], false);
+    render();
+    return;
+  }
+
   state.showLineHints = true;
   state.hintStep += 1;
   const problem = currentProblem();
@@ -683,12 +761,24 @@ function launchConfettiBurst(container, colors, count = 38) {
 function openSuccessModal() {
   renderModalRunTrack();
   launchConfettiBurst(el.modalConfetti, ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"]);
-  const celebrates = [
-    "Perfect build! You nailed it.",
-    "Great job! You got it right.",
-    "Excellent work! Ready for your Ozobot run."
-  ];
-  el.modalCelebrateText.textContent = celebrates[Math.floor(Math.random() * celebrates.length)];
+  if (isPlaygroundMode()) {
+    el.modalCelebrateText.textContent = "Ozobot Playground";
+    document.getElementById("successTitle").textContent = "Run Your Line";
+    el.successModalText.textContent = "Run your Ozobot on this line. When you are ready to keep building, choose Back to Playground.";
+    el.successModalSteps.innerHTML = "<li>Place Ozobot at the start of your line.</li><li>Watch it read your color codes.</li><li>Choose Back to Playground when you want to edit or build another line.</li>";
+    el.nextFromModalBtn.textContent = "Back to Playground";
+  } else {
+    const celebrates = [
+      "Perfect build! You nailed it.",
+      "Great job! You got it right.",
+      "Excellent work! Ready for your Ozobot run."
+    ];
+    el.modalCelebrateText.textContent = celebrates[Math.floor(Math.random() * celebrates.length)];
+    document.getElementById("successTitle").textContent = "Mission Complete";
+    el.successModalText.textContent = "Great work. Run your Ozobot on your track now. When you are done, choose Next Problem.";
+    el.successModalSteps.innerHTML = "<li>Place Ozobot at the start of your line.</li><li>Watch it read your color codes.</li><li>When finished, move to the next challenge.</li>";
+    el.nextFromModalBtn.textContent = "Run Complete - Next Problem";
+  }
   el.successModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
@@ -704,15 +794,49 @@ function openUnlockModal(code) {
   document.body.style.overflow = "hidden";
 }
 
+function openPlaygroundIntroModal() {
+  launchConfettiBurst(el.playgroundIntroConfetti, ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#facc15"], 44);
+  el.playgroundIntroModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
 function closeSuccessModalAndAdvance() {
   el.successModal.classList.add("hidden");
   document.body.style.overflow = "";
+  if (isPlaygroundMode()) return;
+  if (state.currentProblemIdx >= CHALLENGES.length - 1) {
+    state.hasCompletedAllMissions = true;
+    saveProgress();
+    openPlaygroundIntroModal();
+    return;
+  }
   nextProblem(true);
 }
 
 function closeUnlockModal() {
   el.unlockModal.classList.add("hidden");
   document.body.style.overflow = "";
+}
+
+function goToPlayground() {
+  state.mode = "playground";
+  saveProgress();
+  resetBoard();
+  setFeedback("success", "Ozobot Playground is open. Build and run as many lines as you want.");
+}
+
+function enterPlaygroundMode() {
+  el.playgroundIntroModal.classList.add("hidden");
+  document.body.style.overflow = "";
+  goToPlayground();
+}
+
+function restartMissions() {
+  state.mode = "mission";
+  state.currentProblemIdx = 0;
+  saveProgress();
+  resetBoard();
+  setFeedback("success", "Missions restarted at Problem 1.");
 }
 
 function renderModalRunTrack() {
@@ -752,6 +876,7 @@ function handlePassedCheck() {
 }
 
 function maybeAutoCheckAnswer() {
+  if (isPlaygroundMode()) return;
   if (state.isCheckedCorrect) return;
   if (!el.successModal.classList.contains("hidden")) return;
   if (!el.unlockModal.classList.contains("hidden")) return;
@@ -763,6 +888,15 @@ function maybeAutoCheckAnswer() {
 }
 
 function checkAnswer() {
+  if (isPlaygroundMode()) {
+    if (state.placedSegments.length === 0) {
+      setFeedback("error", "Build a line first.");
+      return;
+    }
+    openSuccessModal();
+    return;
+  }
+
   const result = evaluateStudentWork();
   const tryAgainMessages = [
     "Nice try. You are close.",
@@ -781,6 +915,7 @@ function checkAnswer() {
 }
 
 function nextProblem(fromModal = false) {
+  if (isPlaygroundMode()) return;
   if (!fromModal && !state.isCheckedCorrect) {
     setFeedback("error", "Check the answer first.");
     return;
@@ -789,6 +924,7 @@ function nextProblem(fromModal = false) {
   if (state.currentProblemIdx < CHALLENGES.length - 1) {
     const priorUnlockCount = unlockedCodeCount();
     state.currentProblemIdx += 1;
+    saveProgress();
     resetBoard();
     const newUnlockCount = unlockedCodeCount();
     if (newUnlockCount > priorUnlockCount) {
@@ -799,9 +935,8 @@ function nextProblem(fromModal = false) {
     return;
   }
 
-  state.currentProblemIdx = 0;
-  resetBoard();
-  setFeedback("success", "You finished all 10 problems. Starting again at Problem 1.");
+  state.hasCompletedAllMissions = true;
+  saveProgress();
 }
 
 function polarPoint(cx, cy, r, degrees) {
@@ -865,7 +1000,9 @@ function renderFractionButtons() {
     btn.disabled = currentTotal + fraction.units > BASE_UNITS;
     btn.style.setProperty("--fraction-accent", `${fraction.color}66`);
     btn.style.setProperty("--fraction-fill", `${fraction.color}1a`);
-    btn.innerHTML = `<div style="font-size:22px;color:${fraction.textColor}">${fraction.label}</div><div class="small">${fraction.name}</div>`;
+    const labelColor = isPlaygroundMode() ? "#f8fafc" : fraction.textColor;
+    const sublabelColor = isPlaygroundMode() ? "#e2e8f0" : "#475569";
+    btn.innerHTML = `<div style="font-size:22px;color:${labelColor}">${fraction.label}</div><div class="small" style="color:${sublabelColor}">${fraction.name}</div>`;
     btn.addEventListener("click", () => addSegment(fraction));
     el.fractionButtons.appendChild(btn);
   });
@@ -876,7 +1013,9 @@ function renderCodeButtons() {
   const visibleCodes = OZOBOT_CODES.slice(0, unlockedCodeCount());
   const lockedCount = OZOBOT_CODES.length - visibleCodes.length;
 
-  el.codeUnlockText.textContent = `${visibleCodes.length} of ${OZOBOT_CODES.length} codes unlocked`;
+  el.codeUnlockText.textContent = isPlaygroundMode()
+    ? `All ${OZOBOT_CODES.length} codes ready`
+    : `${visibleCodes.length} of ${OZOBOT_CODES.length} codes unlocked`;
 
   visibleCodes.forEach((code) => {
     const btn = document.createElement("button");
@@ -926,6 +1065,8 @@ function renderLiveMarkers() {
       marker.style.transform = "translateX(-100%)";
     }
   };
+
+  if (isPlaygroundMode()) return;
 
   const problem = currentProblem();
   const progress = getSegmentProgress(problem);
@@ -1105,10 +1246,14 @@ function renderTrack() {
   state.placedSegments.forEach((segment) => {
     const block = document.createElement("div");
     block.className = "overlay-segment";
+    if (isPlaygroundMode()) block.classList.add("playground-segment");
     block.style.left = `${(startUnits / BASE_UNITS) * 100}%`;
     block.style.width = `${(segment.units / BASE_UNITS) * 100}%`;
     block.style.borderColor = `${segment.color}99`;
-    block.style.background = `${segment.color}22`;
+    block.style.background = isPlaygroundMode() ? `${segment.color}55` : `${segment.color}22`;
+    if (isPlaygroundMode()) {
+      block.style.boxShadow = `0 0 14px ${segment.color}66, inset 0 0 18px ${segment.color}55`;
+    }
 
     const segLabel = document.createElement("span");
     segLabel.className = "overlay-segment-label";
@@ -1140,10 +1285,31 @@ function renderTrack() {
 }
 
 function render() {
-  const problem = currentProblem();
-  el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
-  el.missionText.textContent = problem.title;
-  el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
+  document.body.classList.toggle("playground-mode", isPlaygroundMode());
+  if (isPlaygroundMode()) {
+    el.problemCounter.textContent = "Ozobot Playground";
+    el.missionText.textContent = "Build any 1 whole fraction line you want. Add any action codes you want, then run it as many times as you like.";
+    el.progressLabel.textContent = "Line Length";
+    el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
+    el.hintBtn.disabled = true;
+    el.checkBtn.textContent = "Run Line";
+    el.playgroundBtn.classList.add("hidden");
+    el.restartMissionsBtn.classList.remove("hidden");
+  } else {
+    const problem = currentProblem();
+    el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
+    el.missionText.textContent = problem.title;
+    el.progressLabel.textContent = "Total Progress";
+    el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
+    el.hintBtn.disabled = false;
+    el.checkBtn.textContent = "Check Answer";
+    if (state.hasCompletedAllMissions) {
+      el.playgroundBtn.classList.remove("hidden");
+    } else {
+      el.playgroundBtn.classList.add("hidden");
+    }
+    el.restartMissionsBtn.classList.add("hidden");
+  }
 
   renderFractionButtons();
   renderCodeButtons();
@@ -1154,9 +1320,12 @@ function render() {
 el.hintBtn.addEventListener("click", showHint);
 el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
+el.playgroundBtn.addEventListener("click", goToPlayground);
+el.restartMissionsBtn.addEventListener("click", restartMissions);
 el.checkBtn.addEventListener("click", checkAnswer);
 el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
 el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
+el.enterPlaygroundBtn.addEventListener("click", enterPlaygroundMode);
 el.unlockModal.addEventListener("click", (event) => {
   if (event.target === el.unlockModal) closeUnlockModal();
 });
@@ -1167,6 +1336,10 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !el.unlockModal.classList.contains("hidden")) {
     closeUnlockModal();
   }
+  if (event.key === "Escape" && !el.playgroundIntroModal.classList.contains("hidden")) {
+    enterPlaygroundMode();
+  }
 });
 
+loadProgress();
 render();

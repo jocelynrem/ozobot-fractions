@@ -16,7 +16,7 @@
             <p id="missionText" class="mission"></p>
             <section class="actions-row">
               <div class="progress-card">
-                <div class="label">Total Progress</div>
+                <div id="progressLabel" class="label">Total Progress</div>
                 <div id="progressValue" class="value">0/1</div>
               </div>
               <div class="controls">
@@ -45,6 +45,10 @@
             </svg>
             <div id="pieLabel" class="pie-label">0/1 of 1 whole</div>
           </div>
+        </section>
+        <section class="mode-nav">
+          <button id="playgroundBtn" class="btn btn-light hidden">Go to Playground</button>
+          <button id="restartMissionsBtn" class="btn btn-light hidden">Restart Missions</button>
         </section>
         <section id="checkDetails" class="check-details hidden"></section>
         <section class="toolbar toolbar-inline">
@@ -84,11 +88,11 @@
         <div id="modalConfetti" class="modal-confetti" aria-hidden="true"></div>
         <p id="modalCelebrateText" class="modal-celebrate">You did it!</p>
         <h2 id="successTitle" class="success-title">Mission Complete</h2>
-        <p class="modal-text">
+        <p id="successModalText" class="modal-text">
           Great work. Run your Ozobot on your track now. When you are done,
           choose Next Problem.
         </p>
-        <ol class="modal-steps">
+        <ol id="successModalSteps" class="modal-steps">
           <li>Place Ozobot at the start of your line.</li>
           <li>Watch it read your color codes.</li>
           <li>When finished, move to the next challenge.</li>
@@ -127,6 +131,28 @@
         </div>
         <p class="unlock-tip">Try placing this new code on your fraction track in the next mission.</p>
         <button id="dismissUnlockBtn" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+    <div
+      id="playgroundIntroModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="playgroundIntroTitle"
+    >
+      <div class="modal-card playground-intro-card">
+        <div id="playgroundIntroConfetti" class="modal-confetti" aria-hidden="true"></div>
+        <p class="modal-celebrate playground-intro-eyebrow">Big Finish</p>
+        <h2 id="playgroundIntroTitle" class="playground-intro-title">Ozobot Playground Unlocked</h2>
+        <p class="modal-text">
+          You finished every mission. Now you can build any 1 whole line you want and try any Ozobot code combination.
+        </p>
+        <ol class="modal-steps">
+          <li>Mix any fraction segments to build a full line.</li>
+          <li>Place any action codes wherever you want.</li>
+          <li>Run, clear, rebuild, and test as many lines as you like.</li>
+        </ol>
+        <button id="enterPlaygroundBtn" class="btn btn-primary">Enter Playground</button>
       </div>
     </div>
 
