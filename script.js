@@ -1,11 +1,11 @@
 const BASE_UNITS = 24;
 
 const FRACTIONS = [
-  { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", name: "Half" },
-  { label: "1/3", numerator: 1, denominator: 3, units: 8, color: "#f59e0b", name: "Third" },
-  { label: "1/4", numerator: 1, denominator: 4, units: 6, color: "#10b981", name: "Fourth" },
-  { label: "1/6", numerator: 1, denominator: 6, units: 4, color: "#3b82f6", name: "Sixth" },
-  { label: "1/8", numerator: 1, denominator: 8, units: 3, color: "#8b5cf6", name: "Eighth" }
+  { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", textColor: "#b91c1c", name: "Half" },
+  { label: "1/3", numerator: 1, denominator: 3, units: 8, color: "#f59e0b", textColor: "#b45309", name: "Third" },
+  { label: "1/4", numerator: 1, denominator: 4, units: 6, color: "#10b981", textColor: "#047857", name: "Fourth" },
+  { label: "1/6", numerator: 1, denominator: 6, units: 4, color: "#3b82f6", textColor: "#1d4ed8", name: "Sixth" },
+  { label: "1/8", numerator: 1, denominator: 8, units: 3, color: "#8b5cf6", textColor: "#6d28d9", name: "Eighth" }
 ];
 
 const OZOBOT_CODES = [
@@ -18,10 +18,12 @@ const OZOBOT_CODES = [
   { id: "play_again", name: "Play Again", colors: ["#00FF00", "#0000FF"] }
 ];
 
+const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
+
 const CHALLENGES = [
   {
-    title: "Make 1 whole with fourths. Put an action code block at 2/4.",
-    requirements: { segments: { "1/4": 4 }, codes: [{ numerator: 2, denominator: 4 }] }
+    title: "Make 1 whole with halves. Put an action code block at 1/2.",
+    requirements: { segments: { "1/2": 2 }, codes: [{ numerator: 1, denominator: 2 }] }
   },
   {
     title: "Make 1 whole with sixths. Put an action code block at 4/6.",
@@ -147,7 +149,13 @@ const el = {
   modalConfetti: document.getElementById("modalConfetti"),
   modalCelebrateText: document.getElementById("modalCelebrateText"),
   modalRunCodes: document.getElementById("modalRunCodes"),
-  nextFromModalBtn: document.getElementById("nextFromModalBtn")
+  nextFromModalBtn: document.getElementById("nextFromModalBtn"),
+  unlockModal: document.getElementById("unlockModal"),
+  unlockConfetti: document.getElementById("unlockConfetti"),
+  unlockMessage: document.getElementById("unlockMessage"),
+  unlockCodePreview: document.getElementById("unlockCodePreview"),
+  unlockCodeName: document.getElementById("unlockCodeName"),
+  dismissUnlockBtn: document.getElementById("dismissUnlockBtn")
 };
 
 function gcd(a, b) {
@@ -317,7 +325,8 @@ function setCheckDetails(lines, pass) {
 }
 
 function unlockedCodeCount() {
-  return Math.min(OZOBOT_CODES.length, Math.floor(state.currentProblemIdx / 2) + 1);
+  const scheduledCount = CODE_UNLOCK_COUNTS[state.currentProblemIdx] ?? OZOBOT_CODES.length;
+  return Math.min(OZOBOT_CODES.length, scheduledCount);
 }
 
 function triggerUnlockCelebration(newlyUnlockedIndex) {
@@ -384,6 +393,7 @@ function addSegment(fraction) {
   setCheckDetails([], false);
   clearCheckProgress();
   render();
+  maybeAutoCheckAnswer();
 }
 
 function addCode(code) {
@@ -436,6 +446,7 @@ function addCode(code) {
   setCheckDetails([], false);
   clearCheckProgress();
   render();
+  maybeAutoCheckAnswer();
 }
 
 function undo() {
@@ -655,22 +666,21 @@ function showHint() {
   render();
 }
 
-function launchConfettiBurst() {
-  const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
-  el.modalConfetti.innerHTML = "";
-  for (let i = 0; i < 38; i += 1) {
+function launchConfettiBurst(container, colors, count = 38) {
+  container.innerHTML = "";
+  for (let i = 0; i < count; i += 1) {
     const piece = document.createElement("span");
     piece.className = "modal-confetti-piece";
     piece.style.left = `${Math.random() * 100}%`;
     piece.style.background = colors[i % colors.length];
     piece.style.animationDelay = `${Math.random() * 260}ms`;
-    el.modalConfetti.appendChild(piece);
+    container.appendChild(piece);
   }
 }
 
 function openSuccessModal() {
   renderModalRunTrack();
-  launchConfettiBurst();
+  launchConfettiBurst(el.modalConfetti, ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"]);
   const celebrates = [
     "Perfect build! You nailed it.",
     "Great job! You got it right.",
@@ -681,10 +691,26 @@ function openSuccessModal() {
   document.body.style.overflow = "hidden";
 }
 
+function openUnlockModal(code) {
+  launchConfettiBurst(el.unlockConfetti, ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"], 28);
+  el.unlockMessage.textContent = `You unlocked ${code.name}. This action code is now ready to use in your next challenge.`;
+  el.unlockCodeName.textContent = code.name;
+  el.unlockCodePreview.innerHTML = code.colors
+    .map((color) => `<span class="unlock-preview-stripe" style="background:${color}"></span>`)
+    .join("");
+  el.unlockModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
 function closeSuccessModalAndAdvance() {
   el.successModal.classList.add("hidden");
   document.body.style.overflow = "";
   nextProblem(true);
+}
+
+function closeUnlockModal() {
+  el.unlockModal.classList.add("hidden");
+  document.body.style.overflow = "";
 }
 
 function renderModalRunTrack() {
@@ -710,13 +736,32 @@ function renderModalRunTrack() {
   });
 }
 
-function checkAnswer() {
-  const result = evaluateStudentWork();
+function handlePassedCheck() {
   const successMessages = [
     "Awesome job. Math mission complete.",
     "Great work. Your fraction track is correct.",
     "You got it. Your Ozobot path is ready."
   ];
+  const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
+  state.isCheckedCorrect = true;
+  setFeedback("success", msg);
+  setCheckDetails([], true);
+  openSuccessModal();
+}
+
+function maybeAutoCheckAnswer() {
+  if (state.isCheckedCorrect) return;
+  if (!el.successModal.classList.contains("hidden")) return;
+  if (!el.unlockModal.classList.contains("hidden")) return;
+
+  const result = evaluateStudentWork();
+  if (result.passed) {
+    handlePassedCheck();
+  }
+}
+
+function checkAnswer() {
+  const result = evaluateStudentWork();
   const tryAgainMessages = [
     "Nice try. You are close.",
     "Keep going. Fix one clue at a time.",
@@ -724,11 +769,7 @@ function checkAnswer() {
   ];
 
   if (result.passed) {
-    const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
-    state.isCheckedCorrect = true;
-    setFeedback("success", msg);
-    setCheckDetails([], true);
-    openSuccessModal();
+    handlePassedCheck();
   } else {
     const msg = tryAgainMessages[Math.floor(Math.random() * tryAgainMessages.length)];
     state.isCheckedCorrect = false;
@@ -751,6 +792,7 @@ function nextProblem(fromModal = false) {
     if (newUnlockCount > priorUnlockCount) {
       triggerUnlockCelebration(newUnlockCount - 1);
       setFeedback("success", `You unlocked a new action code block. ${newUnlockCount} of ${OZOBOT_CODES.length} codes unlocked.`);
+      openUnlockModal(OZOBOT_CODES[newUnlockCount - 1]);
     }
     return;
   }
@@ -817,10 +859,11 @@ function renderFractionButtons() {
 
   FRACTIONS.forEach((fraction) => {
     const btn = document.createElement("button");
-    btn.className = "tile";
+    btn.className = "tile fraction-tile";
     btn.disabled = currentTotal + fraction.units > BASE_UNITS;
-    btn.style.borderColor = `${fraction.color}66`;
-    btn.innerHTML = `<div style="font-size:22px;color:${fraction.color}">${fraction.label}</div><div class="small">${fraction.name}</div>`;
+    btn.style.setProperty("--fraction-accent", `${fraction.color}66`);
+    btn.style.setProperty("--fraction-fill", `${fraction.color}1a`);
+    btn.innerHTML = `<div style="font-size:22px;color:${fraction.textColor}">${fraction.label}</div><div class="small">${fraction.name}</div>`;
     btn.addEventListener("click", () => addSegment(fraction));
     el.fractionButtons.appendChild(btn);
   });
@@ -1111,12 +1154,19 @@ el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
 el.checkBtn.addEventListener("click", checkAnswer);
 el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
+el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
 el.successModal.addEventListener("click", (event) => {
   if (event.target === el.successModal) closeSuccessModalAndAdvance();
+});
+el.unlockModal.addEventListener("click", (event) => {
+  if (event.target === el.unlockModal) closeUnlockModal();
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !el.successModal.classList.contains("hidden")) {
     closeSuccessModalAndAdvance();
+  }
+  if (event.key === "Escape" && !el.unlockModal.classList.contains("hidden")) {
+    closeUnlockModal();
   }
 });
 

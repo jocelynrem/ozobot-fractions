@@ -50,14 +50,14 @@
         <section class="toolbar toolbar-inline">
           <section class="panel">
             <h2>Fraction Segments</h2>
-            <div id="fractionButtons" class="button-grid"></div>
+            <div id="fractionButtons" class="button-grid fraction-grid"></div>
           </section>
           <section class="panel">
             <div id="codePanelHeader" class="code-panel-header">
               <h2 class="code-panel-title">Action Codes</h2>
               <p id="codeUnlockText" class="unlock-note"></p>
             </div>
-            <div id="codeButtons" class="button-grid"></div>
+            <div id="codeButtons" class="button-grid code-grid"></div>
           </section>
         </section>
 
@@ -105,6 +105,28 @@
           </div>
         </div>
         <button id="nextFromModalBtn" class="btn btn-primary">Run Complete - Next Problem</button>
+      </div>
+    </div>
+    <div
+      id="unlockModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="unlockTitle"
+    >
+      <div class="modal-card unlock-card">
+        <div id="unlockConfetti" class="modal-confetti" aria-hidden="true"></div>
+        <p class="modal-celebrate unlock-eyebrow">New Action Code</p>
+        <h2 id="unlockTitle" class="unlock-title">Code Unlocked</h2>
+        <p id="unlockMessage" class="modal-text">
+          You unlocked a new Ozobot action code.
+        </p>
+        <div class="unlock-preview-wrap">
+          <div id="unlockCodePreview" class="unlock-code-preview" aria-label="Unlocked action code preview"></div>
+          <p id="unlockCodeName" class="unlock-code-name">Spin</p>
+        </div>
+        <p class="unlock-tip">Try placing this new code on your fraction track in the next mission.</p>
+        <button id="dismissUnlockBtn" class="btn btn-primary">Continue</button>
       </div>
     </div>
 
