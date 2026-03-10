@@ -1157,9 +1157,6 @@ el.resetBtn.addEventListener("click", resetBoard);
 el.checkBtn.addEventListener("click", checkAnswer);
 el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
 el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
-el.successModal.addEventListener("click", (event) => {
-  if (event.target === el.successModal) closeSuccessModalAndAdvance();
-});
 el.unlockModal.addEventListener("click", (event) => {
   if (event.target === el.unlockModal) closeUnlockModal();
 });
