@@ -12,11 +12,11 @@ const FRACTIONS = [
 
 const OZOBOT_CODES = [
   { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
-  { id: "super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#000000", OZOBOT_SCREEN_RED] },
+  { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
   { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
   { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
-  { id: "tornado", name: "Tornado", colors: ["#00FF00", OZOBOT_SCREEN_BLUE, OZOBOT_SCREEN_RED, "#000000"] },
-  { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_BLUE, OZOBOT_SCREEN_RED] },
+  { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
+  { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
   { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
 ];
 
