@@ -54,6 +54,11 @@
           </aside>
         </section>
         <section class="mode-nav">
+          <div class="robot-picker" role="group" aria-label="Choose Ozobot robot">
+            <span class="robot-picker-label">Robot</span>
+            <button id="bitRobotBtn" class="robot-toggle-btn" type="button">Bit</button>
+            <button id="evoRobotBtn" class="robot-toggle-btn" type="button">Evo</button>
+          </div>
           <button id="playgroundBtn" class="btn btn-light hidden">Go to Playground</button>
         </section>
         <section id="checkDetails" class="check-details hidden"></section>
@@ -64,7 +69,7 @@
           </section>
           <section class="panel">
             <div id="codePanelHeader" class="code-panel-header">
-              <h2 class="code-panel-title">Action Codes</h2>
+              <h2 id="codePanelTitle" class="code-panel-title">Action Codes</h2>
               <p id="codeUnlockText" class="unlock-note"></p>
             </div>
             <div id="codeButtons" class="button-grid code-grid"></div>

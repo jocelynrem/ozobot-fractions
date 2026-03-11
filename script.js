@@ -11,15 +11,34 @@ const FRACTIONS = [
   { label: "1/8", numerator: 1, denominator: 8, units: 3, color: "#8b5cf6", textColor: "#6d28d9", name: "Eighth" }
 ];
 
-const OZOBOT_CODES = [
-  { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
-  { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
-  { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
-  { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
-  { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
-  { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
-  { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
-];
+const ROBOT_PROFILES = {
+  bit: {
+    label: "Ozobot Bit",
+    shortLabel: "Bit",
+    codes: [
+      { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
+      { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
+      { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
+    ]
+  },
+  evo: {
+    label: "Ozobot Evo",
+    shortLabel: "Evo",
+    codes: [
+      { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
+      { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
+      { id: "backwalk", name: "Backwalk", colors: [OZOBOT_SCREEN_RED, "#00FF00", "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
+    ]
+  }
+};
 const MODAL_END_CODE = { id: "game_over", name: "Game Over", colors: ["#00FF00", OZOBOT_SCREEN_RED] };
 
 const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
@@ -116,6 +135,7 @@ const CHALLENGES = [
 const state = {
   currentProblemIdx: 0,
   mode: "mission",
+  robotType: "bit",
   hasCompletedAllMissions: false,
   placedSegments: [],
   placedCodes: [],
@@ -142,6 +162,7 @@ const el = {
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
   codePanelHeader: document.getElementById("codePanelHeader"),
+  codePanelTitle: document.getElementById("codePanelTitle"),
   codeUnlockText: document.getElementById("codeUnlockText"),
   liveMarkers: document.getElementById("liveMarkers"),
   lineHintBanner: document.getElementById("lineHintBanner"),
@@ -150,6 +171,8 @@ const el = {
   hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
   resetBtn: document.getElementById("resetBtn"),
+  bitRobotBtn: document.getElementById("bitRobotBtn"),
+  evoRobotBtn: document.getElementById("evoRobotBtn"),
   playgroundBtn: document.getElementById("playgroundBtn"),
   restartMissionsBtn: document.getElementById("restartMissionsBtn"),
   checkBtn: document.getElementById("checkBtn"),
@@ -175,6 +198,14 @@ function isPlaygroundMode() {
   return state.mode === "playground";
 }
 
+function currentRobotProfile() {
+  return ROBOT_PROFILES[state.robotType] || ROBOT_PROFILES.bit;
+}
+
+function currentRobotCodes() {
+  return currentRobotProfile().codes;
+}
+
 function saveProgress() {
   try {
     window.localStorage.setItem(
@@ -182,6 +213,7 @@ function saveProgress() {
       JSON.stringify({
         currentProblemIdx: state.currentProblemIdx,
         mode: state.mode,
+        robotType: state.robotType,
         hasCompletedAllMissions: state.hasCompletedAllMissions
       })
     );
@@ -197,6 +229,9 @@ function loadProgress() {
     const saved = JSON.parse(raw);
     if (saved.mode === "playground" || saved.mode === "mission") {
       state.mode = saved.mode;
+    }
+    if (saved.robotType === "bit" || saved.robotType === "evo") {
+      state.robotType = saved.robotType;
     }
     if (Number.isInteger(saved.currentProblemIdx)) {
       state.currentProblemIdx = Math.max(0, Math.min(CHALLENGES.length - 1, saved.currentProblemIdx));
@@ -227,7 +262,7 @@ function currentProblem() {
 }
 
 function findCodeById(codeId) {
-  return OZOBOT_CODES.find((code) => code.id === codeId);
+  return currentRobotCodes().find((code) => code.id === codeId);
 }
 
 function totalUnits() {
@@ -380,9 +415,10 @@ function setCheckDetails(lines, pass) {
 }
 
 function unlockedCodeCount() {
-  if (isPlaygroundMode()) return OZOBOT_CODES.length;
-  const scheduledCount = CODE_UNLOCK_COUNTS[state.currentProblemIdx] ?? OZOBOT_CODES.length;
-  return Math.min(OZOBOT_CODES.length, scheduledCount);
+  const codes = currentRobotCodes();
+  if (isPlaygroundMode()) return codes.length;
+  const scheduledCount = CODE_UNLOCK_COUNTS[state.currentProblemIdx] ?? codes.length;
+  return Math.min(codes.length, scheduledCount);
 }
 
 function triggerUnlockCelebration(newlyUnlockedIndex) {
@@ -785,7 +821,7 @@ function openSuccessModal() {
 
 function openUnlockModal(code) {
   launchConfettiBurst(el.unlockConfetti, ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"], 28);
-  el.unlockMessage.textContent = `You unlocked ${code.name}. This action code is now ready to use in your next challenge.`;
+  el.unlockMessage.textContent = `You unlocked ${code.name} for ${currentRobotProfile().shortLabel}. This action code is now ready to use in your next challenge.`;
   el.unlockCodeName.textContent = code.name;
   el.unlockCodePreview.innerHTML = code.colors
     .map((color) => `<span class="unlock-preview-stripe" style="background:${color}"></span>`)
@@ -841,6 +877,22 @@ function restartMissions() {
   saveProgress();
   resetBoard();
   setFeedback("success", "Missions restarted at Problem 1.");
+}
+
+function closeAllModals() {
+  el.successModal.classList.add("hidden");
+  el.unlockModal.classList.add("hidden");
+  el.playgroundIntroModal.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function setRobotType(robotType) {
+  if (!ROBOT_PROFILES[robotType] || robotType === state.robotType) return;
+  state.robotType = robotType;
+  saveProgress();
+  closeAllModals();
+  resetBoard();
+  setFeedback("success", `${currentRobotProfile().label} mode is on. Action codes were updated for that robot.`);
 }
 
 function renderModalRunTrack() {
@@ -935,6 +987,7 @@ function nextProblem(fromModal = false) {
   }
 
   if (state.currentProblemIdx < CHALLENGES.length - 1) {
+    const codes = currentRobotCodes();
     const priorUnlockCount = unlockedCodeCount();
     state.currentProblemIdx += 1;
     saveProgress();
@@ -942,8 +995,8 @@ function nextProblem(fromModal = false) {
     const newUnlockCount = unlockedCodeCount();
     if (newUnlockCount > priorUnlockCount) {
       triggerUnlockCelebration(newUnlockCount - 1);
-      setFeedback("success", `You unlocked a new action code block. ${newUnlockCount} of ${OZOBOT_CODES.length} codes unlocked.`);
-      openUnlockModal(OZOBOT_CODES[newUnlockCount - 1]);
+      setFeedback("success", `You unlocked a new action code block. ${newUnlockCount} of ${codes.length} codes unlocked.`);
+      openUnlockModal(codes[newUnlockCount - 1]);
     }
     return;
   }
@@ -1023,17 +1076,19 @@ function renderFractionButtons() {
 
 function renderCodeButtons() {
   el.codeButtons.innerHTML = "";
-  const visibleCodes = OZOBOT_CODES.slice(0, unlockedCodeCount());
-  const lockedCount = OZOBOT_CODES.length - visibleCodes.length;
+  const codes = currentRobotCodes();
+  const visibleCodes = codes.slice(0, unlockedCodeCount());
+  const lockedCount = codes.length - visibleCodes.length;
 
+  el.codePanelTitle.textContent = `Action Codes for ${currentRobotProfile().shortLabel}`;
   el.codeUnlockText.textContent = isPlaygroundMode()
-    ? `All ${OZOBOT_CODES.length} codes ready`
-    : `${visibleCodes.length} of ${OZOBOT_CODES.length} codes unlocked`;
+    ? `All ${codes.length} ${currentRobotProfile().shortLabel} codes ready`
+    : `${visibleCodes.length} of ${codes.length} ${currentRobotProfile().shortLabel} codes unlocked`;
 
   visibleCodes.forEach((code) => {
     const btn = document.createElement("button");
     btn.className = "tile";
-    btn.dataset.codeIdx = String(OZOBOT_CODES.findIndex((c) => c.id === code.id));
+    btn.dataset.codeIdx = String(codes.findIndex((c) => c.id === code.id));
     btn.innerHTML = `<div style="display:flex;gap:0;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
     btn.addEventListener("click", () => addCode(code));
     el.codeButtons.appendChild(btn);
@@ -1299,6 +1354,10 @@ function renderTrack() {
 
 function render() {
   document.body.classList.toggle("playground-mode", isPlaygroundMode());
+  el.bitRobotBtn.classList.toggle("active", state.robotType === "bit");
+  el.evoRobotBtn.classList.toggle("active", state.robotType === "evo");
+  el.bitRobotBtn.setAttribute("aria-pressed", String(state.robotType === "bit"));
+  el.evoRobotBtn.setAttribute("aria-pressed", String(state.robotType === "evo"));
   if (isPlaygroundMode()) {
     el.problemCounter.textContent = "Ozobot Playground";
     el.missionText.textContent = "Build any 1 whole fraction line you want. Add any action codes you want, then run it as many times as you like.";
@@ -1331,6 +1390,8 @@ function render() {
 el.hintBtn.addEventListener("click", showHint);
 el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
+el.bitRobotBtn.addEventListener("click", () => setRobotType("bit"));
+el.evoRobotBtn.addEventListener("click", () => setRobotType("evo"));
 el.playgroundBtn.addEventListener("click", goToPlayground);
 el.restartMissionsBtn.addEventListener("click", restartMissions);
 el.checkBtn.addEventListener("click", checkAnswer);
