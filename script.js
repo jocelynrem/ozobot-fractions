@@ -173,6 +173,8 @@ const el = {
   axis: document.getElementById("axis"),
   progressLabel: document.getElementById("progressLabel"),
   progressValue: document.getElementById("progressValue"),
+  missionConfetti: document.getElementById("missionConfetti"),
+  missionRunHint: document.getElementById("missionRunHint"),
   playgroundRunHint: document.getElementById("playgroundRunHint"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
@@ -944,6 +946,10 @@ function launchConfettiBurst(container, colors, count = 38) {
   }
 }
 
+function celebrateMissionReady() {
+  launchConfettiBurst(el.missionConfetti, ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"], 30);
+}
+
 function openSuccessModal() {
   renderModalRunTrack();
   launchConfettiBurst(el.modalConfetti, ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"]);
@@ -1122,8 +1128,14 @@ function handlePassedCheck() {
   const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
   state.isCheckedCorrect = true;
   setFeedback("success", msg);
-  setCheckDetails([], true);
-  openSuccessModal();
+  if (isPlaygroundMode()) {
+    setCheckDetails([], true);
+    openSuccessModal();
+    return;
+  }
+  setCheckDetails([], false);
+  celebrateMissionReady();
+  render();
 }
 
 function maybeAutoCheckAnswer() {
@@ -1148,21 +1160,11 @@ function checkAnswer() {
     return;
   }
 
-  const result = evaluateStudentWork();
-  const tryAgainMessages = [
-    "Nice try. You are close.",
-    "Keep going. Fix one clue at a time.",
-    "Good effort. Tune one part and recheck."
-  ];
-
-  if (result.passed) {
-    handlePassedCheck();
-  } else {
-    const msg = tryAgainMessages[Math.floor(Math.random() * tryAgainMessages.length)];
-    state.isCheckedCorrect = false;
-    setFeedback("error", `${msg} ${result.errors[0]}`);
-    setCheckDetails(["Mission hints:", ...result.hints], false);
+  if (state.isCheckedCorrect) {
+    openSuccessModal();
+    return;
   }
+  setFeedback("error", "Finish building the correct whole line first.");
 }
 
 function nextProblem(fromModal = false) {
@@ -1522,9 +1524,11 @@ function renderTrack() {
     block.style.left = `${(startUnits / BASE_UNITS) * 100}%`;
     block.style.width = `${(segment.units / BASE_UNITS) * 100}%`;
     block.style.borderColor = `${segment.color}99`;
-    block.style.background = isPlaygroundMode() ? `${segment.color}55` : `${segment.color}22`;
+    block.style.background = isPlaygroundMode() ? `${segment.color}55` : `${segment.color}3d`;
     if (isPlaygroundMode()) {
       block.style.boxShadow = `0 0 14px ${segment.color}66, inset 0 0 18px ${segment.color}55`;
+    } else {
+      block.style.boxShadow = `inset 0 0 0 1px ${segment.color}55, inset 0 8px 10px rgba(255,255,255,0.22)`;
     }
 
     const segLabel = document.createElement("span");
@@ -1545,7 +1549,7 @@ function renderTrack() {
     chip.innerHTML = placedCode.colors
       .map(
         (color) =>
-          `<span class="code-stripe" style="background:${color};width:var(--ozobot-line-size);height:var(--ozobot-line-size);border-radius:0"></span>`
+          `<span class="code-stripe" style="background:${color};width:22px;height:22px;border-radius:0"></span>`
       )
       .join("");
 
@@ -1570,6 +1574,8 @@ function render() {
     el.hintBtn.disabled = true;
     setButtonLabel(el.checkBtn, "▶", "Run Ozobot Line");
     el.checkBtn.classList.add("playground-run-btn");
+    el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
+    el.missionRunHint.classList.add("hidden");
     el.playgroundRunHint.classList.remove("hidden");
     setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
     el.playgroundBtn.classList.remove("hidden");
@@ -1580,8 +1586,11 @@ function render() {
     el.progressLabel.textContent = "Total Progress";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = false;
-    setButtonLabel(el.checkBtn, "✓", "Check Answer");
-    el.checkBtn.classList.remove("playground-run-btn");
+    setButtonLabel(el.checkBtn, "▶", "Run Ozobot");
+    el.checkBtn.classList.add("playground-run-btn", "mission-run-btn");
+    el.checkBtn.classList.toggle("mission-run-btn-ready", state.isCheckedCorrect);
+    el.checkBtn.disabled = !state.isCheckedCorrect;
+    el.missionRunHint.classList.toggle("hidden", !state.isCheckedCorrect);
     el.playgroundRunHint.classList.add("hidden");
     setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
     if (state.hasCompletedAllMissions) {
@@ -1589,6 +1598,11 @@ function render() {
     } else {
       el.playgroundBtn.classList.add("hidden");
     }
+  }
+
+  if (isPlaygroundMode()) {
+    el.checkBtn.disabled = false;
+    el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
   }
 
   renderFractionButtons();
