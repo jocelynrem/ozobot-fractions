@@ -1,6 +1,7 @@
 const BASE_UNITS = 24;
 const OZOBOT_SCREEN_BLUE = "#1DA1FF";
 const OZOBOT_SCREEN_RED = "#FF6B6B";
+const OZOBOT_EVO_RED = "#E11D48";
 const STORAGE_KEY = "ozobot-fractions-progress";
 
 const FRACTIONS = [
@@ -19,7 +20,7 @@ const ROBOT_PROFILES = {
       { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
       { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
       { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
-      { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_EVO_RED] },
       { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
       { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
       { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
@@ -29,12 +30,12 @@ const ROBOT_PROFILES = {
     label: "Ozobot Evo",
     shortLabel: "Evo",
     codes: [
-      { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
-      { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
+      { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_EVO_RED, "#00FF00", OZOBOT_EVO_RED] },
+      { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_EVO_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
       { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
       { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
-      { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
-      { id: "backwalk", name: "Backwalk", colors: [OZOBOT_SCREEN_RED, "#00FF00", "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "tornado", name: "Tornado", colors: [OZOBOT_EVO_RED, "#00FF00", OZOBOT_EVO_RED, "#00FF00"] },
+      { id: "backwalk", name: "Backwalk", colors: [OZOBOT_EVO_RED, "#00FF00", "#000000", OZOBOT_SCREEN_BLUE] },
       { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
     ]
   }
@@ -1021,6 +1022,19 @@ function setRobotType(robotType) {
   setFeedback("success", `${currentRobotProfile().label} mode is on. Action codes were updated for that robot.`);
 }
 
+function bindRobotToggle(button, robotType) {
+  const activate = (event) => {
+    event.preventDefault();
+    setRobotType(robotType);
+  };
+
+  button.addEventListener("click", activate);
+  button.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    activate(event);
+  });
+}
+
 function renderModalRunTrack() {
   el.modalRunCodes.innerHTML = "";
 
@@ -1534,8 +1548,8 @@ function render() {
 el.hintBtn.addEventListener("click", showHint);
 el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
-el.bitRobotBtn.addEventListener("click", () => setRobotType("bit"));
-el.evoRobotBtn.addEventListener("click", () => setRobotType("evo"));
+bindRobotToggle(el.bitRobotBtn, "bit");
+bindRobotToggle(el.evoRobotBtn, "evo");
 el.playgroundBtn.addEventListener("click", goToPlayground);
 el.restartMissionsBtn.addEventListener("click", restartMissions);
 el.checkBtn.addEventListener("click", checkAnswer);
