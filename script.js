@@ -147,6 +147,18 @@ const state = {
   hintStep: 0
 };
 
+const dragState = {
+  code: null,
+  moved: false,
+  pointerId: null,
+  startX: 0,
+  startY: 0,
+  sourceCodeId: null,
+  ghostEl: null,
+  targetUnits: null
+};
+let suppressCodeClickId = null;
+
 const el = {
   problemCounter: document.getElementById("problemCounter"),
   missionText: document.getElementById("missionText"),
@@ -156,6 +168,7 @@ const el = {
   pieLabel: document.getElementById("pieLabel"),
   segmentOverlay: document.getElementById("segmentOverlay"),
   codesLayer: document.getElementById("codesLayer"),
+  dragDropMarker: document.getElementById("dragDropMarker"),
   axis: document.getElementById("axis"),
   progressLabel: document.getElementById("progressLabel"),
   progressValue: document.getElementById("progressValue"),
@@ -460,7 +473,25 @@ function clearCheckProgress() {
   state.isCheckedCorrect = false;
 }
 
+function resetDragState() {
+  dragState.code = null;
+  dragState.moved = false;
+  dragState.pointerId = null;
+  dragState.startX = 0;
+  dragState.startY = 0;
+  dragState.sourceCodeId = null;
+  dragState.targetUnits = null;
+  if (dragState.ghostEl) {
+    dragState.ghostEl.remove();
+    dragState.ghostEl = null;
+  }
+  document.body.classList.remove("dragging-code");
+  el.dragDropMarker.classList.add("hidden");
+  el.dragDropMarker.style.removeProperty("--drop-left");
+}
+
 function resetBoard() {
+  resetDragState();
   state.placedSegments = [];
   state.placedCodes = [];
   state.history = [];
@@ -489,10 +520,14 @@ function addSegment(fraction) {
 }
 
 function addCode(code) {
+  return addCodeAtUnits(code, totalUnits());
+}
+
+function addCodeAtUnits(code, positionUnits) {
   if (isPlaygroundMode()) {
     const newCode = {
       ...code,
-      positionUnits: totalUnits(),
+      positionUnits,
       uid: makeId()
     };
     state.placedCodes.push(newCode);
@@ -503,17 +538,16 @@ function addCode(code) {
     setCheckDetails([], false);
     clearCheckProgress();
     render();
-    return;
+    return true;
   }
 
   const requiredCodeCount = currentProblem().requirements.codes.length;
   if (state.placedCodes.length >= requiredCodeCount) {
     const plural = requiredCodeCount === 1 ? "" : "s";
     setFeedback("error", `This mission uses ${requiredCodeCount} action code block${plural}.`);
-    return;
+    return false;
   }
 
-  const positionUnits = totalUnits();
   const requiredCounts = new Map();
   currentProblem().requirements.codes.forEach((req) => {
     const units = reqToUnits(req);
@@ -556,6 +590,98 @@ function addCode(code) {
   clearCheckProgress();
   render();
   maybeAutoCheckAnswer();
+  return true;
+}
+
+function getCodePlacementUnits() {
+  const units = [];
+  const seen = new Set();
+  let running = 0;
+  state.placedSegments.forEach((segment) => {
+    running += segment.units;
+    if (running <= 0 || running > BASE_UNITS || seen.has(running)) return;
+    seen.add(running);
+    units.push(running);
+  });
+  return units;
+}
+
+function getTrackDropTarget(clientX, clientY) {
+  const boundaryUnits = getCodePlacementUnits();
+  if (!boundaryUnits.length) return null;
+
+  const rect = el.codesLayer.getBoundingClientRect();
+  const withinX = clientX >= rect.left - 20 && clientX <= rect.right + 20;
+  const withinY = clientY >= rect.top - 48 && clientY <= rect.bottom + 48;
+  if (!withinX || !withinY) return null;
+
+  const rawRatio = (clientX - rect.left) / rect.width;
+  const clampedRatio = Math.max(0, Math.min(1, rawRatio));
+  const rawUnits = clampedRatio * BASE_UNITS;
+
+  let nearestUnits = boundaryUnits[0];
+  let nearestDistance = Math.abs(boundaryUnits[0] - rawUnits);
+  boundaryUnits.forEach((units) => {
+    const distance = Math.abs(units - rawUnits);
+    if (distance < nearestDistance) {
+      nearestUnits = units;
+      nearestDistance = distance;
+    }
+  });
+
+  return {
+    units: nearestUnits,
+    leftPercent: (nearestUnits / BASE_UNITS) * 100
+  };
+}
+
+function createCodeDragGhost(code) {
+  const ghost = document.createElement("div");
+  ghost.className = "code-drag-ghost";
+  ghost.innerHTML = `<div class="code-drag-ghost-stripes">${codeStripesHTML(code.colors, 20, 14)}</div><div class="code-drag-ghost-label">${code.name}</div>`;
+  document.body.appendChild(ghost);
+  return ghost;
+}
+
+function updateCodeDrag(clientX, clientY) {
+  if (!dragState.code || !dragState.ghostEl) return;
+  dragState.ghostEl.style.left = `${clientX}px`;
+  dragState.ghostEl.style.top = `${clientY}px`;
+
+  const target = getTrackDropTarget(clientX, clientY);
+  dragState.targetUnits = target ? target.units : null;
+  if (target) {
+    el.dragDropMarker.classList.remove("hidden");
+    el.dragDropMarker.style.setProperty("--drop-left", `${target.leftPercent}%`);
+  } else {
+    el.dragDropMarker.classList.add("hidden");
+    el.dragDropMarker.style.removeProperty("--drop-left");
+  }
+}
+
+function finishCodeDrag(clientX, clientY) {
+  if (!dragState.code) return;
+  const code = dragState.code;
+  const wasDrag = dragState.moved;
+  const sourceCodeId = dragState.sourceCodeId;
+  const target = wasDrag ? getTrackDropTarget(clientX, clientY) : null;
+
+  resetDragState();
+
+  if (!wasDrag) return;
+
+  if (!target) {
+    if (state.placedSegments.length === 0) {
+      setFeedback("error", "Build the fraction line first, then drag an action code to the line.");
+    }
+    return;
+  }
+
+  suppressCodeClickId = sourceCodeId;
+  window.setTimeout(() => {
+    if (suppressCodeClickId === sourceCodeId) suppressCodeClickId = null;
+  }, 0);
+  addCodeAtUnits(code, target.units);
 }
 
 function undo() {
@@ -1087,10 +1213,28 @@ function renderCodeButtons() {
 
   visibleCodes.forEach((code) => {
     const btn = document.createElement("button");
-    btn.className = "tile";
+    btn.className = "tile code-draggable";
     btn.dataset.codeIdx = String(codes.findIndex((c) => c.id === code.id));
+    btn.dataset.codeId = code.id;
     btn.innerHTML = `<div style="display:flex;gap:0;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
-    btn.addEventListener("click", () => addCode(code));
+    btn.addEventListener("click", () => {
+      if (suppressCodeClickId === code.id) {
+        suppressCodeClickId = null;
+        return;
+      }
+      addCode(code);
+    });
+    btn.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || btn.disabled) return;
+      dragState.code = code;
+      dragState.pointerId = event.pointerId;
+      dragState.startX = event.clientX;
+      dragState.startY = event.clientY;
+      dragState.moved = false;
+      dragState.sourceCodeId = code.id;
+      dragState.targetUnits = null;
+      dragState.ghostEl = null;
+    });
     el.codeButtons.appendChild(btn);
   });
 
@@ -1401,6 +1545,27 @@ el.enterPlaygroundBtn.addEventListener("click", enterPlaygroundMode);
 el.unlockModal.addEventListener("click", (event) => {
   if (event.target === el.unlockModal) closeUnlockModal();
 });
+document.addEventListener("pointermove", (event) => {
+  if (!dragState.code || dragState.pointerId !== event.pointerId) return;
+  const movedEnough =
+    Math.abs(event.clientX - dragState.startX) > 8 ||
+    Math.abs(event.clientY - dragState.startY) > 8;
+  if (!dragState.moved && movedEnough) {
+    dragState.moved = true;
+    dragState.ghostEl = createCodeDragGhost(dragState.code);
+    document.body.classList.add("dragging-code");
+  }
+  if (!dragState.moved) return;
+  updateCodeDrag(event.clientX, event.clientY);
+});
+document.addEventListener("pointerup", (event) => {
+  if (!dragState.code || dragState.pointerId !== event.pointerId) return;
+  finishCodeDrag(event.clientX, event.clientY);
+});
+document.addEventListener("pointercancel", () => {
+  if (!dragState.code) return;
+  resetDragState();
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !el.successModal.classList.contains("hidden")) {
     closeSuccessModalAndAdvance();
@@ -1410,6 +1575,9 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape" && !el.playgroundIntroModal.classList.contains("hidden")) {
     enterPlaygroundMode();
+  }
+  if (event.key === "Escape" && dragState.code) {
+    resetDragState();
   }
 });
 

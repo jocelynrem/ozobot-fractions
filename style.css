@@ -427,6 +427,10 @@ body.playground-mode .check-details.fail {
   align-items: center;
 }
 
+body.dragging-code .track-bg {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+}
+
 .line-hint-banner {
   position: absolute;
   left: 36px;
@@ -506,6 +510,31 @@ body.playground-mode .garage-pad {
   z-index: 4;
 }
 
+.drag-drop-marker {
+  position: absolute;
+  left: 36px;
+  width: calc(100% - 72px);
+  top: 44%;
+  transform: translateY(-50%);
+  height: var(--ozobot-line-size);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.drag-drop-marker::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--drop-left, 0%);
+  width: calc(var(--ozobot-line-size) + 8px);
+  height: calc(var(--ozobot-line-size) + 8px);
+  border-radius: 10px;
+  border: 3px dashed #2563eb;
+  background: rgba(219, 234, 254, 0.72);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.18);
+  transform: translate(-50%, -50%);
+}
+
 .code-chip {
   position: absolute;
   transform: translate(-50%, -65%);
@@ -515,6 +544,37 @@ body.playground-mode .garage-pad {
   border: 1px solid #0f172a;
   background: #fff;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+.code-drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 2px solid #2563eb;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 14px 24px rgba(15, 23, 42, 0.18),
+    0 0 0 3px rgba(147, 197, 253, 0.18);
+  pointer-events: none;
+  z-index: 1400;
+}
+
+.code-drag-ghost-stripes {
+  display: flex;
+  gap: 0;
+}
+
+.code-drag-ghost-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: #1e3a8a;
 }
 
 .code-chip-wrong {
@@ -1509,6 +1569,10 @@ body.playground-mode .robot-toggle-btn:hover {
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 0 rgba(99, 102, 241, 0.12);
+}
+
+.code-draggable {
+  touch-action: none;
 }
 
 .tile-locked::before {
