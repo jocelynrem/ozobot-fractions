@@ -26,18 +26,18 @@ const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
 
 const CHALLENGES = [
   {
-    title: "Make 1 whole with halves. Put an action code block at 1/2.",
+    title: "Make 1 whole using halves. Put an action code block at 1/2.",
     requirements: { segments: { "1/2": 2 }, codes: [{ numerator: 1, denominator: 2 }] }
   },
   {
-    title: "Make 1 whole with sixths. Put an action code block at 2/6.",
+    title: "Make 1 whole using sixths. Put an action code block at 2/6.",
     requirements: {
       segments: { "1/6": 6 },
       codes: [{ numerator: 2, denominator: 6 }]
     }
   },
   {
-    title: "Make 1 whole with eighths. Put an action code block at 1/8 and another at 3/8.",
+    title: "Make 1 whole using eighths. Put an action code block at 1/8 and another at 3/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
@@ -47,21 +47,21 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with thirds. Put an action code block at 1/3.",
+    title: "Make 1 whole using thirds. Put an action code block at 1/3.",
     requirements: {
       segments: { "1/3": 3 },
       codes: [{ numerator: 1, denominator: 3 }]
     }
   },
   {
-    title: "Make 1 whole with fourths. Put an action code block at 2/4.",
+    title: "Make 1 whole using fourths. Put an action code block at 2/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [{ numerator: 2, denominator: 4 }]
     }
   },
   {
-    title: "Make 1 whole with fourths. Put action code blocks at 1/4 and 2/4.",
+    title: "Make 1 whole using fourths. Put action code blocks at 1/4 and 2/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
@@ -71,7 +71,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with sixths. Put action code blocks at 1/6 and 3/6.",
+    title: "Make 1 whole using sixths. Put action code blocks at 1/6 and 3/6.",
     requirements: {
       segments: { "1/6": 6 },
       codes: [
@@ -81,7 +81,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with eighths. Put action code blocks at 2/8 and 4/8.",
+    title: "Make 1 whole using eighths. Put action code blocks at 2/8 and 4/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
@@ -91,7 +91,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with thirds. Put action code blocks at 1/3 and 2/3.",
+    title: "Make 1 whole using thirds. Put action code blocks at 1/3 and 2/3.",
     requirements: {
       segments: { "1/3": 3 },
       codes: [
@@ -101,7 +101,7 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Final mission: make 1 whole with fourths. Put action code blocks at 1/4, 2/4, and 3/4.",
+    title: "Make 1 whole using fourths. Put action code blocks at 1/4, 2/4, and 3/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
@@ -832,8 +832,12 @@ function enterPlaygroundMode() {
 }
 
 function restartMissions() {
+  const shouldRestart = window.confirm("Restart all missions from Problem 1?");
+  if (!shouldRestart) return;
+
   state.mode = "mission";
   state.currentProblemIdx = 0;
+  state.hasCompletedAllMissions = false;
   saveProgress();
   resetBoard();
   setFeedback("success", "Missions restarted at Problem 1.");
@@ -1303,7 +1307,6 @@ function render() {
     el.hintBtn.disabled = true;
     el.checkBtn.textContent = "Run Line";
     el.playgroundBtn.classList.add("hidden");
-    el.restartMissionsBtn.classList.remove("hidden");
   } else {
     const problem = currentProblem();
     el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
@@ -1317,7 +1320,6 @@ function render() {
     } else {
       el.playgroundBtn.classList.add("hidden");
     }
-    el.restartMissionsBtn.classList.add("hidden");
   }
 
   renderFractionButtons();
