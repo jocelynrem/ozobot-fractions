@@ -220,6 +220,10 @@ function currentRobotCodes() {
   return currentRobotProfile().codes;
 }
 
+function isEvoMode() {
+  return state.robotType === "evo";
+}
+
 function saveProgress() {
   try {
     window.localStorage.setItem(
@@ -335,6 +339,37 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10) {
         `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:0"></span>`
     )
     .join("");
+}
+
+function trackCodeStripesHTML(colors) {
+  const stripeSize = isEvoMode() ? 34 : 28;
+  const leadInWidth = isEvoMode() ? 22 : 0;
+  const leadIn = leadInWidth > 0
+    ? `<span class="track-code-lead" style="background:#000000;width:${leadInWidth}px;height:${stripeSize}px;border-radius:0"></span>`
+    : "";
+  const stripes = colors
+    .map(
+      (color) =>
+        `<span class="code-stripe" style="background:${color};width:${stripeSize}px;height:${stripeSize}px;border-radius:0"></span>`
+    )
+    .join("");
+  return `${leadIn}${stripes}`;
+}
+
+function modalCodeStripesHTML(colors) {
+  const stripeSize = isEvoMode() ? 34 : 28;
+  const leadInWidth = isEvoMode() ? 22 : 0;
+  const leadIn = leadInWidth > 0
+    ? `<span class="modal-run-stripe modal-run-lead" style="background:#000000;width:${leadInWidth}px;height:${stripeSize}px"></span>`
+    : "";
+  const stripes = colors
+    .map((color) => `<span class="modal-run-stripe" style="background:${color};width:${stripeSize}px;height:${stripeSize}px"></span>`)
+    .join("");
+  return `${leadIn}${stripes}`;
+}
+
+function modalEndCodeColors() {
+  return ["#00FF00", isEvoMode() ? OZOBOT_EVO_RED : OZOBOT_SCREEN_RED];
 }
 
 function setFeedback(type, message) {
@@ -1037,33 +1072,37 @@ function bindRobotToggle(button, robotType) {
 
 function renderModalRunTrack() {
   el.modalRunCodes.innerHTML = "";
+  const modalTrack = document.getElementById("modalRunTrack");
+  if (modalTrack) {
+    modalTrack.classList.toggle("evo-modal-track", isEvoMode());
+  }
 
   state.placedCodes.forEach((placedCode) => {
     const chip = document.createElement("div");
     chip.className = "modal-run-code";
+    if (isEvoMode()) chip.classList.add("evo-modal-run-code");
 
     const ratio = placedCode.positionUnits / BASE_UNITS;
     chip.style.left = `${ratio * 100}%`;
     if (placedCode.positionUnits === 0) {
-      chip.style.transform = "translateX(0)";
+      chip.style.transform = isEvoMode() ? "translate(0, -50%)" : "translateX(0)";
     } else if (placedCode.positionUnits === BASE_UNITS) {
-      chip.style.transform = "translateX(-100%)";
+      chip.style.transform = isEvoMode() ? "translate(-100%, -50%)" : "translateX(-100%)";
+    } else if (isEvoMode()) {
+      chip.style.transform = "translate(-50%, -50%)";
     }
 
-    chip.innerHTML = placedCode.colors
-      .map((color) => `<span class="modal-run-stripe" style="background:${color}"></span>`)
-      .join("");
+    chip.innerHTML = modalCodeStripesHTML(placedCode.colors);
 
     el.modalRunCodes.appendChild(chip);
   });
 
   const endChip = document.createElement("div");
   endChip.className = "modal-run-code modal-run-code-end";
+  if (isEvoMode()) endChip.classList.add("evo-modal-run-code");
   endChip.style.left = "100%";
-  endChip.style.transform = "translateX(-100%)";
-  endChip.innerHTML = MODAL_END_CODE.colors
-    .map((color) => `<span class="modal-run-stripe" style="background:${color}"></span>`)
-    .join("");
+  endChip.style.transform = isEvoMode() ? "translate(-100%, -50%)" : "translateX(-100%)";
+  endChip.innerHTML = modalCodeStripesHTML(modalEndCodeColors());
   el.modalRunCodes.appendChild(endChip);
 }
 
@@ -1494,14 +1533,10 @@ function renderTrack() {
   state.placedCodes.forEach((placedCode) => {
     const chip = document.createElement("div");
     chip.className = "code-chip";
+    if (isEvoMode()) chip.classList.add("evo-code-chip");
     if (placedCode.isWrongPlacement) chip.classList.add("code-chip-wrong");
     chip.style.left = `${(placedCode.positionUnits / BASE_UNITS) * 100}%`;
-    chip.innerHTML = placedCode.colors
-      .map(
-        (color) =>
-          `<span class="code-stripe" style="background:${color};width:var(--ozobot-line-size);height:var(--ozobot-line-size);border-radius:0"></span>`
-      )
-      .join("");
+    chip.innerHTML = trackCodeStripesHTML(placedCode.colors);
 
     el.codesLayer.appendChild(chip);
   });
@@ -1512,6 +1547,7 @@ function renderTrack() {
 
 function render() {
   document.body.classList.toggle("playground-mode", isPlaygroundMode());
+  document.body.classList.toggle("evo-robot", isEvoMode());
   el.bitRobotBtn.classList.toggle("active", state.robotType === "bit");
   el.evoRobotBtn.classList.toggle("active", state.robotType === "evo");
   el.bitRobotBtn.setAttribute("aria-pressed", String(state.robotType === "bit"));
