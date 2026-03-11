@@ -374,6 +374,25 @@ function setButtonLabel(button, icon, label) {
   button.innerHTML = `<span class="btn-icon" aria-hidden="true">${icon}</span><span class="btn-label">${label}</span>`;
 }
 
+function emphasizeFractions(text) {
+  return text.replace(/(\d+\/\d+|1 whole)/g, '<span class="mission-fraction">$1</span>');
+}
+
+function formatMissionText(text) {
+  const lines = text
+    .split(". ")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => (line.endsWith(".") ? line : `${line}.`));
+
+  return lines
+    .map((line, index) => {
+      const className = index === 0 ? "mission-line mission-line-primary" : "mission-line mission-line-secondary";
+      return `<span class="${className}">${emphasizeFractions(line)}</span>`;
+    })
+    .join("");
+}
+
 function setFeedback(type, message) {
   if (!message) {
     if (el.feedback) {
@@ -1568,7 +1587,10 @@ function render() {
   el.evoRobotBtn.setAttribute("aria-pressed", String(state.robotType === "evo"));
   if (isPlaygroundMode()) {
     el.problemCounter.textContent = "Ozobot Playground";
-    el.missionText.textContent = "Build any 1 whole fraction line you want. Add any action codes you want, then run it as many times as you like.";
+    el.missionText.innerHTML = `
+      <span class="mission-line mission-line-primary">Build any <span class="mission-fraction">1 whole</span> fraction line you want.</span>
+      <span class="mission-line mission-line-secondary">Add any action codes you want, then run it as many times as you like.</span>
+    `;
     el.progressLabel.textContent = "Line Length";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = true;
@@ -1582,7 +1604,7 @@ function render() {
   } else {
     const problem = currentProblem();
     el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
-    el.missionText.textContent = problem.title;
+    el.missionText.innerHTML = formatMissionText(problem.title);
     el.progressLabel.textContent = "Total Progress";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = false;
