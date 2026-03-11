@@ -832,8 +832,12 @@ function enterPlaygroundMode() {
 }
 
 function restartMissions() {
+  const shouldRestart = window.confirm("Restart all missions from Problem 1?");
+  if (!shouldRestart) return;
+
   state.mode = "mission";
   state.currentProblemIdx = 0;
+  state.hasCompletedAllMissions = false;
   saveProgress();
   resetBoard();
   setFeedback("success", "Missions restarted at Problem 1.");
@@ -1303,7 +1307,6 @@ function render() {
     el.hintBtn.disabled = true;
     el.checkBtn.textContent = "Run Line";
     el.playgroundBtn.classList.add("hidden");
-    el.restartMissionsBtn.classList.remove("hidden");
   } else {
     const problem = currentProblem();
     el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
@@ -1317,7 +1320,6 @@ function render() {
     } else {
       el.playgroundBtn.classList.add("hidden");
     }
-    el.restartMissionsBtn.classList.add("hidden");
   }
 
   renderFractionButtons();

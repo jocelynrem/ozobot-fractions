@@ -132,6 +132,18 @@ body.playground-mode .mission {
   color: #f8fafc;
 }
 
+body.playground-mode .restart-missions-btn {
+  color: #cbd5e1;
+  border-color: #64748b;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+body.playground-mode .restart-missions-btn:hover {
+  color: #f8fafc;
+  border-color: #94a3b8;
+  background: rgba(15, 23, 42, 0.82);
+}
+
 body.playground-mode .eyebrow,
 body.playground-mode .panel h2,
 body.playground-mode .code-panel-title,
@@ -254,6 +266,33 @@ body.playground-mode .check-details.fail {
   line-height: 1.2;
   font-weight: 900;
   color: #1e1b4b;
+}
+
+.mission-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.restart-missions-btn {
+  border: 1px solid #cbd5e1;
+  background: rgba(255, 255, 255, 0.55);
+  color: #475569;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.86;
+  transition: all 180ms ease;
+}
+
+.restart-missions-btn:hover {
+  opacity: 1;
+  color: #334155;
+  border-color: #94a3b8;
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .inline-code-badge {
