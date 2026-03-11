@@ -50,19 +50,19 @@ const CHALLENGES = [
     requirements: { segments: { "1/2": 2 }, codes: [{ numerator: 1, denominator: 2 }] }
   },
   {
-    title: "Make 1 whole using sixths. Put an action code block at 2/6.",
+    title: "Make 1 whole using sixths. Put an action code block at 3/6.",
     requirements: {
       segments: { "1/6": 6 },
-      codes: [{ numerator: 2, denominator: 6 }]
+      codes: [{ numerator: 3, denominator: 6 }]
     }
   },
   {
-    title: "Make 1 whole using eighths. Put an action code block at 1/8 and another at 3/8.",
+    title: "Make 1 whole using eighths. Put an action code block at 2/8 and another at 5/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
-        { numerator: 1, denominator: 8 },
-        { numerator: 3, denominator: 8 }
+        { numerator: 2, denominator: 8 },
+        { numerator: 5, denominator: 8 }
       ]
     }
   },
@@ -91,22 +91,22 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole using sixths. Put action code blocks at 1/6 and 3/6.",
+    title: "Make 1 whole using sixths. Put action code blocks at 1/6 and 4/6.",
     requirements: {
       segments: { "1/6": 6 },
       codes: [
         { numerator: 1, denominator: 6 },
-        { numerator: 3, denominator: 6 }
+        { numerator: 4, denominator: 6 }
       ]
     }
   },
   {
-    title: "Make 1 whole using eighths. Put action code blocks at 2/8 and 4/8.",
+    title: "Make 1 whole using eighths. Put action code blocks at 2/8 and 6/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
         { numerator: 2, denominator: 8 },
-        { numerator: 4, denominator: 8 }
+        { numerator: 6, denominator: 8 }
       ]
     }
   },
@@ -173,6 +173,7 @@ const el = {
   axis: document.getElementById("axis"),
   progressLabel: document.getElementById("progressLabel"),
   progressValue: document.getElementById("progressValue"),
+  playgroundRunHint: document.getElementById("playgroundRunHint"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
   codePanelHeader: document.getElementById("codePanelHeader"),
@@ -181,7 +182,6 @@ const el = {
   liveMarkers: document.getElementById("liveMarkers"),
   lineHintBanner: document.getElementById("lineHintBanner"),
   quickCue: document.getElementById("quickCue"),
-  successToast: document.getElementById("successToast"),
   hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
   resetBtn: document.getElementById("resetBtn"),
@@ -205,7 +205,10 @@ const el = {
   unlockCodePreview: document.getElementById("unlockCodePreview"),
   unlockCodeName: document.getElementById("unlockCodeName"),
   dismissUnlockBtn: document.getElementById("dismissUnlockBtn"),
-  enterPlaygroundBtn: document.getElementById("enterPlaygroundBtn")
+  enterPlaygroundBtn: document.getElementById("enterPlaygroundBtn"),
+  restartConfirmModal: document.getElementById("restartConfirmModal"),
+  cancelRestartBtn: document.getElementById("cancelRestartBtn"),
+  confirmRestartBtn: document.getElementById("confirmRestartBtn")
 };
 
 function isPlaygroundMode() {
@@ -235,6 +238,14 @@ function saveProgress() {
         hasCompletedAllMissions: state.hasCompletedAllMissions
       })
     );
+  } catch {
+    // Ignore localStorage failures and continue with in-memory progress.
+  }
+}
+
+function clearSavedProgress() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
   } catch {
     // Ignore localStorage failures and continue with in-memory progress.
   }
@@ -341,21 +352,6 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10) {
     .join("");
 }
 
-function trackCodeStripesHTML(colors) {
-  const stripeSize = isEvoMode() ? 34 : 28;
-  const leadInWidth = isEvoMode() ? 22 : 0;
-  const leadIn = leadInWidth > 0
-    ? `<span class="track-code-lead" style="background:#000000;width:${leadInWidth}px;height:${stripeSize}px;border-radius:0"></span>`
-    : "";
-  const stripes = colors
-    .map(
-      (color) =>
-        `<span class="code-stripe" style="background:${color};width:${stripeSize}px;height:${stripeSize}px;border-radius:0"></span>`
-    )
-    .join("");
-  return `${leadIn}${stripes}`;
-}
-
 function modalCodeStripesHTML(colors) {
   const stripeSize = isEvoMode() ? 34 : 28;
   const leadInWidth = isEvoMode() ? 22 : 0;
@@ -372,6 +368,10 @@ function modalEndCodeColors() {
   return ["#00FF00", isEvoMode() ? OZOBOT_EVO_RED : OZOBOT_SCREEN_RED];
 }
 
+function setButtonLabel(button, icon, label) {
+  button.innerHTML = `<span class="btn-icon" aria-hidden="true">${icon}</span><span class="btn-label">${label}</span>`;
+}
+
 function setFeedback(type, message) {
   if (!message) {
     if (el.feedback) {
@@ -382,7 +382,6 @@ function setFeedback(type, message) {
   }
 
   if (type === "success") {
-    showSuccessToast(message);
     showQuickCue("success", message);
     if (el.feedback) {
       el.feedback.className = "feedback hidden";
@@ -396,17 +395,6 @@ function setFeedback(type, message) {
     el.feedback.className = `feedback ${type}`;
     el.feedback.textContent = message;
   }
-}
-
-function showSuccessToast(message) {
-  if (state.celebrationTimer) {
-    window.clearTimeout(state.celebrationTimer);
-  }
-  el.successToast.textContent = message;
-  el.successToast.classList.add("show");
-  state.celebrationTimer = window.setTimeout(() => {
-    el.successToast.classList.remove("show");
-  }, 2200);
 }
 
 function quickCueText(type, message) {
@@ -964,7 +952,7 @@ function openSuccessModal() {
     document.getElementById("successTitle").textContent = "Run Your Line";
     el.successModalText.textContent = "Run your Ozobot on this line. When you are ready to keep building, choose Back to Playground.";
     el.successModalSteps.innerHTML = "<li>Place Ozobot at the start of your line.</li><li>Watch it read your color codes.</li><li>Choose Back to Playground when you want to edit or build another line.</li>";
-    el.nextFromModalBtn.textContent = "Back to Playground";
+    setButtonLabel(el.nextFromModalBtn, "↩", "Back to Playground");
   } else {
     const celebrates = [
       "Perfect build! You nailed it.",
@@ -975,7 +963,7 @@ function openSuccessModal() {
     document.getElementById("successTitle").textContent = "Mission Complete";
     el.successModalText.textContent = "Great work. Run your Ozobot on your track now. When you are done, choose Next Problem.";
     el.successModalSteps.innerHTML = "<li>Place Ozobot at the start of your line.</li><li>Watch it read your color codes.</li><li>When finished, move to the next challenge.</li>";
-    el.nextFromModalBtn.textContent = "Run Complete - Next Problem";
+    setButtonLabel(el.nextFromModalBtn, "▶", "Run Complete - Next Problem");
   }
   el.successModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
@@ -1023,21 +1011,39 @@ function goToPlayground() {
   setFeedback("success", "Ozobot Playground is open. Build and run as many lines as you want.");
 }
 
+function returnToMissions() {
+  state.mode = "mission";
+  saveProgress();
+  resetBoard();
+  setFeedback("success", "Mission mode is open.");
+}
+
 function enterPlaygroundMode() {
   el.playgroundIntroModal.classList.add("hidden");
   document.body.style.overflow = "";
   goToPlayground();
 }
 
-function restartMissions() {
-  const shouldRestart = window.confirm("Restart all missions from Problem 1?");
-  if (!shouldRestart) return;
+function openRestartConfirmModal() {
+  el.restartConfirmModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
 
+function closeRestartConfirmModal() {
+  el.restartConfirmModal.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function restartMissions() {
+  closeRestartConfirmModal();
+  clearSavedProgress();
   state.mode = "mission";
   state.currentProblemIdx = 0;
   state.hasCompletedAllMissions = false;
   saveProgress();
   resetBoard();
+  setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
+  el.playgroundBtn.classList.add("hidden");
   setFeedback("success", "Missions restarted at Problem 1.");
 }
 
@@ -1045,6 +1051,7 @@ function closeAllModals() {
   el.successModal.classList.add("hidden");
   el.unlockModal.classList.add("hidden");
   el.playgroundIntroModal.classList.add("hidden");
+  el.restartConfirmModal.classList.add("hidden");
   document.body.style.overflow = "";
 }
 
@@ -1533,10 +1540,14 @@ function renderTrack() {
   state.placedCodes.forEach((placedCode) => {
     const chip = document.createElement("div");
     chip.className = "code-chip";
-    if (isEvoMode()) chip.classList.add("evo-code-chip");
     if (placedCode.isWrongPlacement) chip.classList.add("code-chip-wrong");
     chip.style.left = `${(placedCode.positionUnits / BASE_UNITS) * 100}%`;
-    chip.innerHTML = trackCodeStripesHTML(placedCode.colors);
+    chip.innerHTML = placedCode.colors
+      .map(
+        (color) =>
+          `<span class="code-stripe" style="background:${color};width:var(--ozobot-line-size);height:var(--ozobot-line-size);border-radius:0"></span>`
+      )
+      .join("");
 
     el.codesLayer.appendChild(chip);
   });
@@ -1547,7 +1558,6 @@ function renderTrack() {
 
 function render() {
   document.body.classList.toggle("playground-mode", isPlaygroundMode());
-  document.body.classList.toggle("evo-robot", isEvoMode());
   el.bitRobotBtn.classList.toggle("active", state.robotType === "bit");
   el.evoRobotBtn.classList.toggle("active", state.robotType === "evo");
   el.bitRobotBtn.setAttribute("aria-pressed", String(state.robotType === "bit"));
@@ -1558,8 +1568,11 @@ function render() {
     el.progressLabel.textContent = "Line Length";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = true;
-    el.checkBtn.textContent = "Run Line";
-    el.playgroundBtn.classList.add("hidden");
+    setButtonLabel(el.checkBtn, "▶", "Run Ozobot Line");
+    el.checkBtn.classList.add("playground-run-btn");
+    el.playgroundRunHint.classList.remove("hidden");
+    setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
+    el.playgroundBtn.classList.remove("hidden");
   } else {
     const problem = currentProblem();
     el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
@@ -1567,7 +1580,10 @@ function render() {
     el.progressLabel.textContent = "Total Progress";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = false;
-    el.checkBtn.textContent = "Check Answer";
+    setButtonLabel(el.checkBtn, "✓", "Check Answer");
+    el.checkBtn.classList.remove("playground-run-btn");
+    el.playgroundRunHint.classList.add("hidden");
+    setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
     if (state.hasCompletedAllMissions) {
       el.playgroundBtn.classList.remove("hidden");
     } else {
@@ -1586,14 +1602,25 @@ el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
 bindRobotToggle(el.bitRobotBtn, "bit");
 bindRobotToggle(el.evoRobotBtn, "evo");
-el.playgroundBtn.addEventListener("click", goToPlayground);
-el.restartMissionsBtn.addEventListener("click", restartMissions);
+el.playgroundBtn.addEventListener("click", () => {
+  if (isPlaygroundMode()) {
+    returnToMissions();
+    return;
+  }
+  goToPlayground();
+});
+el.restartMissionsBtn.addEventListener("click", openRestartConfirmModal);
 el.checkBtn.addEventListener("click", checkAnswer);
 el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
 el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
 el.enterPlaygroundBtn.addEventListener("click", enterPlaygroundMode);
+el.cancelRestartBtn.addEventListener("click", closeRestartConfirmModal);
+el.confirmRestartBtn.addEventListener("click", restartMissions);
 el.unlockModal.addEventListener("click", (event) => {
   if (event.target === el.unlockModal) closeUnlockModal();
+});
+el.restartConfirmModal.addEventListener("click", (event) => {
+  if (event.target === el.restartConfirmModal) closeRestartConfirmModal();
 });
 document.addEventListener("pointermove", (event) => {
   if (!dragState.code || dragState.pointerId !== event.pointerId) return;
@@ -1625,6 +1652,9 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape" && !el.playgroundIntroModal.classList.contains("hidden")) {
     enterPlaygroundMode();
+  }
+  if (event.key === "Escape" && !el.restartConfirmModal.classList.contains("hidden")) {
+    closeRestartConfirmModal();
   }
   if (event.key === "Escape" && dragState.code) {
     resetDragState();

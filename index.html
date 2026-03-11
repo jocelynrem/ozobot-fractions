@@ -40,11 +40,12 @@
                 <div id="progressLabel" class="label">Total Progress</div>
                 <div id="progressValue" class="value">0/1</div>
               </div>
+              <p id="playgroundRunHint" class="playground-run-hint hidden">When your line is ready, tap the big run button.</p>
               <div class="controls">
-                <button id="hintBtn" class="btn btn-light">Hint</button>
-                <button id="undoBtn" class="btn btn-light">Undo</button>
-                <button id="resetBtn" class="btn btn-light danger">Clear</button>
-                <button id="checkBtn" class="btn btn-primary">Check Answer</button>
+                <button id="hintBtn" class="btn btn-light"><span class="btn-icon" aria-hidden="true">💡</span><span class="btn-label">Hint</span></button>
+                <button id="undoBtn" class="btn btn-light"><span class="btn-icon" aria-hidden="true">↺</span><span class="btn-label">Undo</span></button>
+                <button id="resetBtn" class="btn btn-light danger"><span class="btn-icon" aria-hidden="true">✕</span><span class="btn-label">Clear</span></button>
+                <button id="checkBtn" class="btn btn-primary"><span class="btn-icon" aria-hidden="true">✓</span><span class="btn-label">Check Answer</span></button>
               </div>
             </section>
           </div>
@@ -88,7 +89,6 @@
       </main>
     </div>
     <div id="quickCue" class="quick-cue" role="status" aria-live="polite"></div>
-    <div id="successToast" class="success-toast" role="status" aria-live="polite"></div>
     <div
       id="successModal"
       class="modal hidden"
@@ -168,6 +168,30 @@
           <li>Run, clear, rebuild, and test as many lines as you like.</li>
         </ol>
         <button id="enterPlaygroundBtn" class="btn btn-primary">Enter Playground</button>
+      </div>
+    </div>
+    <div
+      id="restartConfirmModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="restartConfirmTitle"
+    >
+      <div class="modal-card restart-confirm-card">
+        <p class="modal-celebrate restart-confirm-eyebrow">Restart Missions</p>
+        <h2 id="restartConfirmTitle" class="restart-confirm-title">Start Over?</h2>
+        <p class="modal-text">
+          Restarting missions will:
+        </p>
+        <ul class="restart-confirm-list">
+          <li>send you back to Problem 1</li>
+          <li>clear your current mission progress</li>
+          <li>lock Playground until the missions are completed again</li>
+        </ul>
+        <div class="restart-confirm-actions">
+          <button id="cancelRestartBtn" class="btn btn-light" type="button">Keep Current Progress</button>
+          <button id="confirmRestartBtn" class="btn btn-primary" type="button">Restart Missions</button>
+        </div>
       </div>
     </div>
 

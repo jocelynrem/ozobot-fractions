@@ -221,6 +221,12 @@ body.playground-mode .btn-primary:hover {
   background: #9d174d;
 }
 
+body.playground-mode .playground-run-hint {
+  background: rgba(34, 211, 238, 0.16);
+  color: #cffafe;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.08);
+}
+
 body.playground-mode .mode-nav .btn-light {
   background: rgba(30, 41, 59, 0.96);
   color: #f8fafc;
@@ -546,17 +552,6 @@ body.playground-mode .garage-pad {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
 }
 
-.code-chip.evo-code-chip {
-  transform: translate(-50%, -68%);
-  box-shadow:
-    0 3px 8px rgba(15, 23, 42, 0.2),
-    0 0 0 1px rgba(15, 23, 42, 0.06);
-}
-
-.track-code-lead {
-  display: inline-block;
-}
-
 .code-drag-ghost {
   position: fixed;
   left: 0;
@@ -766,34 +761,6 @@ body.playground-mode .garage-pad {
   opacity: 1;
 }
 
-.success-toast {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  max-width: 380px;
-  background: #ecfdf5;
-  color: #166534;
-  border: 1px solid #86efac;
-  border-left: 6px solid #22c55e;
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 900;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-8px);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-  z-index: 1200;
-}
-
-.success-toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .quick-cue {
   position: fixed;
   left: 50%;
@@ -871,9 +838,21 @@ body.playground-mode .garage-pad {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: auto;
   padding-top: 10px;
+}
+
+.playground-run-hint {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
 }
 
 .mode-nav {
@@ -1010,6 +989,19 @@ body.playground-mode .robot-toggle-btn:hover {
     background-color 160ms ease,
     border-color 160ms ease;
   box-shadow: 0 2px 0 rgba(15, 23, 42, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.btn-label {
+  line-height: 1;
 }
 
 .btn-light {
@@ -1029,6 +1021,44 @@ body.playground-mode .robot-toggle-btn:hover {
 
 .btn-primary:hover {
   background: var(--primary-dark);
+}
+
+.playground-run-btn {
+  padding: 14px 22px;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow:
+    0 6px 0 rgba(15, 23, 42, 0.22),
+    0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.playground-run-btn .btn-icon {
+  font-size: 22px;
+}
+
+body.playground-mode .playground-run-btn {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 52%, #7c3aed 100%);
+  border: 1px solid #f472b6;
+  color: #ffffff;
+  box-shadow:
+    0 8px 0 rgba(15, 23, 42, 0.3),
+    0 0 0 4px rgba(244, 114, 182, 0.14),
+    0 0 24px rgba(236, 72, 153, 0.2);
+  animation: playground-run-pulse 1.7s ease-in-out infinite;
+}
+
+body.playground-mode .playground-run-btn:hover {
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 48%, #9333ea 100%);
+}
+
+@keyframes playground-run-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
 }
 
 .btn:hover:not(:disabled) {
@@ -1107,6 +1137,13 @@ body.playground-mode .robot-toggle-btn:hover {
   box-shadow:
     0 20px 52px rgba(2, 6, 23, 0.58),
     0 0 28px rgba(34, 211, 238, 0.14);
+}
+
+.restart-confirm-card {
+  width: min(92vw, 480px);
+  border: 3px solid #93c5fd;
+  background: linear-gradient(160deg, #ffffff 0%, #eff6ff 58%, #f8fafc 100%);
+  box-shadow: 0 18px 46px rgba(37, 99, 235, 0.14);
 }
 
 .playground-intro-card::before {
@@ -1224,6 +1261,10 @@ body.playground-mode .robot-toggle-btn:hover {
   color: #67e8f9;
 }
 
+.restart-confirm-eyebrow {
+  color: #2563eb;
+}
+
 .unlock-title {
   color: #6d28d9;
   font-size: 32px;
@@ -1238,6 +1279,13 @@ body.playground-mode .robot-toggle-btn:hover {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   animation: playground-burst 520ms ease-out;
+}
+
+.restart-confirm-title {
+  color: #1d4ed8;
+  font-size: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .playground-intro-card .modal-text,
@@ -1305,6 +1353,32 @@ body.playground-mode .robot-toggle-btn:hover {
   max-width: 100%;
   position: relative;
   z-index: 2;
+}
+
+.restart-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.restart-confirm-list {
+  margin: 0 auto 16px;
+  max-width: 360px;
+  padding-left: 20px;
+  text-align: left;
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  position: relative;
+  z-index: 2;
+}
+
+.restart-confirm-list li {
+  margin-bottom: 6px;
 }
 
 .modal-run-start-note {
