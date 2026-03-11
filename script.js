@@ -375,7 +375,16 @@ function setButtonLabel(button, icon, label) {
 }
 
 function emphasizeFractions(text) {
-  return text.replace(/(\d+\/\d+|1 whole)/g, '<span class="mission-fraction">$1</span>');
+  return text
+    .replace(/(1 whole)/gi, '<span class="mission-whole">$1</span>')
+    .replace(
+      /(\d+\/\d+)/gi,
+      '<span class="mission-number-fraction">$1</span>'
+    )
+    .replace(
+      /(halves|thirds|fourths|sixths|eighths)/gi,
+      '<span class="mission-fraction">$1</span>'
+    );
 }
 
 function formatMissionText(text) {
@@ -1588,13 +1597,13 @@ function render() {
   if (isPlaygroundMode()) {
     el.problemCounter.textContent = "Ozobot Playground";
     el.missionText.innerHTML = `
-      <span class="mission-line mission-line-primary">Build any <span class="mission-fraction">1 whole</span> fraction line you want.</span>
+      <span class="mission-line mission-line-primary">Build any <span class="mission-whole">1 whole</span> fraction line you want.</span>
       <span class="mission-line mission-line-secondary">Add any action codes you want, then run it as many times as you like.</span>
     `;
     el.progressLabel.textContent = "Line Length";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = true;
-    setButtonLabel(el.checkBtn, "▶", "Run Ozobot Line");
+    setButtonLabel(el.checkBtn, "▶", "See Ozobot Code");
     el.checkBtn.classList.add("playground-run-btn");
     el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
     el.missionRunHint.classList.add("hidden");
@@ -1608,7 +1617,7 @@ function render() {
     el.progressLabel.textContent = "Total Progress";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = false;
-    setButtonLabel(el.checkBtn, "▶", "Run Ozobot");
+    setButtonLabel(el.checkBtn, "▶", "See Ozobot Code");
     el.checkBtn.classList.add("playground-run-btn", "mission-run-btn");
     el.checkBtn.classList.toggle("mission-run-btn-ready", state.isCheckedCorrect);
     el.checkBtn.disabled = !state.isCheckedCorrect;
