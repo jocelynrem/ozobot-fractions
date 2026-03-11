@@ -368,8 +368,8 @@ body.playground-mode .check-details.fail {
 .garage-pad {
   position: relative;
   z-index: 2;
-  width: 220px;
-  height: 220px;
+  width: 136px;
+  height: 136px;
   border-radius: 50%;
   background: #ffffff;
   border: 0;
