@@ -30,7 +30,10 @@
           </div>
           <div class="mission-card">
             <p class="eyebrow">Mission Objective</p>
-            <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
+            <div class="mission-meta-row">
+              <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
+              <button id="restartMissionsBtn" class="restart-missions-btn" type="button">Restart Missions</button>
+            </div>
             <p id="missionText" class="mission"></p>
             <section class="actions-row">
               <div class="progress-card">
@@ -68,7 +71,6 @@
         </section>
         <section class="mode-nav">
           <button id="playgroundBtn" class="btn btn-light hidden">Go to Playground</button>
-          <button id="restartMissionsBtn" class="btn btn-light hidden">Restart Missions</button>
         </section>
         <section id="checkDetails" class="check-details hidden"></section>
         <section class="toolbar toolbar-inline">
