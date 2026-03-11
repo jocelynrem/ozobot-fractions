@@ -1266,6 +1266,38 @@ body.playground-mode .garage-pad {
   overflow: hidden;
 }
 
+.modal-run-start {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+
+.modal-run-start::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 16px solid #0f172a;
+  margin-right: 8px;
+}
+
+.modal-run-start-label {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .modal-run-line {
   position: absolute;
   left: 24px;
@@ -1292,6 +1324,10 @@ body.playground-mode .garage-pad {
   display: flex;
   gap: 0;
   transform: translateX(-50%);
+}
+
+.modal-run-code-end {
+  z-index: 1;
 }
 
 .modal-run-stripe {

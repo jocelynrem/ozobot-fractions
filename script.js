@@ -20,6 +20,7 @@ const OZOBOT_CODES = [
   { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
   { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
 ];
+const MODAL_END_CODE = { id: "game_over", name: "Game Over", colors: ["#00FF00", OZOBOT_SCREEN_RED] };
 
 const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
 
@@ -29,10 +30,10 @@ const CHALLENGES = [
     requirements: { segments: { "1/2": 2 }, codes: [{ numerator: 1, denominator: 2 }] }
   },
   {
-    title: "Make 1 whole with sixths. Put an action code block at 4/6.",
+    title: "Make 1 whole with sixths. Put an action code block at 2/6.",
     requirements: {
       segments: { "1/6": 6 },
-      codes: [{ numerator: 4, denominator: 6 }]
+      codes: [{ numerator: 2, denominator: 6 }]
     }
   },
   {
@@ -46,10 +47,10 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with thirds. Put an action code block at 2/3.",
+    title: "Make 1 whole with thirds. Put an action code block at 1/3.",
     requirements: {
       segments: { "1/3": 3 },
-      codes: [{ numerator: 2, denominator: 3 }]
+      codes: [{ numerator: 1, denominator: 3 }]
     }
   },
   {
@@ -60,54 +61,53 @@ const CHALLENGES = [
     }
   },
   {
-    title: "Make 1 whole with fourths. Put action code blocks at 1/4 and 3/4.",
+    title: "Make 1 whole with fourths. Put action code blocks at 1/4 and 2/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
         { numerator: 1, denominator: 4 },
-        { numerator: 3, denominator: 4 }
+        { numerator: 2, denominator: 4 }
       ]
     }
   },
   {
-    title: "Make 1 whole with sixths. Put action code blocks at 1/6 and 5/6.",
+    title: "Make 1 whole with sixths. Put action code blocks at 1/6 and 3/6.",
     requirements: {
       segments: { "1/6": 6 },
       codes: [
         { numerator: 1, denominator: 6 },
-        { numerator: 5, denominator: 6 }
+        { numerator: 3, denominator: 6 }
       ]
     }
   },
   {
-    title: "Make 1 whole with eighths. Put action code blocks at 4/8 and 6/8.",
+    title: "Make 1 whole with eighths. Put action code blocks at 2/8 and 4/8.",
     requirements: {
       segments: { "1/8": 8 },
       codes: [
-        { numerator: 4, denominator: 8 },
-        { numerator: 6, denominator: 8 }
+        { numerator: 2, denominator: 8 },
+        { numerator: 4, denominator: 8 }
       ]
     }
   },
   {
-    title: "Make 1 whole with thirds. Put action code blocks at 2/3 and 3/3.",
+    title: "Make 1 whole with thirds. Put action code blocks at 1/3 and 2/3.",
     requirements: {
       segments: { "1/3": 3 },
       codes: [
+        { numerator: 1, denominator: 3 },
         { numerator: 2, denominator: 3 },
-        { numerator: 3, denominator: 3 }
       ]
     }
   },
   {
-    title: "Final mission: make 1 whole with fourths. Put action code blocks at 1/4, 2/4, 3/4, and 4/4.",
+    title: "Final mission: make 1 whole with fourths. Put action code blocks at 1/4, 2/4, and 3/4.",
     requirements: {
       segments: { "1/4": 4 },
       codes: [
         { numerator: 1, denominator: 4 },
         { numerator: 2, denominator: 4 },
         { numerator: 3, denominator: 4 },
-        { numerator: 4, denominator: 4 }
       ]
     }
   }
@@ -860,6 +860,15 @@ function renderModalRunTrack() {
 
     el.modalRunCodes.appendChild(chip);
   });
+
+  const endChip = document.createElement("div");
+  endChip.className = "modal-run-code modal-run-code-end";
+  endChip.style.left = "100%";
+  endChip.style.transform = "translateX(-100%)";
+  endChip.innerHTML = MODAL_END_CODE.colors
+    .map((color) => `<span class="modal-run-stripe" style="background:${color}"></span>`)
+    .join("");
+  el.modalRunCodes.appendChild(endChip);
 }
 
 function handlePassedCheck() {
