@@ -45,7 +45,7 @@
                 <button id="hintBtn" class="btn btn-light"><span class="btn-icon" aria-hidden="true">💡</span><span class="btn-label">Hint</span></button>
                 <button id="undoBtn" class="btn btn-light"><span class="btn-icon" aria-hidden="true">↺</span><span class="btn-label">Undo</span></button>
                 <button id="resetBtn" class="btn btn-light danger"><span class="btn-icon" aria-hidden="true">✕</span><span class="btn-label">Clear</span></button>
-                <button id="checkBtn" class="btn btn-primary"><span class="btn-icon" aria-hidden="true">▶</span><span class="btn-label">See Ozobot Code</span></button>
+                <button id="checkBtn" class="btn btn-primary"><span class="btn-icon" aria-hidden="true">▶</span><span class="btn-label">Run Line</span></button>
               </div>
             </section>
             <section class="action-hints">
@@ -81,14 +81,22 @@
           </section>
         </section>
 
-        <section class="track-wrap">
+        <section id="trackWrap" class="track-wrap">
           <div id="lineHintBanner" class="line-hint-banner"></div>
+          <div id="trackStartMarker" class="track-start-marker" aria-label="Start Ozobot here">
+            <span class="track-start-arrow" aria-hidden="true"></span>
+            <span class="track-start-label">Start Ozobot here</span>
+          </div>
           <div class="track-bg"></div>
           <div id="segmentOverlay" class="segment-overlay"></div>
           <div id="codesLayer" class="codes-layer"></div>
           <div id="dragDropMarker" class="drag-drop-marker hidden" aria-hidden="true"></div>
           <div id="axis" class="axis"></div>
           <div id="liveMarkers" class="live-markers"></div>
+          <section id="missionAdvancePanel" class="mission-advance-panel hidden" aria-live="polite">
+            <p id="missionAdvanceText" class="mission-advance-text">Run your Ozobot on the line, then move to the next mission.</p>
+            <button id="nextMissionBtn" class="btn btn-primary mission-next-btn" type="button">Run Complete - Next Mission</button>
+          </section>
         </section>
       </main>
     </div>

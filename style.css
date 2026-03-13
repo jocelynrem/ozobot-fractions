@@ -482,7 +482,7 @@ body.playground-mode .mission-whole {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .check-details {
@@ -513,9 +513,26 @@ body.playground-mode .mission-whole {
 
 .track-wrap {
   position: relative;
-  min-height: 220px;
+  min-height: 250px;
   display: flex;
   align-items: center;
+  isolation: isolate;
+}
+
+.track-wrap::after {
+  content: '';
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 44%;
+  height: calc(var(--ozobot-line-size) + 28px);
+  border-radius: 18px;
+  transform: translateY(-50%) scaleX(0.12);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(191, 219, 254, 0.8) 48%, rgba(255, 255, 255, 0) 100%);
 }
 
 body.dragging-code .track-bg {
@@ -535,6 +552,52 @@ body.dragging-code .track-bg {
   pointer-events: none;
 }
 
+.track-start-marker {
+  position: absolute;
+  left: 36px;
+  top: calc(44% - 68px);
+  display: block;
+  z-index: 6;
+  opacity: 0;
+  transform: translate(-18%, 10px);
+  pointer-events: none;
+  transition:
+    opacity 360ms ease,
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-start-arrow {
+  position: absolute;
+  left: 0;
+  top: calc(68px + 1px);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 16px solid #0f172a;
+  filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.18));
+  transform: translate(-16px, -50%);
+}
+
+.track-start-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow:
+    0 8px 20px rgba(59, 130, 246, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .track-bg,
 .segment-overlay {
   position: absolute;
@@ -550,6 +613,11 @@ body.dragging-code .track-bg {
   border: 3px solid #0f172a;
   background: #ffffff;
   z-index: 1;
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    box-shadow 700ms ease,
+    transform 700ms ease;
 }
 
 body.playground-mode .garage-card {
@@ -583,6 +651,12 @@ body.playground-mode .garage-pad {
   justify-content: center;
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    box-shadow 700ms ease,
+    transform 700ms ease,
+    border-radius 700ms ease;
 }
 
 .overlay-segment-label {
@@ -590,6 +664,10 @@ body.playground-mode .garage-pad {
   font-weight: 900;
   color: #1e293b;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.92);
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease,
+    color 320ms ease;
 }
 
 .codes-layer {
@@ -636,6 +714,13 @@ body.playground-mode .garage-pad {
   border: 1px solid rgba(15, 23, 42, 0.32);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
+  transition:
+    transform 700ms ease,
+    border-color 700ms ease,
+    background 700ms ease,
+    box-shadow 700ms ease,
+    filter 700ms ease,
+    opacity 320ms ease;
 }
 
 .code-drag-ghost {
@@ -711,6 +796,9 @@ body.playground-mode .garage-pad {
   font-size: 11px;
   font-weight: 700;
   height: 24px;
+  transition:
+    opacity 360ms ease,
+    transform 480ms ease;
 }
 
 .axis-label {
@@ -729,6 +817,9 @@ body.playground-mode .garage-pad {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  transition:
+    opacity 360ms ease,
+    transform 480ms ease;
 }
 
 .live-marker {
@@ -967,6 +1058,55 @@ body.playground-mode .garage-pad {
     0 0 0 2px rgba(129, 140, 248, 0.08);
 }
 
+.mission-advance-panel {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: calc(44% + 26px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(219, 234, 254, 0.16) 100%);
+  box-shadow:
+    0 12px 26px rgba(37, 99, 235, 0.08);
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  pointer-events: none;
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mission-advance-text {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.mission-next-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-width: 280px;
+  animation: mission-next-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes mission-next-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
 .actions-row .controls {
   margin-left: auto;
 }
@@ -1177,6 +1317,124 @@ body.playground-mode .robot-toggle-btn:hover {
   box-shadow:
     0 5px 0 rgba(15, 23, 42, 0.12),
     0 0 0 3px rgba(203, 213, 225, 0.18);
+}
+
+.track-wrap.mission-track-ready .track-bg {
+  background: #000000;
+  border-color: #020617;
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.12),
+    0 0 22px rgba(59, 130, 246, 0.16);
+}
+
+.track-wrap.mission-track-ready .overlay-segment {
+  border-color: #000000 !important;
+  background: #000000 !important;
+  border-radius: 2px;
+  box-shadow: none !important;
+}
+
+.track-wrap.mission-track-ready .overlay-segment-label {
+  opacity: 0;
+  transform: translateY(8px) scale(0.82);
+}
+
+.track-wrap.mission-track-ready .code-chip {
+  transform: translate(-50%, -50%);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  filter: saturate(1.12);
+}
+
+.track-wrap.mission-track-ready .axis,
+.track-wrap.mission-track-ready .live-markers {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.track-wrap.mission-track-ready .track-start-marker {
+  opacity: 1;
+  transform: translate(-18%, 0);
+  transition-delay: 160ms;
+}
+
+.track-wrap.mission-track-ready .mission-advance-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  transition-delay: 220ms;
+}
+
+.track-wrap.mission-track-morphing::after {
+  opacity: 1;
+  animation: track-morph-sweep 1550ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.track-wrap.mission-track-morphing .track-bg {
+  animation: track-ready-bounce 1180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-wrap.mission-track-morphing .overlay-segment {
+  animation: track-segment-settle 1120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-wrap.mission-track-morphing .code-chip {
+  animation: code-chip-drop 1080ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes track-morph-sweep {
+  0% {
+    opacity: 0;
+    transform: translate(-34%, -50%) scaleX(0.2);
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(30%, -50%) scaleX(1);
+  }
+}
+
+@keyframes track-ready-bounce {
+  0% {
+    transform: translateY(-50%) scaleX(0.985);
+  }
+  45% {
+    transform: translateY(-50%) scaleX(1.012);
+  }
+  100% {
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+@keyframes track-segment-settle {
+  0% {
+    transform: scaleY(1) scaleX(1);
+  }
+  40% {
+    transform: scaleY(1.06) scaleX(1.01);
+  }
+  100% {
+    transform: scaleY(1) scaleX(1);
+  }
+}
+
+@keyframes code-chip-drop {
+  0% {
+    transform: translate(-50%, -112%);
+  }
+  55% {
+    transform: translate(-50%, -56%);
+  }
+  100% {
+    transform: translate(-50%, -50%);
+  }
 }
 
 @keyframes mission-run-pulse {
@@ -1984,6 +2242,25 @@ body.playground-mode .playground-run-btn:hover {
   .mode-nav {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .mission-advance-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .track-start-marker {
+    left: 24px;
+    top: calc(44% - 74px);
+  }
+
+  .track-start-arrow {
+    left: 0;
+  }
+
+  .mission-next-btn {
+    width: 100%;
+    min-width: 0;
   }
 
   .robot-picker {

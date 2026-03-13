@@ -142,6 +142,7 @@ const state = {
   placedCodes: [],
   history: [],
   isCheckedCorrect: false,
+  isMorphingTrack: false,
   celebrationTimer: null,
   cueTimer: null,
   showLineHints: false,
@@ -176,6 +177,8 @@ const el = {
   missionConfetti: document.getElementById("missionConfetti"),
   missionRunHint: document.getElementById("missionRunHint"),
   playgroundRunHint: document.getElementById("playgroundRunHint"),
+  missionAdvancePanel: document.getElementById("missionAdvancePanel"),
+  missionAdvanceText: document.getElementById("missionAdvanceText"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
   codePanelHeader: document.getElementById("codePanelHeader"),
@@ -183,6 +186,7 @@ const el = {
   codeUnlockText: document.getElementById("codeUnlockText"),
   liveMarkers: document.getElementById("liveMarkers"),
   lineHintBanner: document.getElementById("lineHintBanner"),
+  trackWrap: document.getElementById("trackWrap"),
   quickCue: document.getElementById("quickCue"),
   hintBtn: document.getElementById("hintBtn"),
   undoBtn: document.getElementById("undoBtn"),
@@ -199,6 +203,7 @@ const el = {
   modalCelebrateText: document.getElementById("modalCelebrateText"),
   modalRunCodes: document.getElementById("modalRunCodes"),
   nextFromModalBtn: document.getElementById("nextFromModalBtn"),
+  nextMissionBtn: document.getElementById("nextMissionBtn"),
   playgroundIntroModal: document.getElementById("playgroundIntroModal"),
   playgroundIntroConfetti: document.getElementById("playgroundIntroConfetti"),
   unlockModal: document.getElementById("unlockModal"),
@@ -525,6 +530,30 @@ function triggerUnlockCelebration(newlyUnlockedIndex) {
 
 function clearCheckProgress() {
   state.isCheckedCorrect = false;
+  state.isMorphingTrack = false;
+  if (state.celebrationTimer) {
+    window.clearTimeout(state.celebrationTimer);
+    state.celebrationTimer = null;
+  }
+}
+
+function triggerTrackMorphAnimation() {
+  state.isMorphingTrack = false;
+  if (state.celebrationTimer) {
+    window.clearTimeout(state.celebrationTimer);
+    state.celebrationTimer = null;
+  }
+  if (el.trackWrap) {
+    el.trackWrap.classList.remove("mission-track-morphing");
+    void el.trackWrap.offsetWidth;
+  }
+  state.isMorphingTrack = true;
+  render();
+  state.celebrationTimer = window.setTimeout(() => {
+    state.isMorphingTrack = false;
+    state.celebrationTimer = null;
+    render();
+  }, 1900);
 }
 
 function resetDragState() {
@@ -1163,7 +1192,7 @@ function handlePassedCheck() {
   }
   setCheckDetails([], false);
   celebrateMissionReady();
-  render();
+  triggerTrackMorphAnimation();
 }
 
 function maybeAutoCheckAnswer() {
@@ -1189,7 +1218,8 @@ function checkAnswer() {
   }
 
   if (state.isCheckedCorrect) {
-    openSuccessModal();
+    triggerTrackMorphAnimation();
+    setFeedback("success", "Run your Ozobot on the line, then tap Next Mission.");
     return;
   }
   setFeedback("error", "Finish building the correct whole line first.");
@@ -1340,6 +1370,7 @@ function renderCodeButtons() {
 function renderLiveMarkers() {
   el.liveMarkers.innerHTML = "";
   el.lineHintBanner.innerHTML = "";
+  if (!isPlaygroundMode() && state.isCheckedCorrect) return;
   const removeSegmentByUid = (segmentUid) => {
     const idx = state.placedSegments.findIndex((seg) => seg.uid === segmentUid);
     if (idx === -1) return;
@@ -1589,11 +1620,15 @@ function renderTrack() {
 }
 
 function render() {
+  const missionRunReady = !isPlaygroundMode() && state.isCheckedCorrect;
+  const isLastMission = state.currentProblemIdx >= CHALLENGES.length - 1;
   document.body.classList.toggle("playground-mode", isPlaygroundMode());
   el.bitRobotBtn.classList.toggle("active", state.robotType === "bit");
   el.evoRobotBtn.classList.toggle("active", state.robotType === "evo");
   el.bitRobotBtn.setAttribute("aria-pressed", String(state.robotType === "bit"));
   el.evoRobotBtn.setAttribute("aria-pressed", String(state.robotType === "evo"));
+  el.trackWrap.classList.toggle("mission-track-ready", missionRunReady);
+  el.trackWrap.classList.toggle("mission-track-morphing", missionRunReady && state.isMorphingTrack);
   if (isPlaygroundMode()) {
     el.problemCounter.textContent = "Ozobot Playground";
     el.missionText.innerHTML = `
@@ -1603,11 +1638,13 @@ function render() {
     el.progressLabel.textContent = "Line Length";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = true;
-    setButtonLabel(el.checkBtn, "▶", "See Ozobot Code");
+    setButtonLabel(el.checkBtn, "▶", "Run Line");
     el.checkBtn.classList.add("playground-run-btn");
     el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
+    el.checkBtn.classList.remove("hidden");
     el.missionRunHint.classList.add("hidden");
     el.playgroundRunHint.classList.remove("hidden");
+    el.missionAdvancePanel.classList.add("hidden");
     setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
     el.playgroundBtn.classList.remove("hidden");
   } else {
@@ -1617,12 +1654,21 @@ function render() {
     el.progressLabel.textContent = "Total Progress";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
     el.hintBtn.disabled = false;
-    setButtonLabel(el.checkBtn, "▶", "See Ozobot Code");
+    setButtonLabel(el.checkBtn, "▶", "Run Line");
     el.checkBtn.classList.add("playground-run-btn", "mission-run-btn");
     el.checkBtn.classList.toggle("mission-run-btn-ready", state.isCheckedCorrect);
-    el.checkBtn.disabled = !state.isCheckedCorrect;
-    el.missionRunHint.classList.toggle("hidden", !state.isCheckedCorrect);
+    el.checkBtn.disabled = true;
+    el.checkBtn.classList.add("hidden");
+    el.missionRunHint.textContent = missionRunReady
+      ? "Fraction line transformed into the Ozobot path. Run Ozobot, then tap Next Mission."
+      : "";
+    el.missionRunHint.classList.toggle("hidden", !missionRunReady);
     el.playgroundRunHint.classList.add("hidden");
+    el.missionAdvanceText.textContent = isLastMission
+      ? "Run your Ozobot on the line, then finish the mission set."
+      : "Run your Ozobot on the line, then move to the next mission.";
+    el.nextMissionBtn.textContent = isLastMission ? "Run Complete - Finish Missions" : "Run Complete - Next Mission";
+    el.missionAdvancePanel.classList.toggle("hidden", !missionRunReady);
     setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
     if (state.hasCompletedAllMissions) {
       el.playgroundBtn.classList.remove("hidden");
@@ -1657,6 +1703,7 @@ el.playgroundBtn.addEventListener("click", () => {
 el.restartMissionsBtn.addEventListener("click", openRestartConfirmModal);
 el.checkBtn.addEventListener("click", checkAnswer);
 el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
+el.nextMissionBtn.addEventListener("click", () => nextProblem(true));
 el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
 el.enterPlaygroundBtn.addEventListener("click", enterPlaygroundMode);
 el.cancelRestartBtn.addEventListener("click", closeRestartConfirmModal);
