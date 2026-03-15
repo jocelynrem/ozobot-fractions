@@ -3,8 +3,2314 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Build fraction lines, place Ozobot color codes, and solve hands-on math missions in the Ozobot Fractions Lab."
+    />
     <title>Ozobot Fractions Lab</title>
-    <link rel="stylesheet" href="style.css" />
+      <style>
+:root {
+  --bg: #f3f5fa;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --danger: #e11d48;
+  --border: #e2e8f0;
+  --ozobot-line-size: 28px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 45%, #e2e8f0 100%);
+  color: var(--text);
+  transition: background 260ms ease;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
+.toolbar,
+.workspace {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+  transition:
+    background 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.mission-row {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.mission-card {
+  flex: 1 1 50%;
+  border: 2px solid #c7d2fe;
+  background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  min-height: 264px;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease,
+    transform 260ms ease;
+}
+
+.mission-card > *:not(.mission-confetti) {
+  position: relative;
+  z-index: 1;
+}
+
+body.playground-mode {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(34, 211, 238, 0.16),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(244, 114, 182, 0.14),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at bottom center,
+      rgba(168, 85, 247, 0.12),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #050816 0%, #0b1120 42%, #111827 100%);
+}
+
+body.playground-mode .workspace {
+  border-color: #22d3ee;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 15, 32, 0.96) 0%,
+    rgba(13, 20, 38, 0.96) 100%
+  );
+  box-shadow:
+    0 18px 42px rgba(2, 6, 23, 0.56),
+    0 0 0 1px rgba(34, 211, 238, 0.08);
+}
+
+body.playground-mode .mission-card {
+  border-color: #22d3ee;
+  background:
+    radial-gradient(
+      circle at 12% 12%,
+      rgba(34, 211, 238, 0.16),
+      transparent 22%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(10, 17, 36, 0.98) 0%,
+      rgba(17, 24, 39, 0.98) 58%,
+      rgba(22, 28, 45, 0.98) 100%
+    );
+  box-shadow:
+    0 14px 30px rgba(2, 6, 23, 0.46),
+    0 0 22px rgba(34, 211, 238, 0.08);
+  transform: translateY(-2px);
+}
+
+body.playground-mode .problem-counter {
+  background: rgba(34, 211, 238, 0.14);
+  color: #a5f3fc;
+  border-color: #22d3ee;
+}
+
+body.playground-mode .mission {
+  color: #f8fafc;
+}
+
+body.playground-mode .restart-missions-btn {
+  color: #cbd5e1;
+  border-color: #64748b;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+body.playground-mode .restart-missions-btn:hover {
+  color: #f8fafc;
+  border-color: #94a3b8;
+  background: rgba(15, 23, 42, 0.82);
+}
+
+body.playground-mode .eyebrow,
+body.playground-mode .panel h2,
+body.playground-mode .code-panel-title,
+body.playground-mode .pie-label,
+body.playground-mode .unlock-note {
+  color: #cbd5e1;
+}
+
+body.playground-mode .progress-card {
+  border-color: #f472b6;
+  background: linear-gradient(
+    160deg,
+    rgba(24, 24, 41, 0.96) 0%,
+    rgba(30, 27, 75, 0.96) 100%
+  );
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.42),
+    0 0 20px rgba(244, 114, 182, 0.1);
+}
+
+body.playground-mode .progress-card .label {
+  color: #e9d5ff;
+}
+
+body.playground-mode .progress-card .value {
+  color: #f9a8d4;
+}
+
+body.playground-mode .toolbar {
+  border-color: #a855f7;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 18, 33, 0.98) 0%,
+    rgba(16, 23, 42, 0.98) 100%
+  );
+}
+
+body.playground-mode .pie-card {
+  border-color: #22d3ee;
+  background: linear-gradient(
+    180deg,
+    rgba(9, 15, 28, 0.98) 0%,
+    rgba(15, 23, 42, 0.98) 100%
+  );
+}
+
+body.playground-mode .track-bg {
+  border-color: #e2e8f0;
+  background: #ffffff;
+}
+
+body.playground-mode .playground-segment {
+  backdrop-filter: saturate(1.2);
+}
+
+body.playground-mode .playground-segment .overlay-segment-label {
+  color: #ffffff;
+  text-shadow:
+    0 0 10px rgba(15, 23, 42, 0.7),
+    0 1px 0 rgba(15, 23, 42, 0.7);
+}
+
+body.playground-mode .btn-light {
+  background: #111827;
+  color: #f8fafc;
+  border-color: #64748b;
+}
+
+body.playground-mode .btn-primary {
+  background: #be185d;
+  color: #ffffff;
+}
+
+body.playground-mode .btn-primary:hover {
+  background: #9d174d;
+}
+
+body.playground-mode .playground-run-hint {
+  background: rgba(34, 211, 238, 0.16);
+  color: #cffafe;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.08);
+}
+
+body.playground-mode .mode-nav .btn-light {
+  background: rgba(30, 41, 59, 0.96);
+  color: #f8fafc;
+  border-color: #22d3ee;
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.42),
+    0 0 16px rgba(34, 211, 238, 0.1);
+}
+
+body.playground-mode .check-details {
+  background: rgba(15, 23, 42, 0.96);
+  color: #e2e8f0;
+  border-color: #475569;
+  border-left-color: #22d3ee;
+}
+
+body.playground-mode .check-details.pass {
+  background: rgba(6, 78, 59, 0.92);
+  border-color: #34d399;
+  border-left-color: #6ee7b7;
+  color: #ecfdf5;
+}
+
+body.playground-mode .check-details.fail {
+  background: rgba(69, 26, 3, 0.92);
+  border-color: #fb923c;
+  border-left-color: #fdba74;
+  color: #fff7ed;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 900;
+  color: #4338ca;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mission {
+  margin: 10px 0 0;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #1e1b4b;
+  min-height: 88px;
+}
+
+.mission-line {
+  display: block;
+}
+
+.mission-line + .mission-line {
+  margin-top: 10px;
+}
+
+.mission-line-primary {
+  color: #1e1b4b;
+}
+
+.mission-line-secondary {
+  color: #3730a3;
+}
+
+.mission-fraction {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.16);
+  color: #7e22ce;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.22);
+}
+
+.mission-number-fraction {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.22);
+}
+
+.mission-whole {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.22);
+}
+
+body.playground-mode .mission-line-primary {
+  color: #f8fafc;
+}
+
+body.playground-mode .mission-line-secondary {
+  color: #c4b5fd;
+}
+
+body.playground-mode .mission-fraction {
+  background: rgba(168, 85, 247, 0.24);
+  color: #f3e8ff;
+  box-shadow:
+    inset 0 0 0 1px rgba(196, 181, 253, 0.28),
+    0 0 18px rgba(168, 85, 247, 0.1);
+}
+
+body.playground-mode .mission-number-fraction {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fef3c7;
+  box-shadow:
+    inset 0 0 0 1px rgba(252, 211, 77, 0.28),
+    0 0 18px rgba(245, 158, 11, 0.1);
+}
+
+body.playground-mode .mission-whole {
+  background: rgba(59, 130, 246, 0.24);
+  color: #dbeafe;
+  box-shadow:
+    inset 0 0 0 1px rgba(96, 165, 250, 0.3),
+    0 0 18px rgba(59, 130, 246, 0.12);
+}
+
+.mission-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 30px;
+}
+
+.restart-missions-btn {
+  border: 1px solid #cbd5e1;
+  background: rgba(255, 255, 255, 0.55);
+  color: #475569;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.86;
+  transition: all 180ms ease;
+}
+
+.restart-missions-btn:hover {
+  opacity: 1;
+  color: #334155;
+  border-color: #94a3b8;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.inline-code-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+.inline-code-image {
+  display: inline-flex;
+  gap: 0;
+}
+
+.problem-counter {
+  margin: 8px 0 0;
+  display: inline-block;
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pie-card {
+  width: 260px;
+  flex: 0 0 260px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.garage-card {
+  width: 260px;
+  flex: 0 0 260px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 264px;
+  background: #374151;
+}
+
+.garage-eyebrow {
+  color: #ffffff;
+}
+
+.garage-pad {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+#pieChart {
+  width: 220px;
+  height: 220px;
+}
+
+.pie-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.feedback {
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.feedback.success {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.feedback.error {
+  color: #9f1239;
+  background: #ffe4e6;
+  border: 1px solid #fecdd3;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.check-details {
+  border: 2px solid #cbd5e1;
+  border-left: 6px solid #94a3b8;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+}
+
+.check-details.pass {
+  border-color: #86efac;
+  border-left-color: #22c55e;
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.check-details.fail {
+  border-color: #cbd5e1;
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+  color: #334155;
+}
+
+.track-wrap {
+  position: relative;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  isolation: isolate;
+}
+
+.track-wrap::after {
+  content: '';
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 44%;
+  height: calc(var(--ozobot-line-size) + 28px);
+  border-radius: 18px;
+  transform: translateY(-50%) scaleX(0.12);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(191, 219, 254, 0.8) 48%, rgba(255, 255, 255, 0) 100%);
+}
+
+body.dragging-code .track-bg {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+}
+
+.line-hint-banner {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 6px;
+  min-height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.track-start-marker {
+  position: absolute;
+  left: 36px;
+  top: calc(44% - 68px);
+  display: block;
+  z-index: 6;
+  opacity: 0;
+  transform: translate(-18%, 10px);
+  pointer-events: none;
+  transition:
+    opacity 360ms ease,
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-start-arrow {
+  position: absolute;
+  left: 0;
+  top: calc(68px + 1px);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 16px solid #0f172a;
+  filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.18));
+  transform: translate(-16px, -50%);
+}
+
+.track-start-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow:
+    0 8px 20px rgba(59, 130, 246, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.track-bg,
+.segment-overlay {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  height: var(--ozobot-line-size);
+  border-radius: 10px;
+  top: 44%;
+  transform: translateY(-50%);
+}
+
+.track-bg {
+  border: 3px solid #0f172a;
+  background: #ffffff;
+  z-index: 1;
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    box-shadow 700ms ease,
+    transform 700ms ease;
+}
+
+body.playground-mode .garage-card {
+  border-color: #22d3ee;
+  background: linear-gradient(180deg, rgba(30, 64, 175, 0.95) 0%, rgba(14, 116, 144, 0.95) 100%);
+  box-shadow:
+    0 14px 30px rgba(2, 6, 23, 0.46),
+    0 0 22px rgba(34, 211, 238, 0.12);
+}
+
+body.playground-mode .garage-eyebrow {
+  color: #f8fafc;
+}
+
+body.playground-mode .garage-pad {
+  background: #ffffff;
+}
+
+.segment-overlay {
+  z-index: 2;
+}
+
+.overlay-segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 2px solid;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  transition:
+    background 700ms ease,
+    border-color 700ms ease,
+    box-shadow 700ms ease,
+    transform 700ms ease,
+    border-radius 700ms ease;
+}
+
+.overlay-segment-label {
+  font-size: 10px;
+  font-weight: 900;
+  color: #1e293b;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.92);
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease,
+    color 320ms ease;
+}
+
+.codes-layer {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 44%;
+  transform: translateY(-50%);
+  height: var(--ozobot-line-size);
+  z-index: 4;
+}
+
+.drag-drop-marker {
+  position: absolute;
+  left: 36px;
+  width: calc(100% - 72px);
+  top: 44%;
+  transform: translateY(-50%);
+  height: var(--ozobot-line-size);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.drag-drop-marker::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--drop-left, 0%);
+  width: calc(var(--ozobot-line-size) + 8px);
+  height: calc(var(--ozobot-line-size) + 8px);
+  border-radius: 10px;
+  border: 3px dashed #2563eb;
+  background: rgba(219, 234, 254, 0.72);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.18);
+  transform: translate(-50%, -50%);
+}
+
+.code-chip {
+  position: absolute;
+  transform: translate(-50%, -112%);
+  top: 50%;
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(15, 23, 42, 0.32);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
+  transition:
+    transform 700ms ease,
+    border-color 700ms ease,
+    background 700ms ease,
+    box-shadow 700ms ease,
+    filter 700ms ease,
+    opacity 320ms ease;
+}
+
+.code-drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 2px solid #2563eb;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 14px 24px rgba(15, 23, 42, 0.18),
+    0 0 0 3px rgba(147, 197, 253, 0.18);
+  pointer-events: none;
+  z-index: 1400;
+}
+
+.code-drag-ghost-stripes {
+  display: flex;
+  gap: 0;
+}
+
+.code-drag-ghost-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: #1e3a8a;
+}
+
+.code-chip-wrong {
+  border-color: #f59e0b;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.34);
+  animation: wrong-chip-wiggle 460ms ease-in-out;
+}
+
+@keyframes wrong-chip-wiggle {
+  0% {
+    transform: translate(-50%, -112%) rotate(0deg);
+  }
+  20% {
+    transform: translate(-50%, -112%) rotate(-8deg);
+  }
+  40% {
+    transform: translate(-50%, -112%) rotate(8deg);
+  }
+  60% {
+    transform: translate(-50%, -112%) rotate(-6deg);
+  }
+  80% {
+    transform: translate(-50%, -112%) rotate(6deg);
+  }
+  100% {
+    transform: translate(-50%, -112%) rotate(0deg);
+  }
+}
+
+.code-stripe {
+  width: 14px;
+  height: 24px;
+  border-radius: 0;
+}
+
+.axis {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: calc(44% + 26px);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  height: 24px;
+  transition:
+    opacity 360ms ease,
+    transform 480ms ease;
+}
+
+.axis-label {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.live-markers {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: calc(44% + 52px);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    opacity 360ms ease,
+    transform 480ms ease;
+}
+
+.live-marker {
+  position: absolute;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+}
+
+.live-hint {
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.live-hint.warning {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.live-marker.boundary {
+  top: 0;
+}
+
+.live-marker.code {
+  top: 20px;
+}
+
+.live-marker.matched {
+  color: #166534;
+  border-color: #86efac;
+  background: #f0fdf4;
+  min-width: 22px;
+  height: 22px;
+  font-size: 13px;
+  box-shadow:
+    0 0 0 2px rgba(34, 197, 94, 0.18),
+    0 3px 10px rgba(22, 101, 52, 0.2);
+  animation: matched-burst 450ms ease-out;
+}
+
+.live-marker.pending {
+  color: #64748b;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.live-marker.pending.hint-focus {
+  color: #1d4ed8;
+  border-color: #60a5fa;
+  background: #eff6ff;
+  min-width: 24px;
+  height: 24px;
+  font-size: 14px;
+  box-shadow:
+    0 0 0 3px rgba(96, 165, 250, 0.24),
+    0 4px 12px rgba(29, 78, 216, 0.26);
+  animation: hint-pulse 800ms ease-in-out infinite;
+}
+
+.live-marker.wrong {
+  color: #b45309;
+  border-color: #fcd34d;
+  background: #fffbeb;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22);
+  animation: wrong-marker-pop 360ms ease-out;
+  cursor: pointer;
+}
+
+.live-marker.wrong:hover {
+  transform: translateX(-50%) scale(1.08);
+}
+
+.live-marker.has-tooltip {
+  position: absolute;
+}
+
+.live-marker.has-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  width: max-content;
+  max-width: 230px;
+  white-space: normal;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+  z-index: 8;
+}
+
+.live-marker.has-tooltip:hover::after {
+  opacity: 1;
+}
+
+.quick-cue {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translate(-50%, 10px);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 14px;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px 14px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+  z-index: 1250;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.quick-cue.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.quick-cue.error {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.quick-cue.success {
+  border-color: #86efac;
+  background: #ecfdf5;
+  color: #166534;
+}
+
+@keyframes wrong-marker-pop {
+  0% {
+    transform: translateX(-50%) scale(0.75);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes matched-burst {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(34, 197, 94, 0.45),
+      0 1px 4px rgba(22, 101, 52, 0.15);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(34, 197, 94, 0.18),
+      0 3px 10px rgba(22, 101, 52, 0.2);
+  }
+}
+
+@keyframes hint-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+.actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.action-hints {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  min-height: 44px;
+}
+
+.mission-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.playground-run-hint {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.mission-run-hint {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%);
+  color: #4338ca;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 6px 14px rgba(99, 102, 241, 0.12),
+    0 0 0 2px rgba(129, 140, 248, 0.08);
+}
+
+.mission-advance-panel {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: calc(44% + 26px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(219, 234, 254, 0.16) 100%);
+  box-shadow:
+    0 12px 26px rgba(37, 99, 235, 0.08);
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  pointer-events: none;
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mission-advance-text {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.mission-next-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-width: 280px;
+  animation: mission-next-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes mission-next-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.actions-row .controls {
+  margin-left: auto;
+}
+
+.mode-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -6px;
+}
+
+.robot-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.robot-picker-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.robot-toggle-btn {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.robot-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}
+
+.robot-toggle-btn:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.robot-toggle-btn.active {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  box-shadow: inset 0 -2px 0 rgba(29, 78, 216, 0.16);
+}
+
+body.playground-mode .robot-picker {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: #22d3ee;
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.42),
+    0 0 14px rgba(34, 211, 238, 0.08);
+}
+
+body.playground-mode .robot-picker-label {
+  color: #a5f3fc;
+}
+
+body.playground-mode .robot-toggle-btn {
+  background: #111827;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+body.playground-mode .robot-toggle-btn.active {
+  background: rgba(34, 211, 238, 0.18);
+  border-color: #22d3ee;
+  color: #ecfeff;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.14);
+}
+
+body.playground-mode .robot-toggle-btn:hover {
+  box-shadow:
+    0 4px 10px rgba(2, 6, 23, 0.42),
+    0 0 12px rgba(34, 211, 238, 0.1);
+}
+
+.progress-card {
+  border: 2px solid #93c5fd;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(160deg, #ffffff 0%, #e0f2fe 100%);
+  box-shadow: 0 6px 14px rgba(14, 116, 144, 0.14);
+}
+
+.progress-card .label {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.progress-card .value {
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.btn-label {
+  line-height: 1;
+}
+
+.btn-light {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-light.danger:hover {
+  color: #9f1239;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.playground-run-btn {
+  padding: 14px 22px;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow:
+    0 6px 0 rgba(15, 23, 42, 0.22),
+    0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.playground-run-btn .btn-icon {
+  font-size: 22px;
+}
+
+.mission-run-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 52%, #3b82f6 100%);
+  border: 1px solid #818cf8;
+  color: #ffffff;
+  box-shadow:
+    0 8px 0 rgba(15, 23, 42, 0.24),
+    0 0 0 4px rgba(129, 140, 248, 0.12);
+}
+
+.mission-run-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 45%, #2563eb 100%);
+}
+
+.mission-run-btn-ready {
+  animation: mission-run-pulse 1.5s ease-in-out infinite;
+}
+
+.mission-run-btn:disabled {
+  opacity: 1;
+  background: linear-gradient(135deg, #cbd5e1 0%, #c7d2fe 50%, #dbeafe 100%);
+  border-color: #cbd5e1;
+  color: #64748b;
+  box-shadow:
+    0 5px 0 rgba(15, 23, 42, 0.12),
+    0 0 0 3px rgba(203, 213, 225, 0.18);
+}
+
+.track-wrap.mission-track-ready .track-bg {
+  background: #000000;
+  border-color: #020617;
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.12),
+    0 0 22px rgba(59, 130, 246, 0.16);
+}
+
+.track-wrap.mission-track-ready .overlay-segment {
+  border-color: #000000 !important;
+  background: #000000 !important;
+  border-radius: 2px;
+  box-shadow: none !important;
+}
+
+.track-wrap.mission-track-ready .overlay-segment-label {
+  opacity: 0;
+  transform: translateY(8px) scale(0.82);
+}
+
+.track-wrap.mission-track-ready .code-chip {
+  transform: translate(-50%, -50%);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  filter: saturate(1.12);
+}
+
+.track-wrap.mission-track-ready .axis,
+.track-wrap.mission-track-ready .live-markers {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.track-wrap.mission-track-ready .track-start-marker {
+  opacity: 1;
+  transform: translate(-18%, 0);
+  transition-delay: 160ms;
+}
+
+.track-wrap.mission-track-ready .mission-advance-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  transition-delay: 220ms;
+}
+
+.track-wrap.mission-track-morphing::after {
+  opacity: 1;
+  animation: track-morph-sweep 1550ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.track-wrap.mission-track-morphing .track-bg {
+  animation: track-ready-bounce 1180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-wrap.mission-track-morphing .overlay-segment {
+  animation: track-segment-settle 1120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-wrap.mission-track-morphing .code-chip {
+  animation: code-chip-drop 1080ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes track-morph-sweep {
+  0% {
+    opacity: 0;
+    transform: translate(-34%, -50%) scaleX(0.2);
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(30%, -50%) scaleX(1);
+  }
+}
+
+@keyframes track-ready-bounce {
+  0% {
+    transform: translateY(-50%) scaleX(0.985);
+  }
+  45% {
+    transform: translateY(-50%) scaleX(1.012);
+  }
+  100% {
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+@keyframes track-segment-settle {
+  0% {
+    transform: scaleY(1) scaleX(1);
+  }
+  40% {
+    transform: scaleY(1.06) scaleX(1.01);
+  }
+  100% {
+    transform: scaleY(1) scaleX(1);
+  }
+}
+
+@keyframes code-chip-drop {
+  0% {
+    transform: translate(-50%, -112%);
+  }
+  55% {
+    transform: translate(-50%, -56%);
+  }
+  100% {
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes mission-run-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 8px 0 rgba(15, 23, 42, 0.24),
+      0 0 0 4px rgba(129, 140, 248, 0.12);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow:
+      0 8px 0 rgba(15, 23, 42, 0.24),
+      0 0 0 6px rgba(99, 102, 241, 0.18),
+      0 0 24px rgba(59, 130, 246, 0.18);
+  }
+}
+
+.mission-card .controls .btn-light {
+  background: linear-gradient(145deg, #ffffff 0%, #eef2ff 100%);
+  border-color: #c7d2fe;
+  box-shadow:
+    0 3px 0 rgba(15, 23, 42, 0.14),
+    0 0 0 2px rgba(199, 210, 254, 0.08);
+}
+
+body.playground-mode .mission-card .controls .btn-light {
+  background: linear-gradient(145deg, #111827 0%, #1f2937 100%);
+  color: #f8fafc;
+  border-color: #475569;
+  box-shadow:
+    0 3px 0 rgba(2, 6, 23, 0.24),
+    0 0 0 2px rgba(34, 211, 238, 0.08);
+}
+
+body.playground-mode .playground-run-btn {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 52%, #7c3aed 100%);
+  border: 1px solid #f472b6;
+  color: #ffffff;
+  box-shadow:
+    0 8px 0 rgba(15, 23, 42, 0.3),
+    0 0 0 4px rgba(244, 114, 182, 0.14),
+    0 0 24px rgba(236, 72, 153, 0.2);
+  animation: playground-run-pulse 1.7s ease-in-out infinite;
+}
+
+body.playground-mode .playground-run-btn:hover {
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 48%, #9333ea 100%);
+}
+
+@keyframes playground-run-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 rgba(15, 23, 42, 0.2);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.2);
+}
+
+.btn:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-card {
+  width: min(96vw, 860px);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 18px;
+  padding: 18px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  text-align: center;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.success-card {
+  border: 3px solid #60a5fa;
+  background: #ffffff;
+  box-shadow: 0 18px 46px rgba(30, 64, 175, 0.24);
+}
+
+.unlock-card {
+  width: min(92vw, 560px);
+  border: 3px solid #a78bfa;
+  background: linear-gradient(160deg, #ffffff 0%, #faf5ff 52%, #ede9fe 100%);
+  box-shadow: 0 18px 46px rgba(109, 40, 217, 0.2);
+}
+
+.playground-intro-card {
+  width: min(92vw, 620px);
+  border: 3px solid #22d3ee;
+  background:
+    radial-gradient(
+      circle at 12% 14%,
+      rgba(34, 211, 238, 0.18),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 86% 16%,
+      rgba(244, 114, 182, 0.12),
+      transparent 22%
+    ),
+    linear-gradient(160deg, #0b1120 0%, #111827 50%, #1e1b4b 100%);
+  box-shadow:
+    0 20px 52px rgba(2, 6, 23, 0.58),
+    0 0 28px rgba(34, 211, 238, 0.14);
+}
+
+.restart-confirm-card {
+  width: min(92vw, 480px);
+  border: 3px solid #93c5fd;
+  background: linear-gradient(160deg, #ffffff 0%, #eff6ff 58%, #f8fafc 100%);
+  box-shadow: 0 18px 46px rgba(37, 99, 235, 0.14);
+}
+
+.playground-intro-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 18% 82%,
+      rgba(45, 212, 191, 0.16),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle at 82% 78%,
+      rgba(168, 85, 247, 0.16),
+      transparent 18%
+    );
+  pointer-events: none;
+}
+
+.unlock-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 14% 18%,
+      rgba(139, 92, 246, 0.18),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 84% 16%,
+      rgba(59, 130, 246, 0.14),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 78% 84%,
+      rgba(16, 185, 129, 0.14),
+      transparent 26%
+    );
+  pointer-events: none;
+}
+
+.success-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.modal-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.modal-confetti-piece {
+  position: absolute;
+  top: -14px;
+  width: 8px;
+  height: 14px;
+  opacity: 0;
+  animation: confetti-fall 1050ms ease-out forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(260px) rotate(260deg);
+  }
+}
+
+.modal-celebrate {
+  margin: 0 0 8px;
+  color: #0f766e;
+  font-size: 15px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-card h2 {
+  margin: 0;
+  color: #1e1b4b;
+  font-size: 24px;
+  font-weight: 900;
+  position: relative;
+  z-index: 2;
+}
+
+.success-title {
+  color: #1d4ed8;
+  font-size: 34px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  animation: success-pop 420ms ease-out;
+}
+
+.unlock-eyebrow {
+  color: #7c3aed;
+}
+
+.playground-intro-eyebrow {
+  color: #67e8f9;
+}
+
+.restart-confirm-eyebrow {
+  color: #2563eb;
+}
+
+.unlock-title {
+  color: #6d28d9;
+  font-size: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  animation: success-pop 420ms ease-out;
+}
+
+.modal-card h2.playground-intro-title {
+  color: #67e8f9;
+  font-size: 34px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  animation: playground-burst 520ms ease-out;
+}
+
+.restart-confirm-title {
+  color: #1d4ed8;
+  font-size: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.playground-intro-card .modal-text,
+.playground-intro-card .modal-steps {
+  color: #e2e8f0;
+}
+
+@keyframes success-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes playground-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) rotate(-2deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.06) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.modal-text {
+  margin: 10px auto 16px;
+  color: #475569;
+  font-size: 14px;
+  max-width: 420px;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-steps {
+  margin: 0 auto 16px;
+  max-width: 430px;
+  text-align: left;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.35;
+  padding-left: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-steps li {
+  margin-bottom: 8px;
+}
+
+.modal-run-wrap {
+  margin: 8px auto 16px;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.restart-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.restart-confirm-list {
+  margin: 0 auto 16px;
+  max-width: 360px;
+  padding-left: 20px;
+  text-align: left;
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  position: relative;
+  z-index: 2;
+}
+
+.restart-confirm-list li {
+  margin-bottom: 6px;
+}
+
+.modal-run-start-note {
+  margin: 0 0 6px 24px;
+  width: fit-content;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.unlock-preview-wrap {
+  margin: 12px auto 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.unlock-code-preview {
+  margin: 0 auto 12px;
+  min-height: 82px;
+  max-width: 320px;
+  border: 1px solid #c4b5fd;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.unlock-preview-stripe {
+  width: 24px;
+  height: 44px;
+  border-radius: 0;
+}
+
+.unlock-code-name {
+  margin: 0;
+  color: #4c1d95;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.unlock-tip {
+  margin: 0 auto 18px;
+  max-width: 360px;
+  color: #5b21b6;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-run-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 900;
+  color: #1e293b;
+}
+
+.modal-run-track {
+  position: relative;
+  height: 92px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.modal-run-track.evo-modal-track {
+  height: 110px;
+}
+
+.modal-run-start {
+  position: absolute;
+  left: 20px;
+  top: 16px;
+  z-index: 2;
+}
+
+.modal-run-start::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 18px solid #0f172a;
+}
+
+.modal-run-line {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--ozobot-line-size);
+  background: #000000;
+  border-radius: 2px;
+}
+
+.modal-run-track.evo-modal-track .modal-run-line {
+  left: 32px;
+  right: 32px;
+  height: 34px;
+}
+
+.modal-run-codes {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--ozobot-line-size);
+}
+
+.modal-run-track.evo-modal-track .modal-run-codes {
+  left: 32px;
+  right: 32px;
+  height: 34px;
+}
+
+.modal-run-code {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 0;
+  transform: translateX(-50%);
+}
+
+.evo-modal-run-code {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.modal-run-code-end {
+  z-index: 1;
+}
+
+.modal-run-stripe {
+  width: 20px;
+  height: var(--ozobot-line-size);
+  border-radius: 0;
+}
+
+.modal-run-lead {
+  display: inline-block;
+}
+
+.toolbar {
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: 12px;
+}
+
+.toolbar-inline {
+  margin-top: -4px;
+}
+
+.panel h2 {
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 900;
+  height: 24px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.panel > h2 {
+  margin-bottom: 10px;
+}
+
+.code-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  height: 24px;
+  margin-bottom: 10px;
+}
+
+.code-panel-header.unlock-pop {
+  animation: unlock-pop 420ms ease-out;
+}
+
+@keyframes unlock-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.code-panel-title {
+  margin: 0;
+  color: #1e1b4b;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.unlock-note {
+  margin: 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.button-grid {
+  display: grid;
+  gap: 6px;
+  position: relative;
+  overflow: visible;
+}
+
+.fraction-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.code-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.tile {
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #fff;
+  min-height: 70px;
+  padding: 5px 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 800;
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+  box-shadow: 0 3px 0 rgba(15, 23, 42, 0.14);
+}
+
+.fraction-tile {
+  border-color: var(--fraction-accent, #cbd5e1);
+  background-color: var(--fraction-fill, #fff);
+}
+
+.fraction-tile .small {
+  color: #475569;
+}
+
+.tile:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 rgba(15, 23, 42, 0.13);
+}
+
+.tile:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.13);
+}
+
+.tile:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.tile:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tile-locked {
+  border: 1px dashed #a78bfa;
+  background: linear-gradient(145deg, #f5f3ff 0%, #eef2ff 100%);
+  color: #7c3aed;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 0 rgba(99, 102, 241, 0.12);
+}
+
+.code-draggable {
+  touch-action: none;
+}
+
+.tile-locked::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(167, 139, 250, 0.15) 50%,
+    transparent 65%
+  );
+  animation: mystery-sheen 2900ms linear infinite;
+}
+
+@keyframes mystery-sheen {
+  0% {
+    transform: translateX(-36%) rotate(8deg);
+  }
+  100% {
+    transform: translateX(36%) rotate(8deg);
+  }
+}
+
+.tile-locked .small {
+  color: #7c3aed;
+}
+
+.tile-locked:disabled {
+  opacity: 0.78;
+  cursor: default;
+}
+
+.button-grid.unlock-burst {
+  animation: unlock-grid-pulse 440ms ease-out;
+}
+
+@keyframes unlock-grid-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.tile.unlock-target {
+  animation: unlock-target-pop 520ms ease-out;
+  border-color: #6366f1;
+  box-shadow:
+    0 8px 0 rgba(15, 23, 42, 0.12),
+    0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+@keyframes unlock-target-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.unlock-spark {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: unlock-spark-fly 680ms ease-out forwards;
+  z-index: 5;
+}
+
+@keyframes unlock-spark-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(1.35);
+  }
+}
+
+.small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+@media (max-width: 1000px) {
+  .mission-row {
+    flex-direction: column;
+  }
+
+  .pie-card,
+  .garage-card {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .ozobot-garage {
+    position: static;
+    width: 100%;
+    margin-top: 18px;
+  }
+
+  .mission {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 700px) {
+  .mode-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mission-advance-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .track-start-marker {
+    left: 24px;
+    top: calc(44% - 74px);
+  }
+
+  .track-start-arrow {
+    left: 0;
+  }
+
+  .mission-next-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .robot-picker {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .button-grid {
+    gap: 4px;
+  }
+
+  .tile {
+    min-height: 62px;
+    padding: 4px 2px;
+    border-radius: 12px;
+    gap: 3px;
+  }
+
+  .small {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 560px) {
+  .fraction-grid,
+  .code-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+    </style>
   </head>
   <body>
     <div class="app">
@@ -35,7 +2341,10 @@
               <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
               <button id="restartMissionsBtn" class="restart-missions-btn" type="button">Restart Missions</button>
             </div>
-            <p id="missionText" class="mission"></p>
+            <p id="missionText" class="mission">
+              <span class="mission-line mission-line-primary">Make <span class="mission-whole">1 whole</span> using <span class="mission-fraction">halves</span>.</span>
+              <span class="mission-line mission-line-secondary">Put an action code block at <span class="mission-number-fraction">1/2</span>.</span>
+            </p>
             <section class="actions-row">
               <div class="progress-card">
                 <div id="progressLabel" class="label">Total Progress</div>
@@ -206,7 +2515,1765 @@
         </div>
       </div>
     </div>
+      <script>
+const BASE_UNITS = 24;
+const OZOBOT_SCREEN_BLUE = "#1DA1FF";
+const OZOBOT_SCREEN_RED = "#FF6B6B";
+const OZOBOT_EVO_RED = "#E11D48";
+const STORAGE_KEY = "ozobot-fractions-progress";
 
-    <script src="script.js"></script>
+const FRACTIONS = [
+  { label: "1/2", numerator: 1, denominator: 2, units: 12, color: "#ef4444", textColor: "#b91c1c", name: "Half" },
+  { label: "1/3", numerator: 1, denominator: 3, units: 8, color: "#f59e0b", textColor: "#b45309", name: "Third" },
+  { label: "1/4", numerator: 1, denominator: 4, units: 6, color: "#10b981", textColor: "#047857", name: "Fourth" },
+  { label: "1/6", numerator: 1, denominator: 6, units: 4, color: "#3b82f6", textColor: "#1d4ed8", name: "Sixth" },
+  { label: "1/8", numerator: 1, denominator: 8, units: 3, color: "#8b5cf6", textColor: "#6d28d9", name: "Eighth" }
+];
+
+const ROBOT_PROFILES = {
+  bit: {
+    label: "Ozobot Bit",
+    shortLabel: "Bit",
+    codes: [
+      { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
+      { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_EVO_RED] },
+      { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
+      { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
+    ]
+  },
+  evo: {
+    label: "Ozobot Evo",
+    shortLabel: "Evo",
+    codes: [
+      { id: "spin", name: "Spin", colors: ["#00FF00", OZOBOT_EVO_RED, "#00FF00", OZOBOT_EVO_RED] },
+      { id: "short_super_slow", name: "Super Slow", colors: [OZOBOT_EVO_RED, "#00FF00", OZOBOT_SCREEN_BLUE] },
+      { id: "fast", name: "Fast", colors: [OZOBOT_SCREEN_BLUE, "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
+      { id: "tornado", name: "Tornado", colors: [OZOBOT_EVO_RED, "#00FF00", OZOBOT_EVO_RED, "#00FF00"] },
+      { id: "backwalk", name: "Backwalk", colors: [OZOBOT_EVO_RED, "#00FF00", "#000000", OZOBOT_SCREEN_BLUE] },
+      { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
+    ]
+  }
+};
+const MODAL_END_CODE = { id: "game_over", name: "Game Over", colors: ["#00FF00", OZOBOT_SCREEN_RED] };
+
+const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
+
+const CHALLENGES = [
+  {
+    title: "Make 1 whole using halves. Put an action code block at 1/2.",
+    requirements: { segments: { "1/2": 2 }, codes: [{ numerator: 1, denominator: 2 }] }
+  },
+  {
+    title: "Make 1 whole using sixths. Put an action code block at 3/6.",
+    requirements: {
+      segments: { "1/6": 6 },
+      codes: [{ numerator: 3, denominator: 6 }]
+    }
+  },
+  {
+    title: "Make 1 whole using eighths. Put an action code block at 2/8 and another at 5/8.",
+    requirements: {
+      segments: { "1/8": 8 },
+      codes: [
+        { numerator: 2, denominator: 8 },
+        { numerator: 5, denominator: 8 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole using thirds. Put an action code block at 1/3.",
+    requirements: {
+      segments: { "1/3": 3 },
+      codes: [{ numerator: 1, denominator: 3 }]
+    }
+  },
+  {
+    title: "Make 1 whole using fourths. Put an action code block at 2/4.",
+    requirements: {
+      segments: { "1/4": 4 },
+      codes: [{ numerator: 2, denominator: 4 }]
+    }
+  },
+  {
+    title: "Make 1 whole using fourths. Put action code blocks at 1/4 and 2/4.",
+    requirements: {
+      segments: { "1/4": 4 },
+      codes: [
+        { numerator: 1, denominator: 4 },
+        { numerator: 2, denominator: 4 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole using sixths. Put action code blocks at 1/6 and 4/6.",
+    requirements: {
+      segments: { "1/6": 6 },
+      codes: [
+        { numerator: 1, denominator: 6 },
+        { numerator: 4, denominator: 6 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole using eighths. Put action code blocks at 2/8 and 6/8.",
+    requirements: {
+      segments: { "1/8": 8 },
+      codes: [
+        { numerator: 2, denominator: 8 },
+        { numerator: 6, denominator: 8 }
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole using thirds. Put action code blocks at 1/3 and 2/3.",
+    requirements: {
+      segments: { "1/3": 3 },
+      codes: [
+        { numerator: 1, denominator: 3 },
+        { numerator: 2, denominator: 3 },
+      ]
+    }
+  },
+  {
+    title: "Make 1 whole using fourths. Put action code blocks at 1/4, 2/4, and 3/4.",
+    requirements: {
+      segments: { "1/4": 4 },
+      codes: [
+        { numerator: 1, denominator: 4 },
+        { numerator: 2, denominator: 4 },
+        { numerator: 3, denominator: 4 },
+      ]
+    }
+  }
+];
+
+const state = {
+  currentProblemIdx: 0,
+  mode: "mission",
+  robotType: "bit",
+  hasCompletedAllMissions: false,
+  placedSegments: [],
+  placedCodes: [],
+  history: [],
+  isCheckedCorrect: false,
+  isMorphingTrack: false,
+  celebrationTimer: null,
+  cueTimer: null,
+  showLineHints: false,
+  hintStep: 0
+};
+
+const dragState = {
+  code: null,
+  moved: false,
+  pointerId: null,
+  startX: 0,
+  startY: 0,
+  sourceCodeId: null,
+  ghostEl: null,
+  targetUnits: null
+};
+let suppressCodeClickId = null;
+
+const el = {
+  problemCounter: document.getElementById("problemCounter"),
+  missionText: document.getElementById("missionText"),
+  feedback: document.getElementById("feedback"),
+  checkDetails: document.getElementById("checkDetails"),
+  pieSlices: document.getElementById("pieSlices"),
+  pieLabel: document.getElementById("pieLabel"),
+  segmentOverlay: document.getElementById("segmentOverlay"),
+  codesLayer: document.getElementById("codesLayer"),
+  dragDropMarker: document.getElementById("dragDropMarker"),
+  axis: document.getElementById("axis"),
+  progressLabel: document.getElementById("progressLabel"),
+  progressValue: document.getElementById("progressValue"),
+  missionConfetti: document.getElementById("missionConfetti"),
+  missionRunHint: document.getElementById("missionRunHint"),
+  playgroundRunHint: document.getElementById("playgroundRunHint"),
+  missionAdvancePanel: document.getElementById("missionAdvancePanel"),
+  missionAdvanceText: document.getElementById("missionAdvanceText"),
+  fractionButtons: document.getElementById("fractionButtons"),
+  codeButtons: document.getElementById("codeButtons"),
+  codePanelHeader: document.getElementById("codePanelHeader"),
+  codePanelTitle: document.getElementById("codePanelTitle"),
+  codeUnlockText: document.getElementById("codeUnlockText"),
+  liveMarkers: document.getElementById("liveMarkers"),
+  lineHintBanner: document.getElementById("lineHintBanner"),
+  trackWrap: document.getElementById("trackWrap"),
+  quickCue: document.getElementById("quickCue"),
+  hintBtn: document.getElementById("hintBtn"),
+  undoBtn: document.getElementById("undoBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+  bitRobotBtn: document.getElementById("bitRobotBtn"),
+  evoRobotBtn: document.getElementById("evoRobotBtn"),
+  playgroundBtn: document.getElementById("playgroundBtn"),
+  restartMissionsBtn: document.getElementById("restartMissionsBtn"),
+  checkBtn: document.getElementById("checkBtn"),
+  successModal: document.getElementById("successModal"),
+  successModalText: document.getElementById("successModalText"),
+  successModalSteps: document.getElementById("successModalSteps"),
+  modalConfetti: document.getElementById("modalConfetti"),
+  modalCelebrateText: document.getElementById("modalCelebrateText"),
+  modalRunCodes: document.getElementById("modalRunCodes"),
+  nextFromModalBtn: document.getElementById("nextFromModalBtn"),
+  nextMissionBtn: document.getElementById("nextMissionBtn"),
+  playgroundIntroModal: document.getElementById("playgroundIntroModal"),
+  playgroundIntroConfetti: document.getElementById("playgroundIntroConfetti"),
+  unlockModal: document.getElementById("unlockModal"),
+  unlockConfetti: document.getElementById("unlockConfetti"),
+  unlockMessage: document.getElementById("unlockMessage"),
+  unlockCodePreview: document.getElementById("unlockCodePreview"),
+  unlockCodeName: document.getElementById("unlockCodeName"),
+  dismissUnlockBtn: document.getElementById("dismissUnlockBtn"),
+  enterPlaygroundBtn: document.getElementById("enterPlaygroundBtn"),
+  restartConfirmModal: document.getElementById("restartConfirmModal"),
+  cancelRestartBtn: document.getElementById("cancelRestartBtn"),
+  confirmRestartBtn: document.getElementById("confirmRestartBtn")
+};
+
+function isPlaygroundMode() {
+  return state.mode === "playground";
+}
+
+function currentRobotProfile() {
+  return ROBOT_PROFILES[state.robotType] || ROBOT_PROFILES.bit;
+}
+
+function currentRobotCodes() {
+  return currentRobotProfile().codes;
+}
+
+function isEvoMode() {
+  return state.robotType === "evo";
+}
+
+function saveProgress() {
+  try {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        currentProblemIdx: state.currentProblemIdx,
+        mode: state.mode,
+        robotType: state.robotType,
+        hasCompletedAllMissions: state.hasCompletedAllMissions
+      })
+    );
+  } catch {
+    // Ignore localStorage failures and continue with in-memory progress.
+  }
+}
+
+function clearSavedProgress() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore localStorage failures and continue with in-memory progress.
+  }
+}
+
+function loadProgress() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.mode === "playground" || saved.mode === "mission") {
+      state.mode = saved.mode;
+    }
+    if (saved.robotType === "bit" || saved.robotType === "evo") {
+      state.robotType = saved.robotType;
+    }
+    if (Number.isInteger(saved.currentProblemIdx)) {
+      state.currentProblemIdx = Math.max(0, Math.min(CHALLENGES.length - 1, saved.currentProblemIdx));
+    }
+    state.hasCompletedAllMissions = Boolean(saved.hasCompletedAllMissions);
+  } catch {
+    // Ignore corrupt storage and use default progress.
+  }
+}
+
+function gcd(a, b) {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x || 1;
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function currentProblem() {
+  return CHALLENGES[state.currentProblemIdx];
+}
+
+function findCodeById(codeId) {
+  return currentRobotCodes().find((code) => code.id === codeId);
+}
+
+function totalUnits() {
+  return state.placedSegments.reduce((sum, s) => sum + s.units, 0);
+}
+
+function simplifyFraction(numerator, denominator) {
+  const divisor = gcd(numerator, denominator);
+  return { numerator: numerator / divisor, denominator: denominator / divisor };
+}
+
+function formatUnitsAsFraction(units) {
+  if (units === BASE_UNITS) return "1 whole";
+  const simplified = simplifyFraction(units, BASE_UNITS);
+  return `${simplified.numerator}/${simplified.denominator}`;
+}
+
+function getPrimarySegmentDenominator() {
+  if (state.placedSegments.length > 0) {
+    const firstDenominator = state.placedSegments[0].denominator;
+    const sameDenominator = state.placedSegments.every((s) => s.denominator === firstDenominator);
+    if (sameDenominator) return firstDenominator;
+  }
+
+  if (isPlaygroundMode()) return null;
+
+  const requiredSegments = Object.keys(currentProblem().requirements.segments);
+  if (requiredSegments.length === 1) {
+    const parts = requiredSegments[0].split("/");
+    return Number(parts[1]);
+  }
+
+  return null;
+}
+
+function formatAxisLabel(units, denominatorHint) {
+  if (units === 0) return "0";
+  if (denominatorHint && BASE_UNITS % denominatorHint === 0) {
+    const unitsPerPart = BASE_UNITS / denominatorHint;
+    if (units % unitsPerPart === 0) {
+      const numerator = units / unitsPerPart;
+      return `${numerator}/${denominatorHint}`;
+    }
+  }
+  return formatUnitsAsFraction(units);
+}
+
+function reqToUnits(req) {
+  return (req.numerator * BASE_UNITS) / req.denominator;
+}
+
+function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10) {
+  return colors
+    .map(
+      (color) =>
+        `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:0"></span>`
+    )
+    .join("");
+}
+
+function modalCodeStripesHTML(colors) {
+  const stripeSize = isEvoMode() ? 34 : 28;
+  const leadInWidth = isEvoMode() ? 22 : 0;
+  const leadIn = leadInWidth > 0
+    ? `<span class="modal-run-stripe modal-run-lead" style="background:#000000;width:${leadInWidth}px;height:${stripeSize}px"></span>`
+    : "";
+  const stripes = colors
+    .map((color) => `<span class="modal-run-stripe" style="background:${color};width:${stripeSize}px;height:${stripeSize}px"></span>`)
+    .join("");
+  return `${leadIn}${stripes}`;
+}
+
+function modalEndCodeColors() {
+  return ["#00FF00", isEvoMode() ? OZOBOT_EVO_RED : OZOBOT_SCREEN_RED];
+}
+
+function setButtonLabel(button, icon, label) {
+  button.innerHTML = `<span class="btn-icon" aria-hidden="true">${icon}</span><span class="btn-label">${label}</span>`;
+}
+
+function emphasizeFractions(text) {
+  return text
+    .replace(/(1 whole)/gi, '<span class="mission-whole">$1</span>')
+    .replace(
+      /(\d+\/\d+)/gi,
+      '<span class="mission-number-fraction">$1</span>'
+    )
+    .replace(
+      /(halves|thirds|fourths|sixths|eighths)/gi,
+      '<span class="mission-fraction">$1</span>'
+    );
+}
+
+function formatMissionText(text) {
+  const lines = text
+    .split(". ")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => (line.endsWith(".") ? line : `${line}.`));
+
+  return lines
+    .map((line, index) => {
+      const className = index === 0 ? "mission-line mission-line-primary" : "mission-line mission-line-secondary";
+      return `<span class="${className}">${emphasizeFractions(line)}</span>`;
+    })
+    .join("");
+}
+
+function setFeedback(type, message) {
+  if (!message) {
+    if (el.feedback) {
+      el.feedback.className = "feedback hidden";
+      el.feedback.textContent = "";
+    }
+    return;
+  }
+
+  if (type === "success") {
+    showQuickCue("success", message);
+    if (el.feedback) {
+      el.feedback.className = "feedback hidden";
+      el.feedback.textContent = "";
+    }
+    return;
+  }
+  showQuickCue("error", message);
+
+  if (el.feedback) {
+    el.feedback.className = `feedback ${type}`;
+    el.feedback.textContent = message;
+  }
+}
+
+function quickCueText(type, message) {
+  if (type === "success") {
+    if (!message) return "Done.";
+    if (message.startsWith("No more segment hints")) return "No more hints. Try Check Answer.";
+    if (message.includes("unlocked")) return "New action code unlocked!";
+    if (message.includes("finished all 10")) return "You finished all missions!";
+    return message;
+  }
+  if (!message) return "Try again.";
+  if (isPlaygroundMode()) {
+    if (message.includes("Build a line first")) return "Build a line first.";
+    return message;
+  }
+  if (message.startsWith("Hint")) return message;
+  const codeTargets = currentProblem().requirements.codes
+    .map((req) => `${req.numerator}/${req.denominator}`);
+  const codeTargetCue =
+    codeTargets.length === 1
+      ? `Put the action code at ${codeTargets[0]}.`
+      : `Put action codes at ${codeTargets.join(" and ")}.`;
+  if (message.includes("not on a target location")) return codeTargetCue;
+  if (message.includes("mission uses")) return codeTargetCue;
+  if (message.includes("Check the answer first")) return "Tap Check Answer first.";
+  if (message.includes("Need")) return "Add more fraction pieces.";
+  if (message.includes("Too many")) return "Remove one piece.";
+  if (message.includes("longer than 1 whole")) return "Stop at 1 whole.";
+  return "Try one small fix.";
+}
+
+function showQuickCue(type, message) {
+  if (state.cueTimer) {
+    window.clearTimeout(state.cueTimer);
+  }
+  el.quickCue.classList.remove("error", "success", "show");
+  el.quickCue.textContent = quickCueText(type, message);
+  el.quickCue.classList.add(type === "success" ? "success" : "error");
+  void el.quickCue.offsetWidth;
+  el.quickCue.classList.add("show");
+  state.cueTimer = window.setTimeout(() => {
+    el.quickCue.classList.remove("show");
+  }, 1350);
+}
+
+function setCheckDetails(lines, pass) {
+  if (!lines.length) {
+    el.checkDetails.className = "check-details hidden";
+    el.checkDetails.textContent = "";
+    return;
+  }
+
+  el.checkDetails.className = `check-details ${pass ? "pass" : "fail"}`;
+  el.checkDetails.innerHTML = lines.map((line) => `<div>${line}</div>`).join("");
+}
+
+function unlockedCodeCount() {
+  const codes = currentRobotCodes();
+  if (isPlaygroundMode()) return codes.length;
+  const scheduledCount = CODE_UNLOCK_COUNTS[state.currentProblemIdx] ?? codes.length;
+  return Math.min(codes.length, scheduledCount);
+}
+
+function triggerUnlockCelebration(newlyUnlockedIndex) {
+  el.codePanelHeader.classList.remove("unlock-pop");
+  void el.codePanelHeader.offsetWidth;
+  el.codePanelHeader.classList.add("unlock-pop");
+
+  el.codeButtons.classList.remove("unlock-burst");
+  void el.codeButtons.offsetWidth;
+  el.codeButtons.classList.add("unlock-burst");
+
+  const unlockedTile = el.codeButtons.querySelector(`.tile[data-code-idx="${newlyUnlockedIndex}"]`);
+  if (unlockedTile) {
+    unlockedTile.classList.remove("unlock-target");
+    void unlockedTile.offsetWidth;
+    unlockedTile.classList.add("unlock-target");
+  }
+
+  const burstColors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
+  const sparkCount = 16;
+  const gridRect = el.codeButtons.getBoundingClientRect();
+  const tileRect = unlockedTile ? unlockedTile.getBoundingClientRect() : null;
+  const centerX = tileRect ? tileRect.left - gridRect.left + tileRect.width / 2 : gridRect.width / 2;
+  const centerY = tileRect ? tileRect.top - gridRect.top + tileRect.height / 2 : gridRect.height / 2;
+  for (let i = 0; i < sparkCount; i += 1) {
+    const spark = document.createElement("span");
+    spark.className = "unlock-spark";
+    spark.style.background = burstColors[i % burstColors.length];
+    spark.style.left = `${centerX}px`;
+    spark.style.top = `${centerY}px`;
+    spark.style.setProperty("--dx", `${Math.random() * 170 - 85}px`);
+    spark.style.setProperty("--dy", `${Math.random() * 110 - 55}px`);
+    el.codeButtons.appendChild(spark);
+    window.setTimeout(() => spark.remove(), 760);
+  }
+}
+
+function clearCheckProgress() {
+  state.isCheckedCorrect = false;
+  state.isMorphingTrack = false;
+  if (state.celebrationTimer) {
+    window.clearTimeout(state.celebrationTimer);
+    state.celebrationTimer = null;
+  }
+}
+
+function triggerTrackMorphAnimation() {
+  state.isMorphingTrack = false;
+  if (state.celebrationTimer) {
+    window.clearTimeout(state.celebrationTimer);
+    state.celebrationTimer = null;
+  }
+  if (el.trackWrap) {
+    el.trackWrap.classList.remove("mission-track-morphing");
+    void el.trackWrap.offsetWidth;
+  }
+  state.isMorphingTrack = true;
+  render();
+  state.celebrationTimer = window.setTimeout(() => {
+    state.isMorphingTrack = false;
+    state.celebrationTimer = null;
+    render();
+  }, 1900);
+}
+
+function resetDragState() {
+  dragState.code = null;
+  dragState.moved = false;
+  dragState.pointerId = null;
+  dragState.startX = 0;
+  dragState.startY = 0;
+  dragState.sourceCodeId = null;
+  dragState.targetUnits = null;
+  if (dragState.ghostEl) {
+    dragState.ghostEl.remove();
+    dragState.ghostEl = null;
+  }
+  document.body.classList.remove("dragging-code");
+  el.dragDropMarker.classList.add("hidden");
+  el.dragDropMarker.style.removeProperty("--drop-left");
+}
+
+function resetBoard() {
+  resetDragState();
+  state.placedSegments = [];
+  state.placedCodes = [];
+  state.history = [];
+  state.showLineHints = false;
+  state.hintStep = 0;
+
+  setFeedback(null, "");
+  setCheckDetails([], false);
+  clearCheckProgress();
+  render();
+}
+
+function addSegment(fraction) {
+  const currentTotal = totalUnits();
+  if (currentTotal + fraction.units > BASE_UNITS) return;
+
+  state.placedSegments.push({ ...fraction, uid: makeId() });
+  state.history.push("segment");
+  state.showLineHints = false;
+  state.hintStep = 0;
+  setFeedback(null, "");
+  setCheckDetails([], false);
+  clearCheckProgress();
+  render();
+  maybeAutoCheckAnswer();
+}
+
+function addCode(code) {
+  return addCodeAtUnits(code, totalUnits());
+}
+
+function addCodeAtUnits(code, positionUnits) {
+  if (isPlaygroundMode()) {
+    const newCode = {
+      ...code,
+      positionUnits,
+      uid: makeId()
+    };
+    state.placedCodes.push(newCode);
+    state.history.push("code");
+    state.showLineHints = false;
+    state.hintStep = 0;
+    setFeedback(null, "");
+    setCheckDetails([], false);
+    clearCheckProgress();
+    render();
+    return true;
+  }
+
+  const requiredCodeCount = currentProblem().requirements.codes.length;
+  if (state.placedCodes.length >= requiredCodeCount) {
+    const plural = requiredCodeCount === 1 ? "" : "s";
+    setFeedback("error", `This mission uses ${requiredCodeCount} action code block${plural}.`);
+    return false;
+  }
+
+  const requiredCounts = new Map();
+  currentProblem().requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    requiredCounts.set(units, (requiredCounts.get(units) || 0) + 1);
+  });
+  const alreadyPlacedAtPosition = state.placedCodes.filter((c) => c.positionUnits === positionUnits).length;
+  const allowedAtPosition = requiredCounts.get(positionUnits) || 0;
+
+  const newCode = {
+    ...code,
+    positionUnits,
+    uid: makeId()
+  };
+  state.placedCodes.push(newCode);
+
+  state.history.push("code");
+  state.showLineHints = false;
+  state.hintStep = 0;
+  if (allowedAtPosition === 0 || alreadyPlacedAtPosition >= allowedAtPosition) {
+    setFeedback("error", "That action code block is not on a target location for this mission.");
+    newCode.isWrongPlacement = true;
+    const wrongUid = newCode.uid;
+    window.setTimeout(() => {
+      const idx = state.placedCodes.findIndex((c) => c.uid === wrongUid);
+      if (idx === -1) return;
+      state.placedCodes.splice(idx, 1);
+
+      for (let i = state.history.length - 1; i >= 0; i -= 1) {
+        if (state.history[i] === "code") {
+          state.history.splice(i, 1);
+          break;
+        }
+      }
+      render();
+    }, 620);
+  } else {
+    setFeedback(null, "");
+  }
+  setCheckDetails([], false);
+  clearCheckProgress();
+  render();
+  maybeAutoCheckAnswer();
+  return true;
+}
+
+function getCodePlacementUnits() {
+  const units = [];
+  const seen = new Set();
+  let running = 0;
+  state.placedSegments.forEach((segment) => {
+    running += segment.units;
+    if (running <= 0 || running > BASE_UNITS || seen.has(running)) return;
+    seen.add(running);
+    units.push(running);
+  });
+  return units;
+}
+
+function getTrackDropTarget(clientX, clientY) {
+  const boundaryUnits = getCodePlacementUnits();
+  if (!boundaryUnits.length) return null;
+
+  const rect = el.codesLayer.getBoundingClientRect();
+  const withinX = clientX >= rect.left - 20 && clientX <= rect.right + 20;
+  const withinY = clientY >= rect.top - 48 && clientY <= rect.bottom + 48;
+  if (!withinX || !withinY) return null;
+
+  const rawRatio = (clientX - rect.left) / rect.width;
+  const clampedRatio = Math.max(0, Math.min(1, rawRatio));
+  const rawUnits = clampedRatio * BASE_UNITS;
+
+  let nearestUnits = boundaryUnits[0];
+  let nearestDistance = Math.abs(boundaryUnits[0] - rawUnits);
+  boundaryUnits.forEach((units) => {
+    const distance = Math.abs(units - rawUnits);
+    if (distance < nearestDistance) {
+      nearestUnits = units;
+      nearestDistance = distance;
+    }
+  });
+
+  return {
+    units: nearestUnits,
+    leftPercent: (nearestUnits / BASE_UNITS) * 100
+  };
+}
+
+function createCodeDragGhost(code) {
+  const ghost = document.createElement("div");
+  ghost.className = "code-drag-ghost";
+  ghost.innerHTML = `<div class="code-drag-ghost-stripes">${codeStripesHTML(code.colors, 20, 14)}</div><div class="code-drag-ghost-label">${code.name}</div>`;
+  document.body.appendChild(ghost);
+  return ghost;
+}
+
+function updateCodeDrag(clientX, clientY) {
+  if (!dragState.code || !dragState.ghostEl) return;
+  dragState.ghostEl.style.left = `${clientX}px`;
+  dragState.ghostEl.style.top = `${clientY}px`;
+
+  const target = getTrackDropTarget(clientX, clientY);
+  dragState.targetUnits = target ? target.units : null;
+  if (target) {
+    el.dragDropMarker.classList.remove("hidden");
+    el.dragDropMarker.style.setProperty("--drop-left", `${target.leftPercent}%`);
+  } else {
+    el.dragDropMarker.classList.add("hidden");
+    el.dragDropMarker.style.removeProperty("--drop-left");
+  }
+}
+
+function finishCodeDrag(clientX, clientY) {
+  if (!dragState.code) return;
+  const code = dragState.code;
+  const wasDrag = dragState.moved;
+  const sourceCodeId = dragState.sourceCodeId;
+  const target = wasDrag ? getTrackDropTarget(clientX, clientY) : null;
+
+  resetDragState();
+
+  if (!wasDrag) return;
+
+  if (!target) {
+    if (state.placedSegments.length === 0) {
+      setFeedback("error", "Build the fraction line first, then drag an action code to the line.");
+    }
+    return;
+  }
+
+  suppressCodeClickId = sourceCodeId;
+  window.setTimeout(() => {
+    if (suppressCodeClickId === sourceCodeId) suppressCodeClickId = null;
+  }, 0);
+  addCodeAtUnits(code, target.units);
+}
+
+function undo() {
+  if (!state.history.length) return;
+  const last = state.history.pop();
+  if (last === "segment") state.placedSegments.pop();
+  if (last === "code") state.placedCodes.pop();
+  state.showLineHints = false;
+  state.hintStep = 0;
+
+  setFeedback(null, "");
+  setCheckDetails([], false);
+  clearCheckProgress();
+  render();
+}
+
+function evaluateStudentWork() {
+  const problem = currentProblem();
+  const errors = [];
+  const passes = [];
+  const hints = [];
+  const remainingCodeIndexes = new Set(state.placedCodes.map((_, idx) => idx));
+
+  problem.requirements.codes.forEach((req) => {
+    const reqUnits = reqToUnits(req);
+    let matchedIndex = -1;
+    for (const idx of remainingCodeIndexes) {
+      const placed = state.placedCodes[idx];
+      const positionMatches = placed.positionUnits === reqUnits;
+      const typeMatches = !req.codeId || placed.id === req.codeId;
+      if (positionMatches && typeMatches) {
+        matchedIndex = idx;
+        break;
+      }
+    }
+
+    const label = `${req.numerator}/${req.denominator}`;
+
+    if (matchedIndex === -1) {
+      errors.push(`Missing an action code block at ${label}.`);
+      hints.push(`Try placing an action code block at ${label}.`);
+    } else {
+      remainingCodeIndexes.delete(matchedIndex);
+      passes.push(`An action code block is at ${label}.`);
+    }
+  });
+
+  const requiredSegments = problem.requirements.segments;
+  Object.entries(requiredSegments).forEach(([segmentLabel, needed]) => {
+    const count = state.placedSegments.filter((s) => s.label === segmentLabel).length;
+    if (count < needed) {
+      errors.push(`Need ${needed} total ${segmentLabel} segments (now ${count}).`);
+      hints.push(`Add ${segmentLabel} segments until you have ${needed}.`);
+    } else if (count > needed) {
+      errors.push(`Too many ${segmentLabel} segments (now ${count}, need ${needed}).`);
+      hints.push(`Remove extra ${segmentLabel} segments.`);
+    } else {
+      passes.push(`Correct number of ${segmentLabel} segments.`);
+    }
+  });
+
+  if (totalUnits() > BASE_UNITS) {
+    errors.push("The line is longer than 1 whole.");
+    hints.push("Remove one segment so the line ends at 1 whole.");
+  }
+
+  return { passed: errors.length === 0, errors, passes, hints };
+}
+
+function getSegmentProgress(problem) {
+  const segmentRule = Object.entries(problem.requirements.segments)[0];
+  if (!segmentRule) {
+    return {
+      requiredLabel: "unit",
+      needed: 0,
+      matchedBoundaryIndexes: new Set(),
+      wrongEndpoints: [],
+      pendingBoundaries: []
+    };
+  }
+
+  const requiredLabel = segmentRule[0];
+  const needed = segmentRule[1];
+  const unitsPerPart = BASE_UNITS / needed;
+  const matchedBoundaryIndexes = new Set();
+  const wrongEndpoints = [];
+  let running = 0;
+  let prefixStillValid = true;
+
+  state.placedSegments.forEach((segment, idx) => {
+    running += segment.units;
+    const boundaryIndex = idx + 1;
+    const segmentMatchesRule = segment.label === requiredLabel;
+    const boundaryMatchesRule =
+      prefixStillValid &&
+      segmentMatchesRule &&
+      boundaryIndex <= needed &&
+      running === boundaryIndex * unitsPerPart;
+
+    if (boundaryMatchesRule) {
+      matchedBoundaryIndexes.add(boundaryIndex);
+    } else {
+      prefixStillValid = false;
+    }
+
+    if (!segmentMatchesRule) {
+      wrongEndpoints.push({ units: running, label: segment.label, uid: segment.uid });
+    }
+  });
+
+  const pendingBoundaries = [];
+  for (let i = 1; i <= needed; i += 1) {
+    if (!matchedBoundaryIndexes.has(i)) {
+      pendingBoundaries.push({ index: i, units: i * unitsPerPart, label: `${i}/${needed}` });
+    }
+  }
+
+  return { requiredLabel, needed, matchedBoundaryIndexes, wrongEndpoints, pendingBoundaries };
+}
+
+function getCodeProgress(problem) {
+  const availablePlacedCounts = new Map();
+  state.placedCodes.forEach((code) => {
+    availablePlacedCounts.set(code.positionUnits, (availablePlacedCounts.get(code.positionUnits) || 0) + 1);
+  });
+
+  const pendingTargets = [];
+  problem.requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    const available = availablePlacedCounts.get(units) || 0;
+    if (available > 0) {
+      availablePlacedCounts.set(units, available - 1);
+    } else {
+      pendingTargets.push({ units, label: `${req.numerator}/${req.denominator}` });
+    }
+  });
+
+  return { pendingTargets };
+}
+
+function showHint() {
+  if (isPlaygroundMode()) {
+    setFeedback("success", "Playground mode: build any 1 whole line you want, then tap Run Line.");
+    setCheckDetails([], false);
+    render();
+    return;
+  }
+
+  state.showLineHints = true;
+  state.hintStep += 1;
+  const problem = currentProblem();
+  const segmentProgress = getSegmentProgress(problem);
+  const codeProgress = getCodeProgress(problem);
+  const matchingCount = state.placedSegments.filter((s) => s.label === segmentProgress.requiredLabel).length;
+  const wrongCount = state.placedSegments.filter((s) => s.label !== segmentProgress.requiredLabel).length;
+  const segmentMarkerSteps = segmentProgress.pendingBoundaries.length;
+  const codeIntroStep = 2 + segmentMarkerSteps;
+  const codeMarkerStartStep = codeIntroStep + 1;
+
+  if (state.hintStep === 1) {
+    let hintLine = "";
+    if (state.placedSegments.length === 0) {
+      hintLine = `Start by adding ${segmentProgress.needed} pieces of ${segmentProgress.requiredLabel}.`;
+    } else if (wrongCount > 0) {
+      hintLine = `Use only ${segmentProgress.requiredLabel} pieces on this mission.`;
+    } else if (matchingCount < segmentProgress.needed) {
+      hintLine = `Add ${segmentProgress.requiredLabel} pieces until you have ${segmentProgress.needed} total.`;
+    } else if (matchingCount > segmentProgress.needed) {
+      hintLine = `Remove extra pieces. You need exactly ${segmentProgress.needed} ${segmentProgress.requiredLabel} pieces.`;
+    } else if (totalUnits() > BASE_UNITS) {
+      hintLine = "Remove one piece so the line ends at 1 whole.";
+    } else {
+      if (codeProgress.pendingTargets.length > 0) {
+        const nextCodeTarget = codeProgress.pendingTargets[0].label;
+        const readyMessage = `Hint 1: Your segments look good. Next, place an action code at ${nextCodeTarget}.`;
+        setFeedback("error", readyMessage);
+        setCheckDetails([readyMessage], false);
+      } else {
+        setFeedback("success", "Your fraction segments look good.");
+        setCheckDetails(["Hint: Your fraction segments are right. Tap Check Answer."], false);
+      }
+      render();
+      return;
+    }
+
+    const hintMessage = `Hint 1: ${hintLine}`;
+    setFeedback("error", hintMessage);
+    setCheckDetails([hintMessage], false);
+    render();
+    return;
+  }
+
+  if (state.hintStep >= 2 && state.hintStep <= 1 + segmentMarkerSteps) {
+    const markerHintIndex = state.hintStep - 2;
+    const nextHint = segmentProgress.pendingBoundaries[markerHintIndex];
+    const markerMessage = `Hint ${state.hintStep}: Watch the glowing dot at ${nextHint.label}.`;
+    setFeedback("error", markerMessage);
+    setCheckDetails([markerMessage], false);
+    render();
+    return;
+  }
+
+  if (state.hintStep === codeIntroStep && codeProgress.pendingTargets.length > 0) {
+    const introMessage = `Hint ${state.hintStep}: Great segments. Now add action codes at the target fractions.`;
+    setFeedback("error", introMessage);
+    setCheckDetails([introMessage], false);
+    render();
+    return;
+  }
+
+  const codeMarkerIdx = state.hintStep - codeMarkerStartStep;
+  if (codeMarkerIdx >= 0 && codeMarkerIdx < codeProgress.pendingTargets.length) {
+    const nextCodeHint = codeProgress.pendingTargets[codeMarkerIdx];
+    const codeMarkerMessage = `Hint ${state.hintStep}: Watch the glowing code dot at ${nextCodeHint.label}.`;
+    setFeedback("error", codeMarkerMessage);
+    setCheckDetails([codeMarkerMessage], false);
+    render();
+    return;
+  }
+
+  const noMoreMessage = "No more hints left. Try Check Answer.";
+  setFeedback("success", noMoreMessage);
+  setCheckDetails([noMoreMessage], false);
+  render();
+}
+
+function launchConfettiBurst(container, colors, count = 38) {
+  container.innerHTML = "";
+  for (let i = 0; i < count; i += 1) {
+    const piece = document.createElement("span");
+    piece.className = "modal-confetti-piece";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[i % colors.length];
+    piece.style.animationDelay = `${Math.random() * 260}ms`;
+    container.appendChild(piece);
+  }
+}
+
+function celebrateMissionReady() {
+  launchConfettiBurst(el.missionConfetti, ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"], 30);
+}
+
+function openSuccessModal() {
+  renderModalRunTrack();
+  launchConfettiBurst(el.modalConfetti, ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"]);
+  if (isPlaygroundMode()) {
+    el.modalCelebrateText.textContent = "Ozobot Playground";
+    document.getElementById("successTitle").textContent = "Run Your Line";
+    el.successModalText.textContent = "Run your Ozobot on this line. When you are ready to keep building, choose Back to Playground.";
+    el.successModalSteps.innerHTML = "<li>Place Ozobot at the start of your line.</li><li>Watch it read your color codes.</li><li>Choose Back to Playground when you want to edit or build another line.</li>";
+    setButtonLabel(el.nextFromModalBtn, "↩", "Back to Playground");
+  } else {
+    const celebrates = [
+      "Perfect build! You nailed it.",
+      "Great job! You got it right.",
+      "Excellent work! Ready for your Ozobot run."
+    ];
+    el.modalCelebrateText.textContent = celebrates[Math.floor(Math.random() * celebrates.length)];
+    document.getElementById("successTitle").textContent = "Mission Complete";
+    el.successModalText.textContent = "Great work. Run your Ozobot on your track now. When you are done, choose Next Problem.";
+    el.successModalSteps.innerHTML = "<li>Place Ozobot at the start of your line.</li><li>Watch it read your color codes.</li><li>When finished, move to the next challenge.</li>";
+    setButtonLabel(el.nextFromModalBtn, "▶", "Run Complete - Next Problem");
+  }
+  el.successModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function openUnlockModal(code) {
+  launchConfettiBurst(el.unlockConfetti, ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"], 28);
+  el.unlockMessage.textContent = `You unlocked ${code.name} for ${currentRobotProfile().shortLabel}. This action code is now ready to use in your next challenge.`;
+  el.unlockCodeName.textContent = code.name;
+  el.unlockCodePreview.innerHTML = code.colors
+    .map((color) => `<span class="unlock-preview-stripe" style="background:${color}"></span>`)
+    .join("");
+  el.unlockModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function openPlaygroundIntroModal() {
+  launchConfettiBurst(el.playgroundIntroConfetti, ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#facc15"], 44);
+  el.playgroundIntroModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSuccessModalAndAdvance() {
+  el.successModal.classList.add("hidden");
+  document.body.style.overflow = "";
+  if (isPlaygroundMode()) return;
+  if (state.currentProblemIdx >= CHALLENGES.length - 1) {
+    state.hasCompletedAllMissions = true;
+    saveProgress();
+    openPlaygroundIntroModal();
+    return;
+  }
+  nextProblem(true);
+}
+
+function closeUnlockModal() {
+  el.unlockModal.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function goToPlayground() {
+  state.mode = "playground";
+  saveProgress();
+  resetBoard();
+  setFeedback("success", "Ozobot Playground is open. Build and run as many lines as you want.");
+}
+
+function returnToMissions() {
+  state.mode = "mission";
+  saveProgress();
+  resetBoard();
+  setFeedback("success", "Mission mode is open.");
+}
+
+function enterPlaygroundMode() {
+  el.playgroundIntroModal.classList.add("hidden");
+  document.body.style.overflow = "";
+  goToPlayground();
+}
+
+function openRestartConfirmModal() {
+  el.restartConfirmModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeRestartConfirmModal() {
+  el.restartConfirmModal.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function restartMissions() {
+  closeRestartConfirmModal();
+  clearSavedProgress();
+  state.mode = "mission";
+  state.currentProblemIdx = 0;
+  state.hasCompletedAllMissions = false;
+  saveProgress();
+  resetBoard();
+  setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
+  el.playgroundBtn.classList.add("hidden");
+  setFeedback("success", "Missions restarted at Problem 1.");
+}
+
+function closeAllModals() {
+  el.successModal.classList.add("hidden");
+  el.unlockModal.classList.add("hidden");
+  el.playgroundIntroModal.classList.add("hidden");
+  el.restartConfirmModal.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function setRobotType(robotType) {
+  if (!ROBOT_PROFILES[robotType] || robotType === state.robotType) return;
+  state.robotType = robotType;
+  saveProgress();
+  closeAllModals();
+  resetBoard();
+  setFeedback("success", `${currentRobotProfile().label} mode is on. Action codes were updated for that robot.`);
+}
+
+function bindRobotToggle(button, robotType) {
+  const activate = (event) => {
+    event.preventDefault();
+    setRobotType(robotType);
+  };
+
+  button.addEventListener("click", activate);
+  button.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    activate(event);
+  });
+}
+
+function renderModalRunTrack() {
+  el.modalRunCodes.innerHTML = "";
+  const modalTrack = document.getElementById("modalRunTrack");
+  if (modalTrack) {
+    modalTrack.classList.toggle("evo-modal-track", isEvoMode());
+  }
+
+  state.placedCodes.forEach((placedCode) => {
+    const chip = document.createElement("div");
+    chip.className = "modal-run-code";
+    if (isEvoMode()) chip.classList.add("evo-modal-run-code");
+
+    const ratio = placedCode.positionUnits / BASE_UNITS;
+    chip.style.left = `${ratio * 100}%`;
+    if (placedCode.positionUnits === 0) {
+      chip.style.transform = isEvoMode() ? "translate(0, -50%)" : "translateX(0)";
+    } else if (placedCode.positionUnits === BASE_UNITS) {
+      chip.style.transform = isEvoMode() ? "translate(-100%, -50%)" : "translateX(-100%)";
+    } else if (isEvoMode()) {
+      chip.style.transform = "translate(-50%, -50%)";
+    }
+
+    chip.innerHTML = modalCodeStripesHTML(placedCode.colors);
+
+    el.modalRunCodes.appendChild(chip);
+  });
+
+  const endChip = document.createElement("div");
+  endChip.className = "modal-run-code modal-run-code-end";
+  if (isEvoMode()) endChip.classList.add("evo-modal-run-code");
+  endChip.style.left = "100%";
+  endChip.style.transform = isEvoMode() ? "translate(-100%, -50%)" : "translateX(-100%)";
+  endChip.innerHTML = modalCodeStripesHTML(modalEndCodeColors());
+  el.modalRunCodes.appendChild(endChip);
+}
+
+function handlePassedCheck() {
+  const successMessages = [
+    "Awesome job. Math mission complete.",
+    "Great work. Your fraction track is correct.",
+    "You got it. Your Ozobot path is ready."
+  ];
+  const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
+  state.isCheckedCorrect = true;
+  setFeedback("success", msg);
+  if (isPlaygroundMode()) {
+    setCheckDetails([], true);
+    openSuccessModal();
+    return;
+  }
+  setCheckDetails([], false);
+  celebrateMissionReady();
+  triggerTrackMorphAnimation();
+}
+
+function maybeAutoCheckAnswer() {
+  if (isPlaygroundMode()) return;
+  if (state.isCheckedCorrect) return;
+  if (!el.successModal.classList.contains("hidden")) return;
+  if (!el.unlockModal.classList.contains("hidden")) return;
+
+  const result = evaluateStudentWork();
+  if (result.passed) {
+    handlePassedCheck();
+  }
+}
+
+function checkAnswer() {
+  if (isPlaygroundMode()) {
+    if (state.placedSegments.length === 0) {
+      setFeedback("error", "Build a line first.");
+      return;
+    }
+    openSuccessModal();
+    return;
+  }
+
+  if (state.isCheckedCorrect) {
+    triggerTrackMorphAnimation();
+    setFeedback("success", "Run your Ozobot on the line, then tap Next Mission.");
+    return;
+  }
+  setFeedback("error", "Finish building the correct whole line first.");
+}
+
+function nextProblem(fromModal = false) {
+  if (isPlaygroundMode()) return;
+  if (!fromModal && !state.isCheckedCorrect) {
+    setFeedback("error", "Check the answer first.");
+    return;
+  }
+
+  if (state.currentProblemIdx < CHALLENGES.length - 1) {
+    const codes = currentRobotCodes();
+    const priorUnlockCount = unlockedCodeCount();
+    state.currentProblemIdx += 1;
+    saveProgress();
+    resetBoard();
+    const newUnlockCount = unlockedCodeCount();
+    if (newUnlockCount > priorUnlockCount) {
+      triggerUnlockCelebration(newUnlockCount - 1);
+      setFeedback("success", `You unlocked a new action code block. ${newUnlockCount} of ${codes.length} codes unlocked.`);
+      openUnlockModal(codes[newUnlockCount - 1]);
+    }
+    return;
+  }
+
+  state.hasCompletedAllMissions = true;
+  saveProgress();
+}
+
+function polarPoint(cx, cy, r, degrees) {
+  const radians = ((degrees - 90) * Math.PI) / 180;
+  return {
+    x: cx + r * Math.cos(radians),
+    y: cy + r * Math.sin(radians)
+  };
+}
+
+function createSlicePath(cx, cy, r, startDeg, endDeg) {
+  const start = polarPoint(cx, cy, r, startDeg);
+  const end = polarPoint(cx, cy, r, endDeg);
+  const largeArc = endDeg - startDeg > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+}
+
+function renderPieChart() {
+  el.pieSlices.innerHTML = "";
+  let currentAngle = 0;
+
+  state.placedSegments.forEach((segment) => {
+    const sliceAngle = (segment.units / BASE_UNITS) * 360;
+    if (sliceAngle <= 0) return;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", createSlicePath(70, 70, 64, currentAngle, currentAngle + sliceAngle));
+    path.setAttribute("fill", segment.color);
+    path.setAttribute("stroke", "#ffffff");
+    path.setAttribute("stroke-width", "1.5");
+    el.pieSlices.appendChild(path);
+
+    if (sliceAngle > 20) {
+      const mid = currentAngle + sliceAngle / 2;
+      const labelPoint = polarPoint(70, 70, 38, mid);
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", labelPoint.x);
+      text.setAttribute("y", labelPoint.y);
+      text.setAttribute("fill", "#ffffff");
+      text.setAttribute("font-size", "10");
+      text.setAttribute("font-weight", "900");
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "middle");
+      text.textContent = segment.label;
+      el.pieSlices.appendChild(text);
+    }
+
+    currentAngle += sliceAngle;
+  });
+
+  el.pieLabel.textContent = `${formatUnitsAsFraction(totalUnits())} of 1 whole`;
+}
+
+function renderFractionButtons() {
+  el.fractionButtons.innerHTML = "";
+  const currentTotal = totalUnits();
+
+  FRACTIONS.forEach((fraction) => {
+    const btn = document.createElement("button");
+    btn.className = "tile fraction-tile";
+    btn.disabled = currentTotal + fraction.units > BASE_UNITS;
+    btn.style.setProperty("--fraction-accent", `${fraction.color}66`);
+    btn.style.setProperty("--fraction-fill", `${fraction.color}1a`);
+    const labelColor = isPlaygroundMode() ? "#f8fafc" : fraction.textColor;
+    const sublabelColor = isPlaygroundMode() ? "#e2e8f0" : "#475569";
+    btn.innerHTML = `<div style="font-size:22px;color:${labelColor}">${fraction.label}</div><div class="small" style="color:${sublabelColor}">${fraction.name}</div>`;
+    btn.addEventListener("click", () => addSegment(fraction));
+    el.fractionButtons.appendChild(btn);
+  });
+}
+
+function renderCodeButtons() {
+  el.codeButtons.innerHTML = "";
+  const codes = currentRobotCodes();
+  const visibleCodes = codes.slice(0, unlockedCodeCount());
+  const lockedCount = codes.length - visibleCodes.length;
+
+  el.codePanelTitle.textContent = `Action Codes for ${currentRobotProfile().shortLabel}`;
+  el.codeUnlockText.textContent = isPlaygroundMode()
+    ? `All ${codes.length} ${currentRobotProfile().shortLabel} codes ready`
+    : `${visibleCodes.length} of ${codes.length} ${currentRobotProfile().shortLabel} codes unlocked`;
+
+  visibleCodes.forEach((code) => {
+    const btn = document.createElement("button");
+    btn.className = "tile code-draggable";
+    btn.dataset.codeIdx = String(codes.findIndex((c) => c.id === code.id));
+    btn.dataset.codeId = code.id;
+    btn.innerHTML = `<div style="display:flex;gap:0;">${codeStripesHTML(code.colors)}</div><div class="small">${code.name}</div>`;
+    btn.addEventListener("click", () => {
+      if (suppressCodeClickId === code.id) {
+        suppressCodeClickId = null;
+        return;
+      }
+      addCode(code);
+    });
+    btn.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || btn.disabled) return;
+      dragState.code = code;
+      dragState.pointerId = event.pointerId;
+      dragState.startX = event.clientX;
+      dragState.startY = event.clientY;
+      dragState.moved = false;
+      dragState.sourceCodeId = code.id;
+      dragState.targetUnits = null;
+      dragState.ghostEl = null;
+    });
+    el.codeButtons.appendChild(btn);
+  });
+
+  for (let i = 0; i < lockedCount; i += 1) {
+    const locked = document.createElement("button");
+    locked.className = "tile tile-locked";
+    locked.disabled = true;
+    locked.innerHTML = `<div style="font-size:20px;">?</div><div class="small">???</div>`;
+    el.codeButtons.appendChild(locked);
+  }
+}
+
+function renderLiveMarkers() {
+  el.liveMarkers.innerHTML = "";
+  el.lineHintBanner.innerHTML = "";
+  if (!isPlaygroundMode() && state.isCheckedCorrect) return;
+  const removeSegmentByUid = (segmentUid) => {
+    const idx = state.placedSegments.findIndex((seg) => seg.uid === segmentUid);
+    if (idx === -1) return;
+    state.placedSegments.splice(idx, 1);
+    state.history = [];
+    state.showLineHints = false;
+    state.hintStep = 0;
+    const undoMessages = [
+      "Nice fix! 😊",
+      "Great catch! ⭐",
+      "Smart undo! 👍",
+      "You got this! 🚀"
+    ];
+    const msg = undoMessages[Math.floor(Math.random() * undoMessages.length)];
+    showQuickCue("success", msg);
+    setCheckDetails([], false);
+    clearCheckProgress();
+    render();
+  };
+  const setMarkerLeft = (marker, units) => {
+    marker.style.left = `${(units / BASE_UNITS) * 100}%`;
+    if (units === 0) {
+      marker.style.transform = "translateX(0)";
+    } else if (units === BASE_UNITS) {
+      marker.style.transform = "translateX(-100%)";
+    }
+  };
+
+  if (isPlaygroundMode()) return;
+
+  const problem = currentProblem();
+  const progress = getSegmentProgress(problem);
+  const codeProgress = getCodeProgress(problem);
+  const segmentMarkerSteps = progress.pendingBoundaries.length;
+  const codeMarkerStartStep = 3 + segmentMarkerSteps;
+  const focusedSegmentHintIdx =
+    state.showLineHints && state.hintStep >= 2 && state.hintStep <= 1 + segmentMarkerSteps
+      ? state.hintStep - 2
+      : -1;
+  const focusedCodeHintIdx =
+    state.showLineHints && state.hintStep >= codeMarkerStartStep
+      ? state.hintStep - codeMarkerStartStep
+      : -1;
+
+  if (state.placedSegments.length === 0 && state.showLineHints && state.hintStep === 1) {
+    const hintA = document.createElement("div");
+    hintA.className = "live-hint";
+    hintA.textContent = `Hint 1: Start by adding ${progress.needed} pieces of ${progress.requiredLabel}.`;
+    el.liveMarkers.appendChild(hintA);
+    return;
+  }
+  if (state.placedSegments.length === 0 && !state.showLineHints) return;
+
+  if (progress.needed > 0) {
+    for (let i = 1; i <= progress.needed; i += 1) {
+      const units = (i * BASE_UNITS) / progress.needed;
+      const matched = progress.matchedBoundaryIndexes.has(i);
+      const marker = document.createElement("div");
+
+      if (matched) {
+        marker.className = "live-marker boundary matched";
+        marker.textContent = "✓";
+      } else if (focusedSegmentHintIdx >= 0) {
+        if (
+          progress.pendingBoundaries[focusedSegmentHintIdx] &&
+          progress.pendingBoundaries[focusedSegmentHintIdx].index === i
+        ) {
+          marker.className = "live-marker boundary pending hint-focus";
+          marker.textContent = "💡";
+        } else {
+          continue;
+        }
+      } else {
+        continue;
+      }
+
+      setMarkerLeft(marker, units);
+      marker.title = `${i}/${progress.needed}`;
+      el.liveMarkers.appendChild(marker);
+    }
+
+    progress.wrongEndpoints.forEach((wrong) => {
+      const marker = document.createElement("div");
+      marker.className = "live-marker boundary wrong";
+      setMarkerLeft(marker, wrong.units);
+      marker.textContent = "↺";
+      const tooltipText = `${wrong.label} is not needed here. Use ${progress.requiredLabel}.`;
+      marker.title = tooltipText;
+      marker.dataset.tooltip = tooltipText;
+      marker.classList.add("has-tooltip");
+      marker.addEventListener("click", () => removeSegmentByUid(wrong.uid));
+      el.liveMarkers.appendChild(marker);
+    });
+
+    if (progress.wrongEndpoints.length > 0) {
+      const warning = document.createElement("div");
+      warning.className = "live-hint warning";
+      warning.textContent = `Try using only ${progress.requiredLabel} segments for this mission.`;
+      el.lineHintBanner.appendChild(warning);
+    }
+  }
+
+  const requiredCodeCounts = new Map();
+  problem.requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    requiredCodeCounts.set(units, (requiredCodeCounts.get(units) || 0) + 1);
+  });
+
+  const availablePlacedCounts = new Map();
+  state.placedCodes.forEach((code) => {
+    availablePlacedCounts.set(code.positionUnits, (availablePlacedCounts.get(code.positionUnits) || 0) + 1);
+  });
+
+  problem.requirements.codes.forEach((req) => {
+    const units = reqToUnits(req);
+    const available = availablePlacedCounts.get(units) || 0;
+    const matched = available > 0;
+    if (matched) availablePlacedCounts.set(units, available - 1);
+    if (!matched) return;
+    const marker = document.createElement("div");
+    marker.className = "live-marker code matched";
+    setMarkerLeft(marker, units);
+    marker.textContent = "✓";
+    marker.title = `Action code at ${req.numerator}/${req.denominator}`;
+    el.liveMarkers.appendChild(marker);
+  });
+
+  if (focusedCodeHintIdx >= 0 && codeProgress.pendingTargets[focusedCodeHintIdx]) {
+    const pendingCode = codeProgress.pendingTargets[focusedCodeHintIdx];
+    const marker = document.createElement("div");
+    marker.className = "live-marker code pending hint-focus";
+    setMarkerLeft(marker, pendingCode.units);
+    marker.textContent = "💡";
+    marker.title = `Action code target at ${pendingCode.label}`;
+    el.liveMarkers.appendChild(marker);
+  }
+
+  const requiredLeftByPosition = new Map(requiredCodeCounts);
+  const wrongCodePlacements = [];
+  state.placedCodes.forEach((code) => {
+    const neededLeft = requiredLeftByPosition.get(code.positionUnits) || 0;
+    if (neededLeft > 0) {
+      requiredLeftByPosition.set(code.positionUnits, neededLeft - 1);
+    } else {
+      wrongCodePlacements.push(code.positionUnits);
+    }
+  });
+
+  wrongCodePlacements.forEach((units) => {
+    const marker = document.createElement("div");
+    marker.className = "live-marker code wrong";
+    setMarkerLeft(marker, units);
+    marker.textContent = "!";
+    marker.title = "This action code block is not at a target location.";
+    el.liveMarkers.appendChild(marker);
+  });
+
+  if (wrongCodePlacements.length > 0) {
+    const requiredTargets = problem.requirements.codes
+      .map((req) => `${req.numerator}/${req.denominator}`)
+      .join(", ");
+    const warning = document.createElement("div");
+    warning.className = "live-hint warning";
+    warning.textContent = `Move action code blocks to: ${requiredTargets}.`;
+    el.lineHintBanner.appendChild(warning);
+  }
+}
+
+function renderAxis() {
+  el.axis.innerHTML = "";
+  const denominatorHint = getPrimarySegmentDenominator();
+
+  const points = [{ units: 0 }];
+  let running = 0;
+  state.placedSegments.forEach((segment) => {
+    running += segment.units;
+    points.push({ units: running });
+  });
+
+  if (!points.some((p) => p.units === BASE_UNITS)) {
+    points.push({ units: BASE_UNITS });
+  }
+
+  const unique = [];
+  const seen = new Set();
+  points.forEach((point) => {
+    if (point.units < 0 || point.units > BASE_UNITS) return;
+    if (seen.has(point.units)) return;
+    seen.add(point.units);
+    unique.push(point);
+  });
+
+  unique.forEach((point) => {
+    const label = document.createElement("span");
+    label.className = "axis-label";
+    label.style.left = `${(point.units / BASE_UNITS) * 100}%`;
+    label.textContent = formatAxisLabel(point.units, denominatorHint);
+    el.axis.appendChild(label);
+  });
+}
+
+function renderTrack() {
+  el.segmentOverlay.innerHTML = "";
+  let startUnits = 0;
+
+  state.placedSegments.forEach((segment) => {
+    const block = document.createElement("div");
+    block.className = "overlay-segment";
+    if (isPlaygroundMode()) block.classList.add("playground-segment");
+    block.style.left = `${(startUnits / BASE_UNITS) * 100}%`;
+    block.style.width = `${(segment.units / BASE_UNITS) * 100}%`;
+    block.style.borderColor = `${segment.color}99`;
+    block.style.background = isPlaygroundMode() ? `${segment.color}55` : `${segment.color}3d`;
+    if (isPlaygroundMode()) {
+      block.style.boxShadow = `0 0 14px ${segment.color}66, inset 0 0 18px ${segment.color}55`;
+    } else {
+      block.style.boxShadow = `inset 0 0 0 1px ${segment.color}55, inset 0 8px 10px rgba(255,255,255,0.22)`;
+    }
+
+    const segLabel = document.createElement("span");
+    segLabel.className = "overlay-segment-label";
+    segLabel.textContent = segment.label;
+    block.appendChild(segLabel);
+
+    el.segmentOverlay.appendChild(block);
+    startUnits += segment.units;
+  });
+
+  el.codesLayer.innerHTML = "";
+  state.placedCodes.forEach((placedCode) => {
+    const chip = document.createElement("div");
+    chip.className = "code-chip";
+    if (placedCode.isWrongPlacement) chip.classList.add("code-chip-wrong");
+    chip.style.left = `${(placedCode.positionUnits / BASE_UNITS) * 100}%`;
+    chip.innerHTML = placedCode.colors
+      .map(
+        (color) =>
+          `<span class="code-stripe" style="background:${color};width:22px;height:22px;border-radius:0"></span>`
+      )
+      .join("");
+
+    el.codesLayer.appendChild(chip);
+  });
+
+  renderAxis();
+  renderLiveMarkers();
+}
+
+function render() {
+  const missionRunReady = !isPlaygroundMode() && state.isCheckedCorrect;
+  const isLastMission = state.currentProblemIdx >= CHALLENGES.length - 1;
+  document.body.classList.toggle("playground-mode", isPlaygroundMode());
+  el.bitRobotBtn.classList.toggle("active", state.robotType === "bit");
+  el.evoRobotBtn.classList.toggle("active", state.robotType === "evo");
+  el.bitRobotBtn.setAttribute("aria-pressed", String(state.robotType === "bit"));
+  el.evoRobotBtn.setAttribute("aria-pressed", String(state.robotType === "evo"));
+  el.trackWrap.classList.toggle("mission-track-ready", missionRunReady);
+  el.trackWrap.classList.toggle("mission-track-morphing", missionRunReady && state.isMorphingTrack);
+  if (isPlaygroundMode()) {
+    el.problemCounter.textContent = "Ozobot Playground";
+    el.missionText.innerHTML = `
+      <span class="mission-line mission-line-primary">Build any <span class="mission-whole">1 whole</span> fraction line you want.</span>
+      <span class="mission-line mission-line-secondary">Add any action codes you want, then run it as many times as you like.</span>
+    `;
+    el.progressLabel.textContent = "Line Length";
+    el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
+    el.hintBtn.disabled = true;
+    setButtonLabel(el.checkBtn, "▶", "Run Line");
+    el.checkBtn.classList.add("playground-run-btn");
+    el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
+    el.checkBtn.classList.remove("hidden");
+    el.missionRunHint.classList.add("hidden");
+    el.playgroundRunHint.classList.remove("hidden");
+    el.missionAdvancePanel.classList.add("hidden");
+    setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
+    el.playgroundBtn.classList.remove("hidden");
+  } else {
+    const problem = currentProblem();
+    el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
+    el.missionText.innerHTML = formatMissionText(problem.title);
+    el.progressLabel.textContent = "Total Progress";
+    el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
+    el.hintBtn.disabled = false;
+    setButtonLabel(el.checkBtn, "▶", "Run Line");
+    el.checkBtn.classList.add("playground-run-btn", "mission-run-btn");
+    el.checkBtn.classList.toggle("mission-run-btn-ready", state.isCheckedCorrect);
+    el.checkBtn.disabled = true;
+    el.checkBtn.classList.add("hidden");
+    el.missionRunHint.textContent = missionRunReady
+      ? "Fraction line transformed into the Ozobot path. Run Ozobot, then tap Next Mission."
+      : "";
+    el.missionRunHint.classList.toggle("hidden", !missionRunReady);
+    el.playgroundRunHint.classList.add("hidden");
+    el.missionAdvanceText.textContent = isLastMission
+      ? "Run your Ozobot on the line, then finish the mission set."
+      : "Run your Ozobot on the line, then move to the next mission.";
+    el.nextMissionBtn.textContent = isLastMission ? "Run Complete - Finish Missions" : "Run Complete - Next Mission";
+    el.missionAdvancePanel.classList.toggle("hidden", !missionRunReady);
+    setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
+    if (state.hasCompletedAllMissions) {
+      el.playgroundBtn.classList.remove("hidden");
+    } else {
+      el.playgroundBtn.classList.add("hidden");
+    }
+  }
+
+  if (isPlaygroundMode()) {
+    el.checkBtn.disabled = false;
+    el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
+  }
+
+  renderFractionButtons();
+  renderCodeButtons();
+  renderTrack();
+  renderPieChart();
+}
+
+el.hintBtn.addEventListener("click", showHint);
+el.undoBtn.addEventListener("click", undo);
+el.resetBtn.addEventListener("click", resetBoard);
+bindRobotToggle(el.bitRobotBtn, "bit");
+bindRobotToggle(el.evoRobotBtn, "evo");
+el.playgroundBtn.addEventListener("click", () => {
+  if (isPlaygroundMode()) {
+    returnToMissions();
+    return;
+  }
+  goToPlayground();
+});
+el.restartMissionsBtn.addEventListener("click", openRestartConfirmModal);
+el.checkBtn.addEventListener("click", checkAnswer);
+el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
+el.nextMissionBtn.addEventListener("click", () => nextProblem(true));
+el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
+el.enterPlaygroundBtn.addEventListener("click", enterPlaygroundMode);
+el.cancelRestartBtn.addEventListener("click", closeRestartConfirmModal);
+el.confirmRestartBtn.addEventListener("click", restartMissions);
+el.unlockModal.addEventListener("click", (event) => {
+  if (event.target === el.unlockModal) closeUnlockModal();
+});
+el.restartConfirmModal.addEventListener("click", (event) => {
+  if (event.target === el.restartConfirmModal) closeRestartConfirmModal();
+});
+document.addEventListener("pointermove", (event) => {
+  if (!dragState.code || dragState.pointerId !== event.pointerId) return;
+  const movedEnough =
+    Math.abs(event.clientX - dragState.startX) > 8 ||
+    Math.abs(event.clientY - dragState.startY) > 8;
+  if (!dragState.moved && movedEnough) {
+    dragState.moved = true;
+    dragState.ghostEl = createCodeDragGhost(dragState.code);
+    document.body.classList.add("dragging-code");
+  }
+  if (!dragState.moved) return;
+  updateCodeDrag(event.clientX, event.clientY);
+});
+document.addEventListener("pointerup", (event) => {
+  if (!dragState.code || dragState.pointerId !== event.pointerId) return;
+  finishCodeDrag(event.clientX, event.clientY);
+});
+document.addEventListener("pointercancel", () => {
+  if (!dragState.code) return;
+  resetDragState();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !el.successModal.classList.contains("hidden")) {
+    closeSuccessModalAndAdvance();
+  }
+  if (event.key === "Escape" && !el.unlockModal.classList.contains("hidden")) {
+    closeUnlockModal();
+  }
+  if (event.key === "Escape" && !el.playgroundIntroModal.classList.contains("hidden")) {
+    enterPlaygroundMode();
+  }
+  if (event.key === "Escape" && !el.restartConfirmModal.classList.contains("hidden")) {
+    closeRestartConfirmModal();
+  }
+  if (event.key === "Escape" && dragState.code) {
+    resetDragState();
+  }
+});
+
+loadProgress();
+render();
+
+    </script>
   </body>
 </html>

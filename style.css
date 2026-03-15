@@ -20,6 +20,7 @@ body {
   background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 45%, #e2e8f0 100%);
   color: var(--text);
   transition: background 260ms ease;
+  min-height: 100vh;
 }
 
 .app {
@@ -63,6 +64,7 @@ body {
   padding: 14px;
   display: flex;
   flex-direction: column;
+  min-height: 264px;
   position: relative;
   overflow: hidden;
   transition:
@@ -279,6 +281,7 @@ body.playground-mode .check-details.fail {
   line-height: 1.2;
   font-weight: 900;
   color: #1e1b4b;
+  min-height: 88px;
 }
 
 .mission-line {
@@ -364,6 +367,7 @@ body.playground-mode .mission-whole {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-height: 30px;
 }
 
 .restart-missions-btn {
@@ -435,6 +439,7 @@ body.playground-mode .mission-whole {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  min-height: 264px;
   background: #374151;
 }
 
@@ -1024,6 +1029,7 @@ body.playground-mode .garage-pad {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+  min-height: 44px;
 }
 
 .mission-confetti {
@@ -1536,9 +1542,11 @@ body.playground-mode .playground-run-btn:hover {
   border: 1px solid #cbd5e1;
   border-radius: 18px;
   padding: 18px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .success-card {
