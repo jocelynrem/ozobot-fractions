@@ -175,10 +175,7 @@ const el = {
   progressLabel: document.getElementById("progressLabel"),
   progressValue: document.getElementById("progressValue"),
   missionConfetti: document.getElementById("missionConfetti"),
-  missionRunHint: document.getElementById("missionRunHint"),
   playgroundRunHint: document.getElementById("playgroundRunHint"),
-  missionAdvancePanel: document.getElementById("missionAdvancePanel"),
-  missionAdvanceText: document.getElementById("missionAdvanceText"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
   codePanelHeader: document.getElementById("codePanelHeader"),
@@ -1029,6 +1026,7 @@ function openSuccessModal() {
     setButtonLabel(el.nextFromModalBtn, "▶", "Run Complete - Next Problem");
   }
   el.successModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
@@ -1040,17 +1038,20 @@ function openUnlockModal(code) {
     .map((color) => `<span class="unlock-preview-stripe" style="background:${color}"></span>`)
     .join("");
   el.unlockModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
 function openPlaygroundIntroModal() {
   launchConfettiBurst(el.playgroundIntroConfetti, ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#facc15"], 44);
   el.playgroundIntroModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
 function closeSuccessModalAndAdvance() {
   el.successModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
   if (isPlaygroundMode()) return;
   if (state.currentProblemIdx >= CHALLENGES.length - 1) {
@@ -1064,6 +1065,7 @@ function closeSuccessModalAndAdvance() {
 
 function closeUnlockModal() {
   el.unlockModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
 }
 
@@ -1083,17 +1085,20 @@ function returnToMissions() {
 
 function enterPlaygroundMode() {
   el.playgroundIntroModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
   goToPlayground();
 }
 
 function openRestartConfirmModal() {
   el.restartConfirmModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
 function closeRestartConfirmModal() {
   el.restartConfirmModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
 }
 
@@ -1115,6 +1120,7 @@ function closeAllModals() {
   el.unlockModal.classList.add("hidden");
   el.playgroundIntroModal.classList.add("hidden");
   el.restartConfirmModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
 }
 
@@ -1145,6 +1151,7 @@ function renderModalRunTrack() {
   const modalTrack = document.getElementById("modalRunTrack");
   if (modalTrack) {
     modalTrack.classList.toggle("evo-modal-track", isEvoMode());
+    modalTrack.style.setProperty("--modal-run-center", isEvoMode() ? "60%" : "58%");
   }
 
   state.placedCodes.forEach((placedCode) => {
@@ -1368,8 +1375,8 @@ function renderCodeButtons() {
 }
 
 function renderLiveMarkers() {
-  el.liveMarkers.innerHTML = "";
   el.lineHintBanner.innerHTML = "";
+  el.liveMarkers.innerHTML = "";
   if (!isPlaygroundMode() && state.isCheckedCorrect) return;
   const removeSegmentByUid = (segmentUid) => {
     const idx = state.placedSegments.findIndex((seg) => seg.uid === segmentUid);
@@ -1642,9 +1649,8 @@ function render() {
     el.checkBtn.classList.add("playground-run-btn");
     el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
     el.checkBtn.classList.remove("hidden");
-    el.missionRunHint.classList.add("hidden");
+    el.nextMissionBtn.classList.add("hidden");
     el.playgroundRunHint.classList.remove("hidden");
-    el.missionAdvancePanel.classList.add("hidden");
     setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
     el.playgroundBtn.classList.remove("hidden");
   } else {
@@ -1659,16 +1665,9 @@ function render() {
     el.checkBtn.classList.toggle("mission-run-btn-ready", state.isCheckedCorrect);
     el.checkBtn.disabled = true;
     el.checkBtn.classList.add("hidden");
-    el.missionRunHint.textContent = missionRunReady
-      ? "Fraction line transformed into the Ozobot path. Run Ozobot, then tap Next Mission."
-      : "";
-    el.missionRunHint.classList.toggle("hidden", !missionRunReady);
+    el.nextMissionBtn.classList.toggle("hidden", !missionRunReady);
     el.playgroundRunHint.classList.add("hidden");
-    el.missionAdvanceText.textContent = isLastMission
-      ? "Run your Ozobot on the line, then finish the mission set."
-      : "Run your Ozobot on the line, then move to the next mission.";
     el.nextMissionBtn.textContent = isLastMission ? "Run Complete - Finish Missions" : "Run Complete - Next Mission";
-    el.missionAdvancePanel.classList.toggle("hidden", !missionRunReady);
     setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
     if (state.hasCompletedAllMissions) {
       el.playgroundBtn.classList.remove("hidden");

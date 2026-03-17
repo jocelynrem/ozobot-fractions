@@ -19,6 +19,8 @@
   --danger: #e11d48;
   --border: #e2e8f0;
   --ozobot-line-size: 28px;
+  --track-line-center: 50%;
+  --modal-run-center: 58%;
 }
 
 * {
@@ -381,6 +383,14 @@ body.playground-mode .mission-whole {
   min-height: 30px;
 }
 
+.mission-meta-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+}
+
 .restart-missions-btn {
   border: 1px solid #cbd5e1;
   background: rgba(255, 255, 255, 0.55);
@@ -439,12 +449,17 @@ body.playground-mode .mission-whole {
   gap: 6px;
 }
 
+.pie-card .restart-missions-btn {
+  margin-top: auto;
+}
+
 .garage-card {
   width: 260px;
   flex: 0 0 260px;
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 12px;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -463,6 +478,13 @@ body.playground-mode .mission-whole {
   height: 220px;
   border-radius: 50%;
   background: #ffffff;
+}
+
+body.modal-open .garage-pad {
+  position: relative;
+  z-index: 1001;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #ffffff;
 }
 
 #pieChart {
@@ -513,6 +535,24 @@ body.playground-mode .mission-whole {
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
 }
 
+.mission-card .check-details {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  margin-top: 0;
+  min-height: 0;
+  max-height: 56px;
+  padding: 8px 10px;
+  overflow: auto;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+  z-index: 2;
+}
+
+.mission-card .check-details.hidden {
+  display: none !important;
+}
+
 .check-details.pass {
   border-color: #86efac;
   border-left-color: #22c55e;
@@ -529,7 +569,7 @@ body.playground-mode .mission-whole {
 
 .track-wrap {
   position: relative;
-  min-height: 250px;
+  min-height: 214px;
   display: flex;
   align-items: center;
   isolation: isolate;
@@ -540,7 +580,7 @@ body.playground-mode .mission-whole {
   position: absolute;
   left: 36px;
   right: 36px;
-  top: 44%;
+  top: var(--track-line-center);
   height: calc(var(--ozobot-line-size) + 28px);
   border-radius: 18px;
   transform: translateY(-50%) scaleX(0.12);
@@ -559,7 +599,7 @@ body.dragging-code .track-bg {
   position: absolute;
   left: 36px;
   right: 36px;
-  top: 6px;
+  top: 2px;
   min-height: 24px;
   display: flex;
   justify-content: center;
@@ -568,50 +608,27 @@ body.dragging-code .track-bg {
   pointer-events: none;
 }
 
-.track-start-marker {
+.track-start-arrow {
   position: absolute;
   left: 36px;
-  top: calc(44% - 68px);
-  display: block;
+  top: calc(var(--track-line-center) - 44px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 4px 6px rgba(15, 23, 42, 0.18);
+  transform: translate(-50%, -50%);
   z-index: 6;
   opacity: 0;
-  transform: translate(-18%, 10px);
   pointer-events: none;
   transition:
     opacity 360ms ease,
     transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.track-start-arrow {
-  position: absolute;
-  left: 0;
-  top: calc(68px + 1px);
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 16px solid #0f172a;
-  filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.18));
-  transform: translate(-16px, -50%);
-}
-
-.track-start-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 30px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.45);
-  box-shadow:
-    0 8px 20px rgba(59, 130, 246, 0.14),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-  color: #1e3a8a;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
 }
 
 .track-bg,
@@ -621,7 +638,7 @@ body.dragging-code .track-bg {
   right: 36px;
   height: var(--ozobot-line-size);
   border-radius: 10px;
-  top: 44%;
+  top: var(--track-line-center);
   transform: translateY(-50%);
 }
 
@@ -690,7 +707,7 @@ body.playground-mode .garage-pad {
   position: absolute;
   left: 36px;
   right: 36px;
-  top: 44%;
+  top: var(--track-line-center);
   transform: translateY(-50%);
   height: var(--ozobot-line-size);
   z-index: 4;
@@ -700,7 +717,7 @@ body.playground-mode .garage-pad {
   position: absolute;
   left: 36px;
   width: calc(100% - 72px);
-  top: 44%;
+  top: var(--track-line-center);
   transform: translateY(-50%);
   height: var(--ozobot-line-size);
   pointer-events: none;
@@ -833,6 +850,7 @@ body.playground-mode .garage-pad {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  z-index: 7;
   transition:
     opacity 360ms ease,
     transform 480ms ease;
@@ -925,6 +943,7 @@ body.playground-mode .garage-pad {
 
 .live-marker.has-tooltip {
   position: absolute;
+  z-index: 8;
 }
 
 .live-marker.has-tooltip::after {
@@ -944,6 +963,7 @@ body.playground-mode .garage-pad {
   max-width: 230px;
   white-space: normal;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+  z-index: 9;
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease;
@@ -1079,7 +1099,7 @@ body.playground-mode .garage-pad {
   position: absolute;
   left: 36px;
   right: 36px;
-  top: calc(44% + 26px);
+  top: calc(var(--track-line-center) + 26px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1131,7 +1151,7 @@ body.playground-mode .garage-pad {
 .mode-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   margin-top: -6px;
 }
@@ -1174,6 +1194,28 @@ body.playground-mode .garage-pad {
   -webkit-tap-highlight-color: transparent;
 }
 
+.mission-action-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-left: auto;
+  padding: 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.mission-action-buttons .robot-toggle-btn {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 12px;
+  box-shadow: none;
+}
+
 .robot-toggle-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
@@ -1201,6 +1243,18 @@ body.playground-mode .robot-picker {
 
 body.playground-mode .robot-picker-label {
   color: #a5f3fc;
+}
+
+body.playground-mode .mission-action-buttons .robot-toggle-btn {
+  background: rgba(15, 23, 42, 0.96);
+}
+
+body.playground-mode .mission-action-buttons {
+  background: rgba(15, 23, 42, 0.94);
+  border-color: #22d3ee;
+  box-shadow:
+    0 6px 14px rgba(2, 6, 23, 0.42),
+    0 0 14px rgba(34, 211, 238, 0.08);
 }
 
 body.playground-mode .robot-toggle-btn {
@@ -1371,9 +1425,9 @@ body.playground-mode .robot-toggle-btn:hover {
   pointer-events: none;
 }
 
-.track-wrap.mission-track-ready .track-start-marker {
+.track-wrap.mission-track-ready .track-start-arrow {
   opacity: 1;
-  transform: translate(-18%, 0);
+  transform: translate(-50%, -50%);
   transition-delay: 160ms;
 }
 
@@ -1836,7 +1890,7 @@ body.playground-mode .playground-run-btn:hover {
 }
 
 .modal-run-start-note {
-  margin: 0 0 6px 24px;
+  margin: 0 0 8px 24px;
   width: fit-content;
   color: #1e293b;
   font-size: 12px;
@@ -1901,7 +1955,7 @@ body.playground-mode .playground-run-btn:hover {
 
 .modal-run-track {
   position: relative;
-  height: 92px;
+  height: 132px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #ffffff;
@@ -1909,13 +1963,13 @@ body.playground-mode .playground-run-btn:hover {
 }
 
 .modal-run-track.evo-modal-track {
-  height: 110px;
+  height: 152px;
 }
 
 .modal-run-start {
   position: absolute;
   left: 20px;
-  top: 16px;
+  top: 20px;
   z-index: 2;
 }
 
@@ -1932,7 +1986,7 @@ body.playground-mode .playground-run-btn:hover {
   position: absolute;
   left: 24px;
   right: 24px;
-  top: 50%;
+  top: var(--modal-run-center);
   transform: translateY(-50%);
   height: var(--ozobot-line-size);
   background: #000000;
@@ -1949,7 +2003,7 @@ body.playground-mode .playground-run-btn:hover {
   position: absolute;
   left: 24px;
   right: 24px;
-  top: 50%;
+  top: var(--modal-run-center);
   transform: translateY(-50%);
   height: var(--ozobot-line-size);
 }
@@ -1995,7 +2049,7 @@ body.playground-mode .playground-run-btn:hover {
 }
 
 .toolbar-inline {
-  margin-top: -4px;
+  margin-top: 4px;
 }
 
 .panel h2 {
@@ -2014,14 +2068,18 @@ body.playground-mode .playground-run-btn:hover {
   margin-bottom: 10px;
 }
 
+.panel-footer-label {
+  margin-top: 10px;
+}
+
 .code-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 12px;
-  height: 24px;
-  margin-bottom: 10px;
+  min-height: 24px;
+  margin-top: 10px;
 }
 
 .code-panel-header.unlock-pop {
@@ -2258,9 +2316,23 @@ body.playground-mode .playground-run-btn:hover {
 }
 
 @media (max-width: 700px) {
+  .actions-row,
+  .mission-meta-row {
+    flex-wrap: wrap;
+  }
+
+  .mission-meta-controls {
+    width: 100%;
+  }
+
+  .mission-action-buttons {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
   .mode-nav {
-    flex-direction: column;
-    align-items: stretch;
+    justify-content: flex-start;
   }
 
   .mission-advance-panel {
@@ -2268,13 +2340,9 @@ body.playground-mode .playground-run-btn:hover {
     align-items: stretch;
   }
 
-  .track-start-marker {
-    left: 24px;
-    top: calc(44% - 74px);
-  }
-
   .track-start-arrow {
-    left: 0;
+    left: 24px;
+    top: calc(var(--track-line-center) - 48px);
   }
 
   .mission-next-btn {
@@ -2285,6 +2353,10 @@ body.playground-mode .playground-run-btn:hover {
   .robot-picker {
     justify-content: center;
     flex-wrap: wrap;
+  }
+
+  .code-panel-header {
+    align-items: stretch;
   }
 
   .button-grid {
@@ -2333,13 +2405,19 @@ body.playground-mode .playground-run-btn:hover {
               <g id="pieSlices"></g>
             </svg>
             <div id="pieLabel" class="pie-label">0/1 of 1 whole</div>
+            <button id="restartMissionsBtn" class="restart-missions-btn" type="button">Restart Missions</button>
           </div>
           <div class="mission-card">
             <div id="missionConfetti" class="mission-confetti" aria-hidden="true"></div>
             <p class="eyebrow">Mission Objective</p>
             <div class="mission-meta-row">
-              <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
-              <button id="restartMissionsBtn" class="restart-missions-btn" type="button">Restart Missions</button>
+              <div class="mission-meta-controls">
+                <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
+                <div class="mission-action-buttons" role="group" aria-label="Choose Ozobot robot">
+                  <button id="bitRobotBtn" class="robot-toggle-btn" type="button">Bit</button>
+                  <button id="evoRobotBtn" class="robot-toggle-btn" type="button">Evo</button>
+                </div>
+              </div>
             </div>
             <p id="missionText" class="mission">
               <span class="mission-line mission-line-primary">Make <span class="mission-whole">1 whole</span> using <span class="mission-fraction">halves</span>.</span>
@@ -2358,9 +2436,10 @@ body.playground-mode .playground-run-btn:hover {
               </div>
             </section>
             <section class="action-hints">
-              <p id="missionRunHint" class="mission-run-hint hidden">Whole line is correct. Tap Run Ozobot.</p>
+              <button id="nextMissionBtn" class="btn btn-primary mission-next-btn hidden" type="button">Run Complete - Next Mission</button>
               <p id="playgroundRunHint" class="playground-run-hint hidden">When your line is ready, tap the big run button.</p>
             </section>
+            <section id="checkDetails" class="check-details hidden"></section>
           </div>
           <aside class="garage-card" aria-label="Ozobot parking area">
             <p class="eyebrow garage-eyebrow">Ozobot Parking</p>
@@ -2368,43 +2447,29 @@ body.playground-mode .playground-run-btn:hover {
           </aside>
         </section>
         <section class="mode-nav">
-          <div class="robot-picker" role="group" aria-label="Choose Ozobot robot">
-            <span class="robot-picker-label">Robot</span>
-            <button id="bitRobotBtn" class="robot-toggle-btn" type="button">Bit</button>
-            <button id="evoRobotBtn" class="robot-toggle-btn" type="button">Evo</button>
-          </div>
           <button id="playgroundBtn" class="btn btn-light hidden">Go to Playground</button>
         </section>
-        <section id="checkDetails" class="check-details hidden"></section>
-        <section class="toolbar toolbar-inline">
-          <section class="panel">
-            <h2>Fraction Segments</h2>
-            <div id="fractionButtons" class="button-grid fraction-grid"></div>
-          </section>
-          <section class="panel">
-            <div id="codePanelHeader" class="code-panel-header">
-              <h2 id="codePanelTitle" class="code-panel-title">Action Codes</h2>
-              <p id="codeUnlockText" class="unlock-note"></p>
-            </div>
-            <div id="codeButtons" class="button-grid code-grid"></div>
-          </section>
-        </section>
-
         <section id="trackWrap" class="track-wrap">
           <div id="lineHintBanner" class="line-hint-banner"></div>
-          <div id="trackStartMarker" class="track-start-marker" aria-label="Start Ozobot here">
-            <span class="track-start-arrow" aria-hidden="true"></span>
-            <span class="track-start-label">Start Ozobot here</span>
-          </div>
+          <span id="trackStartMarker" class="track-start-arrow" aria-label="Start Ozobot here" role="img">→</span>
           <div class="track-bg"></div>
           <div id="segmentOverlay" class="segment-overlay"></div>
           <div id="codesLayer" class="codes-layer"></div>
           <div id="dragDropMarker" class="drag-drop-marker hidden" aria-hidden="true"></div>
           <div id="axis" class="axis"></div>
           <div id="liveMarkers" class="live-markers"></div>
-          <section id="missionAdvancePanel" class="mission-advance-panel hidden" aria-live="polite">
-            <p id="missionAdvanceText" class="mission-advance-text">Run your Ozobot on the line, then move to the next mission.</p>
-            <button id="nextMissionBtn" class="btn btn-primary mission-next-btn" type="button">Run Complete - Next Mission</button>
+        </section>
+        <section class="toolbar toolbar-inline">
+          <section class="panel">
+            <div id="fractionButtons" class="button-grid fraction-grid"></div>
+            <h2 class="panel-footer-label">Fraction Segments</h2>
+          </section>
+          <section class="panel">
+            <div id="codeButtons" class="button-grid code-grid"></div>
+            <div id="codePanelHeader" class="code-panel-header">
+              <h2 id="codePanelTitle" class="code-panel-title">Action Codes</h2>
+              <p id="codeUnlockText" class="unlock-note"></p>
+            </div>
           </section>
         </section>
       </main>
@@ -2693,17 +2758,14 @@ const el = {
   progressLabel: document.getElementById("progressLabel"),
   progressValue: document.getElementById("progressValue"),
   missionConfetti: document.getElementById("missionConfetti"),
-  missionRunHint: document.getElementById("missionRunHint"),
   playgroundRunHint: document.getElementById("playgroundRunHint"),
-  missionAdvancePanel: document.getElementById("missionAdvancePanel"),
-  missionAdvanceText: document.getElementById("missionAdvanceText"),
   fractionButtons: document.getElementById("fractionButtons"),
   codeButtons: document.getElementById("codeButtons"),
   codePanelHeader: document.getElementById("codePanelHeader"),
   codePanelTitle: document.getElementById("codePanelTitle"),
   codeUnlockText: document.getElementById("codeUnlockText"),
-  liveMarkers: document.getElementById("liveMarkers"),
   lineHintBanner: document.getElementById("lineHintBanner"),
+  liveMarkers: document.getElementById("liveMarkers"),
   trackWrap: document.getElementById("trackWrap"),
   quickCue: document.getElementById("quickCue"),
   hintBtn: document.getElementById("hintBtn"),
@@ -3547,6 +3609,7 @@ function openSuccessModal() {
     setButtonLabel(el.nextFromModalBtn, "▶", "Run Complete - Next Problem");
   }
   el.successModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
@@ -3558,17 +3621,20 @@ function openUnlockModal(code) {
     .map((color) => `<span class="unlock-preview-stripe" style="background:${color}"></span>`)
     .join("");
   el.unlockModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
 function openPlaygroundIntroModal() {
   launchConfettiBurst(el.playgroundIntroConfetti, ["#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#facc15"], 44);
   el.playgroundIntroModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
 function closeSuccessModalAndAdvance() {
   el.successModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
   if (isPlaygroundMode()) return;
   if (state.currentProblemIdx >= CHALLENGES.length - 1) {
@@ -3582,6 +3648,7 @@ function closeSuccessModalAndAdvance() {
 
 function closeUnlockModal() {
   el.unlockModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
 }
 
@@ -3601,17 +3668,20 @@ function returnToMissions() {
 
 function enterPlaygroundMode() {
   el.playgroundIntroModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
   goToPlayground();
 }
 
 function openRestartConfirmModal() {
   el.restartConfirmModal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
   document.body.style.overflow = "hidden";
 }
 
 function closeRestartConfirmModal() {
   el.restartConfirmModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
 }
 
@@ -3633,6 +3703,7 @@ function closeAllModals() {
   el.unlockModal.classList.add("hidden");
   el.playgroundIntroModal.classList.add("hidden");
   el.restartConfirmModal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   document.body.style.overflow = "";
 }
 
@@ -3663,6 +3734,7 @@ function renderModalRunTrack() {
   const modalTrack = document.getElementById("modalRunTrack");
   if (modalTrack) {
     modalTrack.classList.toggle("evo-modal-track", isEvoMode());
+    modalTrack.style.setProperty("--modal-run-center", isEvoMode() ? "60%" : "58%");
   }
 
   state.placedCodes.forEach((placedCode) => {
@@ -3886,8 +3958,8 @@ function renderCodeButtons() {
 }
 
 function renderLiveMarkers() {
-  el.liveMarkers.innerHTML = "";
   el.lineHintBanner.innerHTML = "";
+  el.liveMarkers.innerHTML = "";
   if (!isPlaygroundMode() && state.isCheckedCorrect) return;
   const removeSegmentByUid = (segmentUid) => {
     const idx = state.placedSegments.findIndex((seg) => seg.uid === segmentUid);
@@ -4160,9 +4232,8 @@ function render() {
     el.checkBtn.classList.add("playground-run-btn");
     el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
     el.checkBtn.classList.remove("hidden");
-    el.missionRunHint.classList.add("hidden");
+    el.nextMissionBtn.classList.add("hidden");
     el.playgroundRunHint.classList.remove("hidden");
-    el.missionAdvancePanel.classList.add("hidden");
     setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
     el.playgroundBtn.classList.remove("hidden");
   } else {
@@ -4177,16 +4248,9 @@ function render() {
     el.checkBtn.classList.toggle("mission-run-btn-ready", state.isCheckedCorrect);
     el.checkBtn.disabled = true;
     el.checkBtn.classList.add("hidden");
-    el.missionRunHint.textContent = missionRunReady
-      ? "Fraction line transformed into the Ozobot path. Run Ozobot, then tap Next Mission."
-      : "";
-    el.missionRunHint.classList.toggle("hidden", !missionRunReady);
+    el.nextMissionBtn.classList.toggle("hidden", !missionRunReady);
     el.playgroundRunHint.classList.add("hidden");
-    el.missionAdvanceText.textContent = isLastMission
-      ? "Run your Ozobot on the line, then finish the mission set."
-      : "Run your Ozobot on the line, then move to the next mission.";
     el.nextMissionBtn.textContent = isLastMission ? "Run Complete - Finish Missions" : "Run Complete - Next Mission";
-    el.missionAdvancePanel.classList.toggle("hidden", !missionRunReady);
     setButtonLabel(el.playgroundBtn, "🎮", "Go to Playground");
     if (state.hasCompletedAllMissions) {
       el.playgroundBtn.classList.remove("hidden");
