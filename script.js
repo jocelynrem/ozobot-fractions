@@ -1215,8 +1215,8 @@ function handlePassedCheck() {
   state.isCheckedCorrect = true;
   setFeedback("success", msg);
   if (isPlaygroundMode()) {
-    setCheckDetails([], true);
-    openSuccessModal();
+    setCheckDetails([], false);
+    triggerTrackMorphAnimation();
     return;
   }
   setCheckDetails([], false);
@@ -1242,7 +1242,12 @@ function checkAnswer() {
       setFeedback("error", "Build a line first.");
       return;
     }
-    openSuccessModal();
+    if (state.isCheckedCorrect) {
+      triggerTrackMorphAnimation();
+      setFeedback("success", "Run your Ozobot on the line.");
+      return;
+    }
+    handlePassedCheck();
     return;
   }
 
@@ -1641,7 +1646,7 @@ function renderTrack() {
     el.codesLayer.appendChild(chip);
   });
 
-  if (!isPlaygroundMode() && state.isCheckedCorrect && state.placedSegments.length > 0) {
+  if (state.isCheckedCorrect && state.placedSegments.length > 0) {
     const endChip = document.createElement("div");
     endChip.className = "code-chip code-chip-end";
     if (isEvoMode()) endChip.classList.add("evo-code-chip");
@@ -1655,7 +1660,7 @@ function renderTrack() {
 }
 
 function render() {
-  const missionRunReady = !isPlaygroundMode() && state.isCheckedCorrect;
+  const missionRunReady = state.isCheckedCorrect && state.placedSegments.length > 0;
   const isLastMission = state.currentProblemIdx >= CHALLENGES.length - 1;
   document.body.classList.toggle("playground-mode", isPlaygroundMode());
   el.bitRobotBtn.classList.toggle("active", state.robotType === "bit");
@@ -1664,6 +1669,7 @@ function render() {
   el.evoRobotBtn.setAttribute("aria-pressed", String(state.robotType === "evo"));
   el.trackWrap.classList.toggle("mission-track-ready", missionRunReady);
   el.trackWrap.classList.toggle("mission-track-morphing", missionRunReady && state.isMorphingTrack);
+  el.resetBtn.classList.toggle("playground-clear-emphasis", isPlaygroundMode() && missionRunReady);
   if (isPlaygroundMode()) {
     el.problemCounter.textContent = "Ozobot Playground";
     el.missionText.innerHTML = `
@@ -1705,7 +1711,7 @@ function render() {
   }
 
   if (isPlaygroundMode()) {
-    el.checkBtn.disabled = false;
+    el.checkBtn.disabled = missionRunReady;
     el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
   }
 
