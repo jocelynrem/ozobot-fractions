@@ -1,7 +1,7 @@
 const BASE_UNITS = 24;
-const OZOBOT_SCREEN_BLUE = "#1DA1FF";
-const OZOBOT_SCREEN_RED = "#FF6B6B";
-const OZOBOT_EVO_RED = "#E11D48";
+const OZOBOT_SCREEN_BLUE = "#0000FF";
+const OZOBOT_SCREEN_RED = "#FF0000";
+const OZOBOT_EVO_RED = OZOBOT_SCREEN_RED;
 const STORAGE_KEY = "ozobot-fractions-progress";
 
 const FRACTIONS = [
@@ -356,6 +356,10 @@ function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10) {
     .join("");
 }
 
+function endCodeColors() {
+  return MODAL_END_CODE.colors;
+}
+
 function modalCodeStripesHTML(colors) {
   const stripeSize = isEvoMode() ? 34 : 28;
   const leadInWidth = isEvoMode() ? 22 : 0;
@@ -369,7 +373,7 @@ function modalCodeStripesHTML(colors) {
 }
 
 function modalEndCodeColors() {
-  return ["#00FF00", isEvoMode() ? OZOBOT_EVO_RED : OZOBOT_SCREEN_RED];
+  return endCodeColors();
 }
 
 function setButtonLabel(button, icon, label) {
@@ -1173,14 +1177,6 @@ function renderModalRunTrack() {
 
     el.modalRunCodes.appendChild(chip);
   });
-
-  const endChip = document.createElement("div");
-  endChip.className = "modal-run-code modal-run-code-end";
-  if (isEvoMode()) endChip.classList.add("evo-modal-run-code");
-  endChip.style.left = "100%";
-  endChip.style.transform = isEvoMode() ? "translate(-100%, -50%)" : "translateX(-100%)";
-  endChip.innerHTML = modalCodeStripesHTML(modalEndCodeColors());
-  el.modalRunCodes.appendChild(endChip);
 }
 
 function handlePassedCheck() {
@@ -1621,6 +1617,19 @@ function renderTrack() {
 
     el.codesLayer.appendChild(chip);
   });
+
+  if (!isPlaygroundMode() && state.isCheckedCorrect && state.placedSegments.length > 0) {
+    const endChip = document.createElement("div");
+    endChip.className = "code-chip code-chip-end";
+    endChip.style.left = "100%";
+    endChip.innerHTML = endCodeColors()
+      .map(
+        (color) =>
+          `<span class="code-stripe" style="background:${color};width:22px;height:22px;border-radius:0"></span>`
+      )
+      .join("");
+    el.codesLayer.appendChild(endChip);
+  }
 
   renderAxis();
   renderLiveMarkers();
