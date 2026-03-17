@@ -1078,6 +1078,21 @@ function closeSuccessModalAndAdvance() {
   nextProblem(true);
 }
 
+function advanceFromMissionRun() {
+  if (isPlaygroundMode()) return;
+  if (!state.isCheckedCorrect) {
+    setFeedback("error", "Check the answer first.");
+    return;
+  }
+  if (state.currentProblemIdx >= CHALLENGES.length - 1) {
+    state.hasCompletedAllMissions = true;
+    saveProgress();
+    openPlaygroundIntroModal();
+    return;
+  }
+  nextProblem(true);
+}
+
 function closeUnlockModal() {
   el.unlockModal.classList.add("hidden");
   document.body.classList.remove("modal-open");
@@ -1716,7 +1731,7 @@ el.playgroundBtn.addEventListener("click", () => {
 el.restartMissionsBtn.addEventListener("click", openRestartConfirmModal);
 el.checkBtn.addEventListener("click", checkAnswer);
 el.nextFromModalBtn.addEventListener("click", closeSuccessModalAndAdvance);
-el.nextMissionBtn.addEventListener("click", () => nextProblem(true));
+el.nextMissionBtn.addEventListener("click", advanceFromMissionRun);
 el.dismissUnlockBtn.addEventListener("click", closeUnlockModal);
 el.enterPlaygroundBtn.addEventListener("click", enterPlaygroundMode);
 el.cancelRestartBtn.addEventListener("click", closeRestartConfirmModal);
