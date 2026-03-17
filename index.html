@@ -402,6 +402,7 @@ body.playground-mode .mission-whole {
   cursor: pointer;
   opacity: 0.86;
   transition: all 180ms ease;
+  margin-left: auto;
 }
 
 .restart-missions-btn:hover {
@@ -449,8 +450,9 @@ body.playground-mode .mission-whole {
   gap: 6px;
 }
 
-.pie-card .restart-missions-btn {
-  margin-top: auto;
+.pie-progress-card {
+  width: 100%;
+  margin-top: 4px;
 }
 
 .garage-card {
@@ -1158,10 +1160,6 @@ body.playground-mode .garage-pad {
   }
 }
 
-.actions-row .controls {
-  margin-left: auto;
-}
-
 .mode-nav {
   display: flex;
   align-items: center;
@@ -1213,12 +1211,15 @@ body.playground-mode .garage-pad {
   align-items: center;
   gap: 6px;
   min-width: 0;
-  margin-left: auto;
   padding: 4px;
   border: 1px solid #cbd5e1;
   border-radius: 999px;
   background: #ffffff;
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.actions-row .controls {
+  margin-left: auto;
 }
 
 .mission-action-buttons .robot-toggle-btn {
@@ -1296,6 +1297,7 @@ body.playground-mode .robot-toggle-btn:hover {
   padding: 10px 14px;
   background: linear-gradient(160deg, #ffffff 0%, #e0f2fe 100%);
   box-shadow: 0 6px 14px rgba(14, 116, 144, 0.14);
+  text-align: center;
 }
 
 .progress-card .label {
@@ -2455,7 +2457,10 @@ body.playground-mode .playground-run-btn:hover {
               <g id="pieSlices"></g>
             </svg>
             <div id="pieLabel" class="pie-label">0/1 of 1 whole</div>
-            <button id="restartMissionsBtn" class="restart-missions-btn" type="button">Restart Missions</button>
+            <div class="progress-card pie-progress-card">
+              <div id="progressLabel" class="label">Total Progress</div>
+              <div id="progressValue" class="value">0/1</div>
+            </div>
           </div>
           <div class="mission-card">
             <div id="missionConfetti" class="mission-confetti" aria-hidden="true"></div>
@@ -2463,10 +2468,7 @@ body.playground-mode .playground-run-btn:hover {
             <div class="mission-meta-row">
               <div class="mission-meta-controls">
                 <p id="problemCounter" class="problem-counter">Problem 1 of 10</p>
-                <div class="mission-action-buttons" role="group" aria-label="Choose Ozobot robot">
-                  <button id="bitRobotBtn" class="robot-toggle-btn" type="button">Bit</button>
-                  <button id="evoRobotBtn" class="robot-toggle-btn" type="button">Evo</button>
-                </div>
+                <button id="restartMissionsBtn" class="restart-missions-btn" type="button">Restart Missions</button>
               </div>
             </div>
             <p id="missionText" class="mission">
@@ -2474,9 +2476,9 @@ body.playground-mode .playground-run-btn:hover {
               <span class="mission-line mission-line-secondary">Put an action code block at <span class="mission-number-fraction">1/2</span>.</span>
             </p>
             <section class="actions-row">
-              <div class="progress-card">
-                <div id="progressLabel" class="label">Total Progress</div>
-                <div id="progressValue" class="value">0/1</div>
+              <div class="mission-action-buttons" role="group" aria-label="Choose Ozobot robot">
+                <button id="bitRobotBtn" class="robot-toggle-btn" type="button">Bit</button>
+                <button id="evoRobotBtn" class="robot-toggle-btn" type="button">Evo</button>
               </div>
               <div class="controls">
                 <button id="hintBtn" class="btn btn-light"><span class="btn-icon" aria-hidden="true">💡</span><span class="btn-label">Hint</span></button>
