@@ -23,7 +23,7 @@ const ROBOT_PROFILES = {
       { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_EVO_RED] },
       { id: "tornado", name: "Tornado", colors: [OZOBOT_SCREEN_RED, "#00FF00", OZOBOT_SCREEN_RED, "#00FF00"] },
       { id: "nitro_boost", name: "Nitro Boost", colors: [OZOBOT_SCREEN_BLUE, "#00FF00", OZOBOT_SCREEN_RED] },
-      { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
+      { id: "pause_3_sec", name: "3 Second Pause", colors: [OZOBOT_SCREEN_RED, OZOBOT_SCREEN_BLUE, OZOBOT_SCREEN_RED] }
     ]
   },
   evo: {
@@ -36,11 +36,11 @@ const ROBOT_PROFILES = {
       { id: "zigzag", name: "Zigzag", colors: [OZOBOT_SCREEN_BLUE, "#000000", "#00FF00", OZOBOT_SCREEN_RED] },
       { id: "tornado", name: "Tornado", colors: [OZOBOT_EVO_RED, "#00FF00", OZOBOT_EVO_RED, "#00FF00"] },
       { id: "backwalk", name: "Backwalk", colors: [OZOBOT_EVO_RED, "#00FF00", "#000000", OZOBOT_SCREEN_BLUE] },
-      { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] }
+      { id: "pause_3_sec", name: "3 Second Pause", colors: [OZOBOT_EVO_RED, OZOBOT_SCREEN_BLUE, OZOBOT_EVO_RED] }
     ]
   }
 };
-const MODAL_END_CODE = { id: "game_over", name: "Game Over", colors: ["#00FF00", OZOBOT_SCREEN_RED] };
+const DEFAULT_END_CODE = { id: "play_again", name: "Play Again", colors: ["#00FF00", OZOBOT_SCREEN_BLUE] };
 
 const CODE_UNLOCK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 7, 7, 7];
 
@@ -313,6 +313,17 @@ function formatUnitsAsFraction(units) {
   return `${simplified.numerator}/${simplified.denominator}`;
 }
 
+function formatUnitsForMission(units, denominatorHint) {
+  if (units === BASE_UNITS) return "1 whole";
+  if (denominatorHint && BASE_UNITS % denominatorHint === 0) {
+    const unitsPerPart = BASE_UNITS / denominatorHint;
+    if (units % unitsPerPart === 0) {
+      return `${units / unitsPerPart}/${denominatorHint}`;
+    }
+  }
+  return formatUnitsAsFraction(units);
+}
+
 function getPrimarySegmentDenominator() {
   if (state.placedSegments.length > 0) {
     const firstDenominator = state.placedSegments[0].denominator;
@@ -347,29 +358,29 @@ function reqToUnits(req) {
   return (req.numerator * BASE_UNITS) / req.denominator;
 }
 
-function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10) {
-  return colors
+function codeStripesHTML(colors, stripeHeight = 18, stripeWidth = 10, options = {}) {
+  const { includeLeadIn = false, leadInWidth = stripeWidth } = options;
+  const leadIn = includeLeadIn
+    ? `<span class="code-stripe code-stripe-lead" style="display:inline-block;background:#000000;height:${stripeHeight}px;width:${leadInWidth}px;border-radius:0"></span>`
+    : "";
+  const stripes = colors
     .map(
       (color) =>
         `<span class="code-stripe" style="display:inline-block;background:${color};height:${stripeHeight}px;width:${stripeWidth}px;border-radius:0"></span>`
     )
     .join("");
+  return `${leadIn}${stripes}`;
 }
 
 function endCodeColors() {
-  return MODAL_END_CODE.colors;
+  return currentRobotCodes().find((code) => code.id === DEFAULT_END_CODE.id)?.colors || DEFAULT_END_CODE.colors;
 }
 
 function modalCodeStripesHTML(colors) {
   const stripeSize = isEvoMode() ? 34 : 28;
-  const leadInWidth = isEvoMode() ? 22 : 0;
-  const leadIn = leadInWidth > 0
-    ? `<span class="modal-run-stripe modal-run-lead" style="background:#000000;width:${leadInWidth}px;height:${stripeSize}px"></span>`
-    : "";
-  const stripes = colors
-    .map((color) => `<span class="modal-run-stripe" style="background:${color};width:${stripeSize}px;height:${stripeSize}px"></span>`)
-    .join("");
-  return `${leadIn}${stripes}`;
+  return codeStripesHTML(colors, stripeSize, stripeSize)
+    .replaceAll("code-stripe-lead", "modal-run-stripe modal-run-lead")
+    .replaceAll("code-stripe", "modal-run-stripe");
 }
 
 function modalEndCodeColors() {
@@ -1170,7 +1181,7 @@ function renderModalRunTrack() {
     } else if (placedCode.positionUnits === BASE_UNITS) {
       chip.style.transform = isEvoMode() ? "translate(-100%, -50%)" : "translateX(-100%)";
     } else if (isEvoMode()) {
-      chip.style.transform = "translate(-50%, -50%)";
+      chip.style.transform = "translate(-100%, -50%)";
     }
 
     chip.innerHTML = modalCodeStripesHTML(placedCode.colors);
@@ -1606,14 +1617,11 @@ function renderTrack() {
   state.placedCodes.forEach((placedCode) => {
     const chip = document.createElement("div");
     chip.className = "code-chip";
+    if (isEvoMode()) chip.classList.add("evo-code-chip");
     if (placedCode.isWrongPlacement) chip.classList.add("code-chip-wrong");
     chip.style.left = `${(placedCode.positionUnits / BASE_UNITS) * 100}%`;
-    chip.innerHTML = placedCode.colors
-      .map(
-        (color) =>
-          `<span class="code-stripe" style="background:${color};width:22px;height:22px;border-radius:0"></span>`
-      )
-      .join("");
+    if (isEvoMode()) chip.style.transform = "translate(-100%, -50%)";
+    chip.innerHTML = codeStripesHTML(placedCode.colors, isEvoMode() ? 28 : 22, isEvoMode() ? 28 : 22);
 
     el.codesLayer.appendChild(chip);
   });
@@ -1621,13 +1629,9 @@ function renderTrack() {
   if (!isPlaygroundMode() && state.isCheckedCorrect && state.placedSegments.length > 0) {
     const endChip = document.createElement("div");
     endChip.className = "code-chip code-chip-end";
+    if (isEvoMode()) endChip.classList.add("evo-code-chip");
     endChip.style.left = "100%";
-    endChip.innerHTML = endCodeColors()
-      .map(
-        (color) =>
-          `<span class="code-stripe" style="background:${color};width:22px;height:22px;border-radius:0"></span>`
-      )
-      .join("");
+    endChip.innerHTML = codeStripesHTML(endCodeColors(), isEvoMode() ? 28 : 22, isEvoMode() ? 28 : 22);
     el.codesLayer.appendChild(endChip);
   }
 
@@ -1664,10 +1668,11 @@ function render() {
     el.playgroundBtn.classList.remove("hidden");
   } else {
     const problem = currentProblem();
+    const denominatorHint = getPrimarySegmentDenominator();
     el.problemCounter.textContent = `Problem ${state.currentProblemIdx + 1} of ${CHALLENGES.length}`;
     el.missionText.innerHTML = formatMissionText(problem.title);
     el.progressLabel.textContent = "Total Progress";
-    el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
+    el.progressValue.textContent = formatUnitsForMission(totalUnits(), denominatorHint);
     el.hintBtn.disabled = false;
     setButtonLabel(el.checkBtn, "▶", "Run Line");
     el.checkBtn.classList.add("playground-run-btn", "mission-run-btn");

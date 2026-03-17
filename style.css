@@ -745,6 +745,11 @@ body.playground-mode .garage-pad {
     opacity 320ms ease;
 }
 
+.evo-code-chip {
+  top: 50%;
+  transform: translate(-100%, -50%);
+}
+
 .code-chip-end {
   transform: translate(-100%, -112%);
   border-color: transparent;
@@ -1440,6 +1445,14 @@ body.playground-mode .robot-toggle-btn:hover {
   transform: translate(-100%, -50%);
 }
 
+.track-wrap.mission-track-ready .evo-code-chip {
+  transform: translate(-100%, -50%);
+}
+
+.track-wrap.mission-track-ready .evo-code-chip.code-chip-end {
+  transform: translate(-100%, -50%);
+}
+
 .track-wrap.mission-track-ready .axis,
 .track-wrap.mission-track-ready .live-markers {
   opacity: 0;
@@ -1475,6 +1488,10 @@ body.playground-mode .robot-toggle-btn:hover {
 
 .track-wrap.mission-track-morphing .code-chip {
   animation: code-chip-drop 1080ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.track-wrap.mission-track-morphing .evo-code-chip {
+  animation: evo-code-chip-drop 1080ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .track-wrap.mission-track-morphing .code-chip-end {
@@ -1531,6 +1548,18 @@ body.playground-mode .robot-toggle-btn:hover {
   }
   100% {
     transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes evo-code-chip-drop {
+  0% {
+    transform: translate(-100%, -82%);
+  }
+  55% {
+    transform: translate(-100%, -58%);
+  }
+  100% {
+    transform: translate(-100%, -50%);
   }
 }
 
