@@ -29,7 +29,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   padding: 10px;
 }
 
@@ -44,8 +44,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 16px;
+  padding: 14px;
+  gap: 12px;
   transition:
     background 260ms ease,
     border-color 260ms ease,
@@ -55,7 +55,7 @@ body {
 .mission-row {
   display: flex;
   align-items: stretch;
-  gap: 16px;
+  gap: 12px;
 }
 
 .mission-card {
@@ -63,10 +63,10 @@ body {
   border: 2px solid #c7d2fe;
   background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
   border-radius: 14px;
-  padding: 14px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  min-height: 264px;
+  min-height: 232px;
   position: relative;
   overflow: hidden;
   transition:
@@ -131,6 +131,7 @@ body.playground-mode .mission-card {
     0 14px 30px rgba(2, 6, 23, 0.46),
     0 0 22px rgba(34, 211, 238, 0.08);
   transform: translateY(-2px);
+  min-height: 196px;
 }
 
 body.playground-mode .problem-counter {
@@ -141,6 +142,7 @@ body.playground-mode .problem-counter {
 
 body.playground-mode .mission {
   color: #f8fafc;
+  min-height: 0;
 }
 
 body.playground-mode .restart-missions-btn {
@@ -238,7 +240,7 @@ body.playground-mode .playground-run-hint {
   box-shadow: 0 0 18px rgba(34, 211, 238, 0.08);
 }
 
-body.playground-mode .mode-nav .btn-light {
+body.playground-mode .mission-header-actions .btn-light {
   background: rgba(30, 41, 59, 0.96);
   color: #f8fafc;
   border-color: #22d3ee;
@@ -380,6 +382,15 @@ body.playground-mode .mission-whole {
   width: 100%;
 }
 
+.mission-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+  margin-left: auto;
+}
+
 .restart-missions-btn {
   border: 1px solid #cbd5e1;
   background: rgba(255, 255, 255, 0.55);
@@ -391,7 +402,6 @@ body.playground-mode .mission-whole {
   cursor: pointer;
   opacity: 0.86;
   transition: all 180ms ease;
-  margin-left: auto;
 }
 
 .restart-missions-btn:hover {
@@ -528,9 +538,9 @@ body.modal-open .garage-pad {
 
 .mission-card .check-details {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
   margin-top: 0;
   min-height: 0;
   max-height: 56px;
@@ -560,7 +570,7 @@ body.modal-open .garage-pad {
 
 .track-wrap {
   position: relative;
-  min-height: 214px;
+  min-height: 178px;
   display: flex;
   align-items: center;
   isolation: isolate;
@@ -590,7 +600,7 @@ body.dragging-code .track-bg {
   position: absolute;
   left: 36px;
   right: 36px;
-  top: 2px;
+  top: -2px;
   min-height: 24px;
   display: flex;
   justify-content: center;
@@ -602,7 +612,7 @@ body.dragging-code .track-bg {
 .track-start-arrow {
   position: absolute;
   left: 36px;
-  top: calc(var(--track-line-center) - 44px);
+  top: calc(var(--track-line-center) - 36px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1058,14 +1068,14 @@ body.playground-mode .garage-pad {
   align-items: center;
   gap: 12px;
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 6px;
 }
 
 .action-hints {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
-  min-height: 44px;
+  margin-top: 8px;
+  min-height: 32px;
 }
 
 .mission-confetti {
@@ -1147,14 +1157,6 @@ body.playground-mode .garage-pad {
   50% {
     transform: scale(1.03);
   }
-}
-
-.mode-nav {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: -6px;
 }
 
 .robot-picker {
@@ -2386,14 +2388,15 @@ body.playground-mode .playground-run-btn:hover {
     width: 100%;
   }
 
+  .mission-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .mission-action-buttons {
     width: 100%;
     justify-content: center;
     margin-left: 0;
-  }
-
-  .mode-nav {
-    justify-content: flex-start;
   }
 
   .mission-advance-panel {

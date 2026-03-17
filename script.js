@@ -1667,8 +1667,7 @@ function render() {
   if (isPlaygroundMode()) {
     el.problemCounter.textContent = "Ozobot Playground";
     el.missionText.innerHTML = `
-      <span class="mission-line mission-line-primary">Build any <span class="mission-whole">1 whole</span> fraction line you want.</span>
-      <span class="mission-line mission-line-secondary">Add any action codes you want, then run it as many times as you like.</span>
+      <span class="mission-line mission-line-primary">Build any <span class="mission-whole">1 whole</span> line and run it.</span>
     `;
     el.progressLabel.textContent = "Line Length";
     el.progressValue.textContent = formatUnitsAsFraction(totalUnits());
@@ -1678,7 +1677,7 @@ function render() {
     el.checkBtn.classList.remove("mission-run-btn", "mission-run-btn-ready");
     el.checkBtn.classList.remove("hidden");
     el.nextMissionBtn.classList.add("hidden");
-    el.playgroundRunHint.classList.remove("hidden");
+    el.playgroundRunHint.classList.add("hidden");
     setButtonLabel(el.playgroundBtn, "↩", "Back to Missions");
     el.playgroundBtn.classList.remove("hidden");
   } else {
