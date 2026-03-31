@@ -10,6 +10,13 @@
       name="description"
       content="Build fraction lines, place Ozobot color codes, and solve hands-on math missions in the Ozobot Fractions Lab."
     />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Fractions Lab" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
     <title>Ozobot Fractions Lab</title>
       <style>
 :root {
@@ -4500,6 +4507,14 @@ document.addEventListener("keydown", (event) => {
 
 loadProgress();
 render();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.error("Service worker registration failed:", error);
+    });
+  });
+}
 
     </script>
   </body>
