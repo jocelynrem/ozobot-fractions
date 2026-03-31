@@ -136,7 +136,7 @@ const CHALLENGES = [
 const state = {
   currentProblemIdx: 0,
   mode: "mission",
-  robotType: "bit",
+  robotType: "evo",
   hasCompletedAllMissions: false,
   placedSegments: [],
   placedCodes: [],
@@ -1176,6 +1176,34 @@ function bindRobotToggle(button, robotType) {
   });
 }
 
+function preventTouchZoom() {
+  let lastFractionTapAt = 0;
+
+  document.addEventListener(
+    "touchend",
+    (event) => {
+      const fractionButton = event.target.closest(".fraction-tile");
+      if (!fractionButton) return;
+
+      const now = Date.now();
+      if (now - lastFractionTapAt < 320) {
+        event.preventDefault();
+        if (!fractionButton.disabled) fractionButton.click();
+      }
+      lastFractionTapAt = now;
+    },
+    { passive: false }
+  );
+
+  document.addEventListener(
+    "gesturestart",
+    (event) => {
+      event.preventDefault();
+    },
+    { passive: false }
+  );
+}
+
 function renderModalRunTrack() {
   el.modalRunCodes.innerHTML = "";
   const modalTrack = document.getElementById("modalRunTrack");
@@ -1722,6 +1750,7 @@ function render() {
 }
 
 el.hintBtn.addEventListener("click", showHint);
+preventTouchZoom();
 el.undoBtn.addEventListener("click", undo);
 el.resetBtn.addEventListener("click", resetBoard);
 bindRobotToggle(el.bitRobotBtn, "bit");

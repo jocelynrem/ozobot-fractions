@@ -2253,6 +2253,9 @@ body.playground-mode .playground-clear-emphasis {
 .fraction-tile {
   border-color: var(--fraction-accent, #cbd5e1);
   background-color: var(--fraction-fill, #fff);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .fraction-tile .small {
