@@ -60,7 +60,9 @@ body {
 }
 
 .portfolio-footer a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
   padding: 0.4rem;
   color: var(--primary-dark);
   text-underline-offset: 0.18em;
@@ -2596,7 +2598,7 @@ body.playground-mode .playground-clear-emphasis {
         </section>
       </main>
       <footer class="portfolio-footer">
-        <a href="https://jocelynrem.com/"><span aria-hidden="true">↶</span> jocelynrem.com</a>
+        <a href="https://jocelynrem.com/">jocelynrem.com<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5M4 9h10a5 5 0 0 1 0 10h-3"/></svg></a>
       </footer>
     </div>
     <div id="quickCue" class="quick-cue" role="status" aria-live="polite"></div>
