@@ -54,6 +54,22 @@ body {
   padding: 10px;
 }
 
+.portfolio-footer {
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.portfolio-footer a {
+  display: inline-block;
+  padding: 0.4rem;
+  color: var(--primary-dark);
+  text-underline-offset: 0.18em;
+}
+
+body.playground-mode .portfolio-footer a {
+  color: #c7d2fe;
+}
+
 .toolbar,
 .workspace {
   background: var(--surface);
@@ -2579,6 +2595,9 @@ body.playground-mode .playground-clear-emphasis {
           </section>
         </section>
       </main>
+      <footer class="portfolio-footer">
+        <a href="https://jocelynrem.com/">Back to Jocelyn Remington’s portfolio</a>
+      </footer>
     </div>
     <div id="quickCue" class="quick-cue" role="status" aria-live="polite"></div>
     <div

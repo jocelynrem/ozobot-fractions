@@ -1,4 +1,4 @@
-const CACHE_NAME = "ozobot-fractions-lab-v1";
+const CACHE_NAME = "ozobot-fractions-lab-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
